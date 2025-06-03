@@ -47,6 +47,7 @@ A running collection of online posts that provided real insights and motivation 
 |    | Google interview experience | [Link](https://www.linkedin.com/posts/rajatgajbhiye_google-interview-experience-role-l4-software-activity-7333496555145949185-_sWN/?utm_source=social_share_send&utm_medium=android_app&rcm=ACoAADSSr1gBI6vzkVlqc19GZx0G4rRhoECnsx4&utm_campaign=whatsapp) |
 | ⭐ | Google interview experience   | [Link](https://www.linkedin.com/posts/ryanrim_google-swe-interviewprep-activity-7332226519190179841-1QdN/?utm_source=social_share_send&utm_medium=member_desktop_web&rcm=ACoAADSSr1gBI6vzkVlqc19GZx0G4rRhoECnsx4) |
 |    | 𝗧𝗿𝗲𝗲𝘀 and 𝗚𝗿𝗮𝗽𝗵𝘀 problems   | [Link](https://www.linkedin.com/posts/shivam-shrivastava-ab6404179_sharing-all-%F0%9D%97%A7%F0%9D%97%BF%F0%9D%97%B2%F0%9D%97%B2%F0%9D%98%80-and-%F0%9D%97%9A%F0%9D%97%BF%F0%9D%97%AE%F0%9D%97%BD%F0%9D%97%B5%F0%9D%98%80-problems-activity-7334536242107207681-C5xx/?utm_source=social_share_send&utm_medium=android_app&rcm=ACoAADSSr1gBI6vzkVlqc19GZx0G4rRhoECnsx4&utm_campaign=whatsapp) |
+|    | Prep Guide   | [Link](https://www.linkedin.com/posts/karan-saxena-466b07190_google-maps-is-a-use-case-of-graphs-autocomplete-activity-7333848073879625729-rvoQ?utm_source=social_share_send&utm_medium=member_desktop_web&rcm=ACoAADSSr1gBI6vzkVlqc19GZx0G4rRhoECnsx4) |
 ---
 
 ## ✨ Motivation
