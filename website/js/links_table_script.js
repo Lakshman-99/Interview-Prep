@@ -84,7 +84,7 @@ async function getLinks() {
         return JSON.parse(storedLinks);
     }
     try {
-        const response = await fetch("../data/links.json");
+        const response = await fetch("Interview-Prep/website/data/links.json");
         if (!response.ok) throw new Error("Network response was not ok.");
         const linksFromJson = await response.json();
         const linksWithIds = linksFromJson.map((link) => ({

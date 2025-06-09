@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
     async function initializeBrowser() {
         try {
             // Go up one directory to find the manifest file
-            const response = await fetch("./data/file-manifest.json");
+            const response = await fetch("/Interview-Prep/website/data/file-manifest.json");
             if (!response.ok) throw new Error("File manifest not found.");
             fileManifest = await response.json();
 
