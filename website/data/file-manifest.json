@@ -1,0 +1,41 @@
+{
+    "dsa": {
+        "name": "Data Structures & Algorithms",
+        "icon": "fas fa-sitemap",
+        "color": "text-green-500",
+        "filepath": "dsa",
+        "files": [
+            { "name": "Tips and Tricks.MD", "type": "md" },
+            { "name": "LeetCode Coding Patterns Cheat Sheet (Java).md", "type": "md" },
+            { "name": "LeetCode Coding Patterns Cheat Sheet (Java).pdf", "type": "pdf" }
+        ]
+    },
+    "patterns": {
+        "name": "Leetcode Patterns",
+        "icon": "fas fa-th-list",
+        "color": "text-yellow-500",
+        "filepath": "dsa/patterns",
+        "files": [
+            { "name": "sliding window cheet sheet.md", "type": "md" }
+        ]
+    },
+    "system-design": {
+        "name": "System Design",
+        "icon": "fas fa-server",
+        "color": "text-purple-500",
+        "files": [
+            { "name": "Basics of Load Balancing.md", "type": "md" },
+            { "name": "Designing a URL Shortener.md", "type": "md" },
+            { "name": "Database Sharding Diagram.png", "type": "img" }
+        ]
+    },
+    "behavioral": {
+        "name": "Behavioral Questions",
+        "icon": "fas fa-comments",
+        "color": "text-blue-500",
+        "files": [
+            { "name": "STAR Method Guide.md", "type": "md" },
+            { "name": "My Top 3 STAR Stories.md", "type": "md" }
+        ]
+    }
+}

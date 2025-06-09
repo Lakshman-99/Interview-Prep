@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Viewer | Prep Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Showdown.js for Markdown rendering -->
+    <!-- GitHub Markdown Styles -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css/github-markdown.min.css">
+    <link rel="stylesheet" href="./markdown.css">
+    <!-- markdown-it for accurate rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-light': '#ffffff', 'secondary-light': '#f9fafb', 'text-light': '#1f2937', 'accent-light': '#3b82f6',
+                        'primary-dark': '#111827', 'secondary-dark': '#1f2937', 'text-dark': '#d1d5db', 'accent-dark': '#60a5fa',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-secondary-light dark:bg-primary-dark text-text-light dark:text-text-dark font-sans antialiased">
+    <div class="container max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="flex justify-between items-center mb-8">
+            <a href="/website"
+                class="flex items-center gap-3 text-gray-500 hover:text-accent-light dark:hover:text-accent-dark transition-colors">
+                <i class="fas fa-chevron-left"></i>
+                <span>Back to Dashboard</span>
+            </a>
+            <button id="theme-toggle"
+                class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none"><i
+                    id="theme-icon-sun" class="fas fa-sun text-xl text-yellow-500"></i><i id="theme-icon-moon"
+                    class="fas fa-moon text-xl text-blue-300 hidden"></i></button>
+        </header>
+
+        <div id="content-container" class="markdown-body mx-auto max-w-3xl">
+
+        </div>
+    </div>
+
+    <script src="../../js/links_table_script.js"></script>
+    <script src="../../js/viewer.js"></script>
+</body>
+
+</html>
