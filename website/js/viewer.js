@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
             case "pdf":
                 contentContainer.innerHTML = `
                     <iframe
-                    src="/${filePath}"
+                    src="/Interview-Prep/${filePath}"
                     class="w-full h-[80vh] rounded-lg border"
                     frameborder="0"
                     allowfullscreen>
@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
             case "jpg":
             case "jpeg":
             case "gif":
-                contentContainer.innerHTML = `<img src="../${filePath}" alt="${filePath}" class="max-w-full h-auto rounded-lg" />`;
+                contentContainer.innerHTML = `<img src="/Interview-Prep/${filePath}" alt="${filePath}" class="max-w-full h-auto rounded-lg" />`;
                 break;
             default:
                 contentContainer.innerHTML = `<pre class="whitespace-pre-wrap bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">${textContent}</pre>`;
@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             // The file path is relative to the root, so go up one level from /docs/
-            const response = await fetch(`/${filePath}`);
+            const response = await fetch(`/Interview-Prep/${filePath}`);
             if (!response.ok)
                 throw new Error(`File not found or could not be loaded.`);
 
