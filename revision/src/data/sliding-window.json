@@ -1,0 +1,230 @@
+{
+  "id": "sliding-window",
+  "title": "Sliding Window",
+  "icon": "◫",
+  "order": 4,
+  "description": "Transform O(n²) substring/subarray scans into O(n) by maintaining a window that expands and contracts. The key decision: when to grow, when to shrink, and what state to track inside the window.",
+  "patterns": [
+    {
+      "name": "Fixed-Size Window",
+      "description": "Window size is given (k). Slide by adding right element and removing left element each step. Track window state (sum, set, max) incrementally.",
+      "problems": ["contains-duplicate-ii", "find-k-closest-elements", "sliding-window-maximum"]
+    },
+    {
+      "name": "Variable-Size Window (Expand + Shrink)",
+      "description": "Grow right until a condition is met, then shrink left to optimize. The window finds the longest/shortest subarray satisfying a constraint. Only works when the constraint is monotonic.",
+      "problems": ["longest-substring-without-repeating", "longest-repeating-character-replacement", "minimum-size-subarray-sum", "minimum-window-substring"]
+    },
+    {
+      "name": "Window with Frequency Map",
+      "description": "Track character/element frequencies inside the window using a hash map. Enables anagram matching, permutation checking, and constraint counting.",
+      "problems": ["permutation-in-string", "minimum-window-substring", "longest-repeating-character-replacement"]
+    },
+    {
+      "name": "Window with Monotonic Deque",
+      "description": "Maintain a deque of candidates in sorted order within the window. Enables O(1) min/max queries. Elements are removed from front (out of window) and back (no longer useful).",
+      "problems": ["sliding-window-maximum"]
+    },
+    {
+      "name": "Single-Pass State Tracking",
+      "description": "Track running min/max/state in one pass without an explicit window. The 'window' is implicit — defined by the state variable.",
+      "problems": ["best-time-buy-sell-stock"]
+    },
+    {
+      "name": "Condition Counting / Match Tracking",
+      "description": "Track how many conditions are satisfied (e.g., how many required characters are present). A 'formed' counter avoids re-scanning the frequency map each step.",
+      "problems": ["permutation-in-string", "minimum-window-substring"]
+    }
+  ],
+  "problems": [
+    {
+      "id": "contains-duplicate-ii",
+      "title": "Contains Duplicate II",
+      "difficulty": "Easy",
+      "leetcodeNum": 219,
+      "pattern": "Fixed-Size Window",
+      "tldr": "Return true if there are two equal elements within distance k. Maintain a HashSet as a sliding window of size k. For each element, check membership then add; remove the element that falls out of the window.",
+      "keyTrick": "HashSet as a sliding window: if set.contains(nums[i]) → duplicate found. Add nums[i]. If set.size() > k, remove nums[i-k] (element leaving the window). The set always holds the last k+1 elements.",
+      "approaches": [
+        { "name": "Brute Force", "complexity": "O(n·k) time, O(1) space", "description": "For each element, check the next k elements for duplicates." },
+        { "name": "HashMap (value → last index)", "complexity": "O(n) time, O(n) space", "description": "Store last seen index for each value. Check if current - lastSeen ≤ k." },
+        { "name": "Sliding Window HashSet", "complexity": "O(n) time, O(k) space", "description": "Maintain a set of the window's elements. Check membership, add new, remove old. O(k) space vs O(n).", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why is the HashSet approach better than HashMap for space?", "options": ["HashSet uses O(min(n, k)) space — only stores elements in the current window. HashMap stores ALL elements ever seen, using O(n) space", "No difference", "HashMap is better", "They use the same space"], "answer": 0, "explanation": "The sliding window HashSet evicts elements outside the window, capping space at O(k). The HashMap keeps all entries. When k << n, the set saves significant memory." },
+        { "q": "What's the exact condition for removing from the set?", "options": ["When i >= k, remove nums[i - k] — the element that just left the window. The window covers indices [i-k+1, i], size k+1 would include i-k", "Remove when set is full", "Remove the smallest element", "Remove random element"], "answer": 0, "explanation": "Window of indices [i-k, i] has k+1 elements. When i > k, we must remove nums[i-k-1]... actually when set.size() > k, remove nums[i-k]. The window should have at most k+1 elements being checked." },
+        { "q": "This is the bridge between 'Contains Duplicate' (no distance constraint) and which pattern?", "options": ["Sliding Window + HashSet. Contains Duplicate I = global set. Contains Duplicate II = windowed set. Contains Duplicate III = windowed sorted set (BST) with value range", "Two pointers", "Binary search", "Dynamic programming"], "answer": 0, "explanation": "The progression: I (any distance, any value diff) → II (distance ≤ k, same value) → III (distance ≤ k, value diff ≤ t). Each adds a constraint requiring a more sophisticated window structure." },
+        { "q": "If k ≥ n-1, what happens?", "options": ["The window covers the entire array — reduces to Contains Duplicate I. Every pair of indices is within distance k", "Algorithm fails", "Need special handling", "Return false"], "answer": 0, "explanation": "When k ≥ n-1, the window is the whole array. The set grows to hold all elements without eviction. Functionally identical to Contains Duplicate I. The algorithm handles this naturally." },
+        { "q": "How would you extend this to 'duplicates within distance k AND value difference ≤ t' (Contains Duplicate III)?", "options": ["Use a TreeSet (balanced BST) as the window instead of HashSet. For each element, check if there's a value in [nums[i]-t, nums[i]+t] using floor/ceiling operations", "HashMap with range check", "Bucket sort with buckets of size t+1", "Both A and B work, but bucket sort gives O(n) average"], "answer": 3, "explanation": "TreeSet gives O(n log k). Bucket sort with bucket size t+1: elements in same or adjacent buckets have value diff ≤ t. O(n) time, O(k) space. The bucket approach is optimal." }
+      ]
+    },
+    {
+      "id": "best-time-buy-sell-stock",
+      "title": "Best Time to Buy And Sell Stock",
+      "difficulty": "Easy",
+      "leetcodeNum": 121,
+      "pattern": "Single-Pass State Tracking",
+      "tldr": "Find maximum profit from one buy and one sell (buy before sell). Track running minimum price. At each day, profit = price - minSoFar. Track maximum profit seen.",
+      "keyTrick": "One pass: maintain minPrice (lowest price seen so far) and maxProfit. For each price: update minPrice = min(minPrice, price), then update maxProfit = max(maxProfit, price - minPrice). The 'window' is implicitly from minPrice day to current day.",
+      "approaches": [
+        { "name": "Brute Force", "complexity": "O(n²) time, O(1) space", "description": "Check all (buy, sell) pairs where buy < sell. Track max profit." },
+        { "name": "Single Pass (Min Tracking)", "complexity": "O(n) time, O(1) space", "description": "Track running min price. At each step, compute potential profit and update max profit.", "isOptimal": true },
+        { "name": "Kadane's Variant", "complexity": "O(n) time, O(1) space", "description": "Convert to max subarray problem: compute daily price changes, find max subarray sum. Same as Kadane's algorithm.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why is this considered a sliding window problem even though there's no explicit window?", "options": ["The implicit 'window' is from the minimum-price day to the current day. The left boundary (buy day) only moves forward when a new minimum is found — mimicking window shrink", "It's not a sliding window", "The window is the entire array", "Window is fixed size"], "answer": 0, "explanation": "The min-tracking approach implicitly defines a window [buyDay, currentDay]. When a new min is found, the 'window' resets (new buy point). This is the simplest form of variable-window thinking." },
+        { "q": "How does the Kadane's variant work?", "options": ["Compute daily changes: diff[i] = prices[i] - prices[i-1]. Max profit = max subarray sum of diff. Kadane's finds this in O(n). profit(i,j) = sum of diff[i+1..j]", "Unrelated to Kadane's", "Only works for positive prices", "Requires sorting"], "answer": 0, "explanation": "prices[j] - prices[i] = sum(diff[i+1..j]). So max profit = max subarray sum of daily changes. This elegant reduction shows the connection between stock profit and max subarray." },
+        { "q": "Why must you update minPrice BEFORE computing profit?", "options": ["Today's price could be both the new min AND the sell point (profit = 0, which is valid). Updating min first ensures you don't miss this case. Order: min first, then profit", "Order doesn't matter", "Profit first is better", "Update simultaneously"], "answer": 0, "explanation": "If prices = [7, 1, 5, 3], at price 1: update min to 1, profit = 1-1 = 0 (valid — don't sell at a loss). At price 5: min stays 1, profit = 5-1 = 4. Order matters for correctness." },
+        { "q": "How does this extend to the Stock series (II, III, IV, with cooldown, with fee)?", "options": ["Each variant adds constraints requiring different approaches: II (unlimited) = greedy, III (2 transactions) = state DP, IV (k transactions) = general DP, cooldown/fee = state machine DP", "All use the same approach", "Each is independent", "Only II and III are related"], "answer": 0, "explanation": "The Stock series is a progression of DP state machines. I is the base case (greedy). Each constraint (transaction limit, cooldown, fee) adds state variables. Mastering the progression is key." },
+        { "q": "What if prices can be negative (e.g., futures trading)?", "options": ["Algorithm works unchanged — minPrice tracks the most negative price, profit = current - minPrice is still correct. The math doesn't depend on positive prices", "Needs modification", "Return 0 always", "Use absolute values"], "answer": 0, "explanation": "The algorithm finds max(prices[j] - prices[i]) for j > i. Whether prices are positive or negative doesn't affect the logic. Buying at -5 and selling at -2 gives profit of 3." }
+      ]
+    },
+    {
+      "id": "longest-substring-without-repeating",
+      "title": "Longest Substring Without Repeating Characters",
+      "difficulty": "Medium",
+      "leetcodeNum": 3,
+      "pattern": "Variable-Size Window (Expand + Shrink)",
+      "tldr": "Find the length of the longest substring without duplicate characters. Expand right pointer, adding characters. When a duplicate is found, shrink left pointer until the duplicate is removed. Track max window size.",
+      "keyTrick": "HashMap storing {char → last index}. When char at right is already in map AND its last index ≥ left, jump left to lastIndex + 1 (skip over the duplicate directly). This avoids incrementing left one-by-one.",
+      "approaches": [
+        { "name": "Brute Force", "complexity": "O(n³) time", "description": "Check all substrings, verify each has unique characters using a set." },
+        { "name": "Sliding Window + HashSet", "complexity": "O(n) time, O(min(n, charset)) space", "description": "Expand right. If duplicate, shrink left (removing chars) until no duplicate. Track max window." },
+        { "name": "Sliding Window + HashMap (Optimized)", "complexity": "O(n) time, O(min(n, charset)) space", "description": "Store char→lastIndex. On duplicate, jump left pointer directly to lastIndex + 1. Single pass for right pointer.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why check 'last index ≥ left' when finding a duplicate in the map?", "options": ["The character might have been seen before but is OUTSIDE the current window (index < left). Its old entry in the map is stale and doesn't indicate a duplicate within the window", "The check is unnecessary", "For performance only", "To handle empty strings"], "answer": 0, "explanation": "Example: 'abba'. At second 'a' (index 3): map has a→0, but left=2. Since 0 < 2, the old 'a' is outside the window — no duplicate in current window. Without this check, you'd incorrectly shrink." },
+        { "q": "What's the difference between the HashSet and HashMap approaches?", "options": ["HashSet: shrink left one step at a time, removing chars until duplicate is gone (multiple iterations). HashMap: jump left directly to past the duplicate (one operation). HashMap avoids redundant work", "No difference", "HashSet is faster", "HashMap uses more memory"], "answer": 0, "explanation": "For 'abcdefga': HashSet approach removes a,b,c,d,e,f,g one-by-one to pass the duplicate 'a'. HashMap jumps left from 0 to 1 directly. HashMap is O(1) per right-pointer advance." },
+        { "q": "What's the space complexity and why?", "options": ["O(min(n, |charset|)). The map holds at most one entry per unique character. For lowercase English: O(26) = O(1). For Unicode: O(min(n, 65536))", "O(n) always", "O(1) always", "O(n²)"], "answer": 0, "explanation": "Space is bounded by both input size and character set size. For ASCII, at most 128 entries. For extended Unicode, min(n, charset_size). In interviews, clarify the character set to state precise complexity." },
+        { "q": "This problem is often cited as THE canonical sliding window problem. Why?", "options": ["It demonstrates all core window mechanics: expand right to explore, shrink left to fix violations, track state (set/map) inside window, and maximize/minimize window size", "It's the easiest", "It was the first", "Historical reasons"], "answer": 0, "explanation": "It's the perfect teaching example: clear expand/shrink logic, clean state management, and the HashMap optimization shows how to think about amortized improvements. Every other window problem uses the same skeleton." },
+        { "q": "How would you modify this for 'at most k distinct characters' instead of all unique?", "options": ["Same window framework. Track character frequencies in map. Shrink left when map.size() > k (more than k distinct chars). This is 'Longest Substring with At Most K Distinct Characters'", "Completely different approach", "Use k sets", "Not solvable with sliding window"], "answer": 0, "explanation": "Replace the 'duplicate' constraint with 'more than k distinct'. Shrink removes chars from left and decrements their frequency (remove from map when freq hits 0). Same skeleton, different condition." }
+      ]
+    },
+    {
+      "id": "longest-repeating-character-replacement",
+      "title": "Longest Repeating Character Replacement",
+      "difficulty": "Medium",
+      "leetcodeNum": 424,
+      "pattern": "Variable-Size Window (Expand + Shrink)",
+      "tldr": "Find longest substring where you can replace at most k characters to make all characters the same. Window is valid when windowSize - maxFreqInWindow ≤ k. Expand right, shrink left when invalid.",
+      "keyTrick": "The window is valid if (window length - count of most frequent char in window) ≤ k. This means we need at most k replacements. Key insight: maxFreq doesn't need to be EXACTLY correct when shrinking — it never decreases, and that's fine because we only care about the LONGEST valid window.",
+      "approaches": [
+        { "name": "Brute Force", "complexity": "O(26·n²) time", "description": "For each starting position, try each target character, expand while replacements ≤ k." },
+        { "name": "Sliding Window + Frequency Array", "complexity": "O(n) time, O(26) = O(1) space", "description": "Expand right, track freq of each char. Window valid when len - maxFreq ≤ k. Shrink left when invalid. Track max window size.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why is it correct to NOT update maxFreq when shrinking the window?", "options": ["We're looking for the LONGEST valid window. maxFreq can only help (larger maxFreq = more valid). An overestimated maxFreq means we might not shrink enough, but we'll never shrink a valid window — so the answer stays correct", "It's a bug that happens to work", "maxFreq always decreases properly", "You must update it"], "answer": 0, "explanation": "If maxFreq is stale-high, the window might be slightly too big, but we only care about max window length. The window won't grow past the true maximum. We never LOSE a valid larger window. Subtle but correct." },
+        { "q": "Why is the condition (windowSize - maxFreq ≤ k) the right validity check?", "options": ["maxFreq = count of the most common character. The remaining (windowSize - maxFreq) characters need replacement. If ≤ k replacements suffice, the window is valid", "It's an approximation", "Should be windowSize - minFreq", "Should check all 26 characters"], "answer": 0, "explanation": "The optimal strategy is always to keep the most frequent character and replace everything else. windowSize - maxFreq = number of non-majority characters = replacements needed. Clean and optimal." },
+        { "q": "If you DID want to maintain exact maxFreq, how would shrinking work?", "options": ["After decrementing freq[leftChar], scan all 26 frequencies to find the new max. O(26) per shrink, which is still O(1) since 26 is constant", "Impossible without full rescan", "Use a heap", "Use a sorted frequency array"], "answer": 0, "explanation": "Rescanning 26 entries is O(1) since the alphabet is fixed. A heap would give O(log 26) = O(1) too but with more overhead. The optimization of not updating maxFreq avoids even this constant work." },
+        { "q": "How does this problem change if replacements can be ANY character (not just from the current window)?", "options": ["No change — replacements are to a target character. We pick the most frequent char as target and replace the rest. Whether replacement chars 'come from' somewhere is irrelevant", "Need a different algorithm", "Only works with characters from the string", "Need to track replacement pool"], "answer": 0, "explanation": "The problem is about making all characters the same using ≤ k changes. The replacement characters can be anything. We always replace non-majority chars. The source doesn't matter." },
+        { "q": "What makes this problem particularly tricky for interview candidates?", "options": ["The maxFreq non-update is counterintuitive. Most candidates either: 1) wastefully rescan for exact max, 2) incorrectly decrement maxFreq, or 3) can't explain why the stale max is correct", "It's straightforward", "The window logic is hard", "Character handling is complex"], "answer": 0, "explanation": "The non-obvious correctness of stale maxFreq is the crux. In Google interviews, being able to PROVE why this works (via the 'we only care about max window' argument) separates strong from average candidates." }
+      ]
+    },
+    {
+      "id": "permutation-in-string",
+      "title": "Permutation In String",
+      "difficulty": "Medium",
+      "leetcodeNum": 567,
+      "pattern": "Window with Frequency Map",
+      "tldr": "Check if any permutation of s1 exists as a substring of s2. Fixed-size window of len(s1) on s2. Track character frequencies — when window frequencies match s1 frequencies, return true.",
+      "keyTrick": "Fixed window of size len(s1). Maintain a 'matches' counter: count of characters where window freq == s1 freq. When matches == 26, all characters match → permutation found. Update matches incrementally as the window slides (O(1) per slide).",
+      "approaches": [
+        { "name": "Sort + Sliding Window", "complexity": "O(n·m·log m) time", "description": "For each window of size m in s2, sort it and compare with sorted s1. Too slow." },
+        { "name": "Frequency Array + Full Compare", "complexity": "O(26·n) time, O(1) space", "description": "Slide window, maintain freq array. Compare all 26 counts at each position. O(26n) = O(n)." },
+        { "name": "Frequency + Matches Counter", "complexity": "O(n) time, O(1) space", "description": "Track how many of 26 characters have matching frequencies. Update matches incrementally. O(1) per slide.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why is the 'matches' counter approach better than comparing all 26 frequencies?", "options": ["Comparing all 26 each time is O(26) per slide = O(26n) total. Maintaining a matches counter is O(1) per slide = O(n) total. Constant factor matters for Google-scale", "No practical difference since 26 is constant", "Both are technically O(n), but the matches counter shows deeper optimization thinking that Google values", "All of the above"], "answer": 3, "explanation": "Technically both are O(n) since 26 is constant. But the matches counter eliminates the inner loop entirely and shows you can think about incremental state updates — exactly the optimization thinking Google looks for." },
+        { "q": "How does the matches counter update when adding a character to the window?", "options": ["If the new freq now equals target: matches++. If it was equal before but now overshoots: matches--. Check BOTH before and after incrementing the frequency", "Just increment matches", "Recount from scratch", "Only check the added character"], "answer": 0, "explanation": "Before incrementing freq[c]: if freq[c] == target[c], it was matching but will now overshoot → matches--. After incrementing: if freq[c] == target[c], it now matches → matches++. Two checks per character." },
+        { "q": "This is identical to which other problem?", "options": ["Find All Anagrams in a String (LC 438) — same algorithm but collect ALL starting indices instead of returning on first match", "Group Anagrams", "Valid Anagram", "Minimum Window Substring"], "answer": 0, "explanation": "LC 438 is the 'collect all' version of this problem. Same fixed-window sliding with frequency matching. Once you solve one, the other is trivial. Pattern recognition in action." },
+        { "q": "Why must the window be EXACTLY len(s1) and not variable-sized?", "options": ["A permutation has the exact same length as the original. Any substring matching a permutation must have length == len(s1). Shorter or longer substrings can't be permutations", "Variable window would also work", "For efficiency", "The problem constrains it"], "answer": 0, "explanation": "Permutations preserve length. A permutation of 'abc' is always length 3. This constraint gives us a fixed-size window, which is simpler than variable-size window problems." },
+        { "q": "How does this compare to Minimum Window Substring (a harder variant)?", "options": ["Permutation = EXACT frequency match, fixed window. Min Window Substring = AT LEAST target frequencies, VARIABLE window (find shortest). Min Window is strictly harder", "Same difficulty", "Permutation is harder", "Unrelated problems"], "answer": 0, "explanation": "Permutation: fixed window, exact match. Min Window: variable window, at-least match, minimize. Min Window requires the expand-until-valid-then-shrink pattern. Permutation is the simpler special case." }
+      ]
+    },
+    {
+      "id": "minimum-size-subarray-sum",
+      "title": "Minimum Size Subarray Sum",
+      "difficulty": "Medium",
+      "leetcodeNum": 209,
+      "pattern": "Variable-Size Window (Expand + Shrink)",
+      "tldr": "Find the shortest subarray with sum ≥ target (all positive numbers). Expand right to grow sum, shrink left while sum ≥ target (window is valid). Track minimum window length during shrinking.",
+      "keyTrick": "Expand right to increase sum. When sum ≥ target, SHRINK left as much as possible while maintaining sum ≥ target. Record minimum length during the shrink phase. The all-positive constraint guarantees monotonic behavior — adding increases sum, removing decreases it.",
+      "approaches": [
+        { "name": "Brute Force", "complexity": "O(n²) time", "description": "Try all subarrays, compute sums, find shortest with sum ≥ target." },
+        { "name": "Prefix Sum + Binary Search", "complexity": "O(n log n) time, O(n) space", "description": "Compute prefix sums. For each start, binary search for the end where prefixSum[end] - prefixSum[start] ≥ target." },
+        { "name": "Sliding Window", "complexity": "O(n) time, O(1) space", "description": "Expand right to meet target. Shrink left to minimize length while sum ≥ target. Single pass.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why does sliding window work here but NOT for 'Subarray Sum Equals K'?", "options": ["All elements are POSITIVE, so adding an element always increases the sum and removing always decreases it. This monotonicity lets us decide when to expand/shrink. Negative values break this", "Sliding window works for both", "Different target condition", "Array size limitation"], "answer": 0, "explanation": "With all positives: sum is monotonic in window size. Expand → sum grows. Shrink → sum decreases. With negatives, expanding could decrease sum, so you can't greedily decide direction. This is THE key insight." },
+        { "q": "Why minimize during the SHRINK phase, not the expand phase?", "options": ["The window is valid (sum ≥ target) only during shrinking. Expanding adds elements to reach the target — the window is invalid until the target is met. Minimum valid window is found by shrinking as much as possible", "Either phase works", "Expand phase gives exact answer", "Minimize during both"], "answer": 0, "explanation": "During expansion, sum < target (window invalid, no point recording length). Once sum ≥ target, we shrink to find the shortest valid window. Every valid window is a candidate for the minimum." },
+        { "q": "What's the time complexity argument despite nested loops?", "options": ["Each element is added by right pointer once and removed by left pointer at most once. Total operations: at most 2n. The left pointer never moves backward — it only advances", "O(n²)", "O(n log n)", "Depends on target"], "answer": 0, "explanation": "Classic two-pointer amortized argument: left and right each traverse the array at most once. Left never backtracks. Total movements: ≤ 2n. O(n) guaranteed regardless of input." },
+        { "q": "The follow-up asks for O(n log n). How does binary search on prefix sums work?", "options": ["Prefix sums are monotonically increasing (all positive). For each start i, binary search for smallest end j where prefix[j] - prefix[i] ≥ target. O(log n) per start × n starts", "Binary search on the answer length", "Binary search on target", "Sort prefix sums"], "answer": 0, "explanation": "Prefix sums are sorted (all elements positive). For each i, find min j where prefix[j] ≥ prefix[i] + target using binary search. This is the O(n log n) approach — useful when elements can be negative (prefix sums still sorted if...)." },
+        { "q": "How would you solve this if elements could be negative?", "options": ["Sliding window fails. Use prefix sum + deque (monotonic queue) to find the shortest subarray with sum ≥ k. This is 'Shortest Subarray with Sum at Least K' (LC 862, Hard)", "Same sliding window", "Not possible in O(n)", "Sort the array first"], "answer": 0, "explanation": "With negatives, prefix sums aren't monotonic. Use a monotonic deque maintaining increasing prefix sums. For each j, pop from deque front while prefix[j] - prefix[front] ≥ k. O(n). LC 862 is the hard generalization." }
+      ]
+    },
+    {
+      "id": "find-k-closest-elements",
+      "title": "Find K Closest Elements",
+      "difficulty": "Medium",
+      "leetcodeNum": 658,
+      "pattern": "Fixed-Size Window",
+      "tldr": "Given a sorted array, find k closest elements to target x. Binary search for the left boundary of the k-size window. Compare elements at window edges to determine which side is closer.",
+      "keyTrick": "Binary search for the LEFT BOUNDARY of the result window. Search range: [0, n-k]. Compare: if x - arr[mid] > arr[mid+k] - x, the left element is farther → move right. Otherwise, move left. The result is arr[mid..mid+k-1].",
+      "approaches": [
+        { "name": "Sort by Distance", "complexity": "O(n log n) time, O(n) space", "description": "Sort all elements by |element - x|, take first k, sort again by value. Simple but slow." },
+        { "name": "Binary Search + Expand", "complexity": "O(log n + k) time, O(1) space", "description": "Binary search for closest element. Expand outward with two pointers, taking k nearest elements." },
+        { "name": "Binary Search for Window Left", "complexity": "O(log(n-k) + k) time, O(1) space", "description": "Binary search for the optimal left boundary of the k-size window directly. Most elegant.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why binary search for the LEFT boundary instead of the closest element?", "options": ["Searching for the left boundary gives the answer window directly — no expansion phase needed. The result is always a contiguous subarray (sorted property), so one index defines it", "Either works equally well", "Closest element is harder to find", "Left boundary is easier to compare"], "answer": 0, "explanation": "The result must be a contiguous k-length subarray (closest elements in sorted array are contiguous). Binary searching for the window's left edge finds the answer in O(log(n-k)) with no post-processing." },
+        { "q": "In the comparison x - arr[mid] > arr[mid+k] - x, why use > instead of >=?", "options": ["When distances are equal, we prefer the smaller element (left side). Using > means we only move right when left is STRICTLY farther, keeping the smaller-valued window on ties", "No difference", ">= would also work", "The problem doesn't specify tie-breaking"], "answer": 0, "explanation": "The problem says when distances are equal, prefer the smaller element. x - arr[mid] > arr[mid+k] - x: strictly farther left → must go right. Equal → stay left (smaller values). Tie-breaking via inequality direction." },
+        { "q": "Why is the search range [0, n-k] and not [0, n-1]?", "options": ["The left boundary of a k-element window can't be beyond index n-k (otherwise the window would extend past the array end). This constraint bounds the search space", "n-1 also works", "n-k is an optimization", "For boundary safety"], "answer": 0, "explanation": "If left = n-k, the window is arr[n-k..n-1] (last k elements). Any left > n-k would mean fewer than k elements to the right. The search space is naturally [0, n-k]." },
+        { "q": "The 'binary search + expand' approach has what disadvantage?", "options": ["O(log n + k) vs O(log(n-k) + k). Similar asymptotically, but the expand phase has fiddly boundary logic for ties and edge cases. The window-left approach is cleaner", "It's slower", "Uses more memory", "Can't handle duplicates"], "answer": 0, "explanation": "Both are O(log n + k). But expand from center has edge cases: what if closest is at the boundary? What about ties? The binary search for window-left handles everything in the comparison naturally." },
+        { "q": "How does this connect to the 'merge k sorted lists' problem?", "options": ["Both use the concept of maintaining a fixed-size window/set over sorted data. K-closest uses a fixed window on one sorted array; k-way merge maintains a k-size heap over k sorted arrays", "No connection", "Same algorithm", "Merge doesn't use binary search"], "answer": 0, "explanation": "The meta-pattern is 'select k elements efficiently from sorted data'. K-closest: contiguous window (binary search). K-way merge: distributed elements (heap). Both exploit sorted structure differently." }
+      ]
+    },
+    {
+      "id": "minimum-window-substring",
+      "title": "Minimum Window Substring",
+      "difficulty": "Hard",
+      "leetcodeNum": 76,
+      "pattern": "Window with Frequency Map",
+      "tldr": "Find the shortest substring of s containing all characters of t (with duplicates). Variable window: expand right to include characters, shrink left when all of t is covered. Track minimum valid window.",
+      "keyTrick": "Two maps: target freq map (from t) and window freq map. Track 'formed' = count of characters where window freq ≥ target freq. When formed == required (unique chars in t), the window is valid. Shrink left to minimize. Update formed on each add/remove.",
+      "approaches": [
+        { "name": "Brute Force", "complexity": "O(n²·m) time", "description": "Check all substrings, verify each contains all chars of t." },
+        { "name": "Sliding Window + Frequency Maps", "complexity": "O(n + m) time, O(n + m) space", "description": "Expand right to cover t. When all of t is covered, shrink left to minimize. Track with 'formed' counter.", "isOptimal": true },
+        { "name": "Optimized with Filtered s", "complexity": "O(n + m) time, O(n + m) space", "description": "Pre-filter s to only positions containing chars in t. Reduces window operations when s is much larger than t." }
+      ],
+      "quiz": [
+        { "q": "What exactly does the 'formed' counter track?", "options": ["The number of UNIQUE characters in t for which the window has at least the required frequency. When formed == number of unique chars in t, the window contains all of t", "Total character count", "Number of matching positions", "Frequency sum"], "answer": 0, "explanation": "If t='AABC', required unique chars = 3 (A:2, B:1, C:1). formed counts how many of these 3 requirements are met. When formed=3, the window is valid. This avoids re-scanning all frequencies each step." },
+        { "q": "Why is 'formed' needed instead of just comparing total matched chars?", "options": ["Total count doesn't distinguish between having enough A's vs enough B's. formed ensures EACH character meets its individual requirement. Having 5 A's doesn't help if B is still missing", "Total count works too", "Formed is less accurate", "For performance only"], "answer": 0, "explanation": "t='ABC': window 'AAAA' has count=4 ≥ 3 but missing B and C. formed correctly shows 1/3 (only A met). Total count is misleading. formed is the precise validity check." },
+        { "q": "When shrinking, how do you update 'formed'?", "options": ["Before removing left char: if window freq for that char was exactly equal to target freq, removing it will break the requirement → formed--. Then decrement window freq", "Always decrement formed", "Don't update formed during shrink", "Recount from scratch"], "answer": 0, "explanation": "Only decrement formed when the removed char's freq drops BELOW target. If freq was 3 and target is 2, removing gives freq=2, still meeting target → formed unchanged. Precise bookkeeping is critical." },
+        { "q": "The filtered optimization pre-processes s. When is it most beneficial?", "options": ["When s is very long but has few characters from t. Example: s has 100000 chars but only 50 match any char in t. The filtered list has 50 entries — window operations run on 50, not 100000", "When s is short", "When t is longer than s", "Always beneficial"], "answer": 0, "explanation": "If s='aaaa...aXY...aZ' (mostly 'a's, t='XYZ'), the filtered list contains only positions of X, Y, Z. Window slides over ~3 positions instead of ~n. Huge speedup when t's chars are sparse in s." },
+        { "q": "How would you extend this to 'minimum window containing t as a subsequence' (not just character counts)?", "options": ["This becomes DP or two-pointer with order tracking: dp[i][j] = earliest start in s to match t[0..j] ending at or before s[i]. Much harder — O(n·m) DP", "Same algorithm", "Add position tracking to frequency map", "Sliding window with deque"], "answer": 0, "explanation": "Subsequence requires ORDER preservation, not just frequency matching. This is 'Minimum Window Subsequence' (LC 727, Hard). DP tracks matching positions. Fundamentally different from frequency-based window." }
+      ]
+    },
+    {
+      "id": "sliding-window-maximum",
+      "title": "Sliding Window Maximum",
+      "difficulty": "Hard",
+      "leetcodeNum": 239,
+      "pattern": "Window with Monotonic Deque",
+      "tldr": "Find the maximum in each sliding window of size k. Monotonic DECREASING deque of indices: front is always the max. Remove from front if out of window. Remove from back if smaller than new element. O(n).",
+      "keyTrick": "Deque stores indices in DECREASING value order. For each new element: 1) Remove front if out of window (index ≤ i-k). 2) Remove from back while back's value ≤ current value (they'll never be the max). 3) Push current index to back. 4) Front of deque = window maximum.",
+      "approaches": [
+        { "name": "Brute Force", "complexity": "O(n·k) time, O(1) space", "description": "For each window position, scan k elements for the max." },
+        { "name": "Max-Heap (Priority Queue)", "complexity": "O(n log n) time, O(n) space", "description": "Max-heap with lazy deletion: add all, peek max, remove expired indices lazily." },
+        { "name": "Monotonic Deque", "complexity": "O(n) time, O(k) space", "description": "Deque maintains decreasing order of useful candidates. Each element enters and exits deque once. O(n) total.", "isOptimal": true },
+        { "name": "Sparse Table / Segment Tree", "complexity": "O(n log n) build, O(1) per query", "description": "Preprocess for range max queries. Overkill for sliding window but generalizes to arbitrary ranges." }
+      ],
+      "quiz": [
+        { "q": "Why remove from the BACK when new element ≥ deque's back?", "options": ["Those elements are smaller AND older — they'll never be the maximum in any future window (the new element is both larger and more recent). They're permanently useless", "For space savings", "To maintain sorted order", "Optional optimization"], "answer": 0, "explanation": "An element that is both smaller and older than the new element can never be the answer for any window. The new element dominates it in every future window. Removing it is correct and necessary." },
+        { "q": "Why remove from the FRONT when the index is out of the window?", "options": ["The front element was the maximum but its index is now outside [i-k+1, i]. It's no longer in the current window. After removal, the new front is the next maximum within the window", "The front is always out of window", "For performance", "Only when deque is full"], "answer": 0, "explanation": "The deque front might be the global max but from a past window. Checking if front index ≤ i-k removes expired elements. This ensures the deque only contains current window candidates." },
+        { "q": "Why is the deque size bounded by O(k) and not O(n)?", "options": ["The deque only holds elements within the current window (at most k elements). Additionally, the monotonic property means it holds at most k strictly decreasing values", "It can grow to O(n)", "Limited by the decreasing property", "Both window bound and monotonic property limit it to O(k)"], "answer": 3, "explanation": "Two bounds: 1) Window has at most k elements (expired ones are removed from front). 2) Monotonic decreasing property further prunes. In practice, deque is often much smaller than k." },
+        { "q": "Why does the heap approach have O(n log n) time instead of O(n log k)?", "options": ["Lazy deletion: expired elements aren't removed immediately, they stay in the heap until they reach the top. Heap can grow to O(n). Each insertion/deletion is O(log n)", "The heap is always size k", "Heap can't do lazy deletion", "It is O(n log k)"], "answer": 0, "explanation": "With lazy deletion, the heap accumulates all n elements. Size = O(n) in worst case. Each operation is O(log n). To achieve O(n log k), you'd need eager deletion which requires indexed heaps." },
+        { "q": "How does this extend to 'Sliding Window Minimum'?", "options": ["Flip the deque to INCREASING order: remove from back while back's value ≥ current. Front gives minimum. Everything else is identical", "Need a completely different approach", "Use a min-heap", "Reverse the array and find max"], "answer": 0, "explanation": "Min version: maintain increasing deque. Remove from back when current ≤ back (smaller element dominates). The pattern is symmetric. Both are O(n). Once you master one, the other is trivial." }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,554 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+/* ── Dark theme (default) ──────────────────────────────────── */
+
+:root {
+  /* Surfaces */
+  --bg-root: #0a0a0f;
+  --bg-header: linear-gradient(180deg, #0e0e1a, #0a0a0f);
+  --bg-sidebar: #09090f;
+  --bg-card: #0e0e18;
+  --bg-card-hover: #101020;
+  --bg-input: #0e0e18;
+  --bg-deep: #0a0a14;
+  --bg-trick: linear-gradient(135deg, #0a140a, #0a0a14);
+
+  /* Borders */
+  --border: #1a1a2a;
+  --border-hover: #2a2a4a;
+  --border-active: #3a3a6a;
+  --border-accent: #4a4aff;
+
+  /* Text */
+  --text-primary: #e0e0e8;
+  --text-heading: #ffffff;
+  --text-secondary: #c0c0d8;
+  --text-muted: #8888a0;
+  --text-dimmed: #666680;
+  --text-faint: #555570;
+  --text-ghost: #444460;
+
+  /* Accent */
+  --accent: #4a4aff;
+  --accent-soft: #8888ff;
+  --accent-bg: #4a4aff22;
+  --accent-glow: #4a4aff33;
+  --accent-surface: #14142a;
+
+  /* Patterns / tags */
+  --tag-bg: #1a1a2a;
+  --tag-text: #8888a0;
+  --pattern-text: #b0b0ff;
+
+  /* Difficulty */
+  --easy: #22c55e;
+  --medium: #f59e0b;
+  --hard: #ef4444;
+
+  /* Quiz */
+  --correct-bg: #0a1f0a;
+  --correct-border: #22c55e33;
+  --incorrect-bg: #1f0a0a;
+  --incorrect-border: #ef444433;
+
+  /* Approach */
+  --approach-bg: #0a0a14;
+  --approach-optimal-bg: #0a140a;
+  --approach-optimal-border: #22c55e44;
+
+  /* Progress */
+  --progress-track: #1a1a2a;
+  --progress-fill: linear-gradient(90deg, #4a4aff, #22c55e);
+
+  /* Misc */
+  --scrollbar-track: #0a0a0f;
+  --scrollbar-thumb: #2a2a3a;
+  --code-bg: #14142a;
+  --code-text: #b0b0ff;
+  --completed-text: #555570;
+  --glow: linear-gradient(90deg, transparent, #4a4aff33, transparent);
+
+  /* Check button */
+  --check-border: #2a2a4a;
+  --check-done-bg: #22c55e;
+  --check-done-border: #22c55e;
+  --check-icon: #0a0a0f;
+
+  /* Topic button */
+  --topic-btn-hover-bg: #12121f;
+  --topic-btn-active-bg: #14142a;
+
+  /* Diff pill */
+  --pill-border: #1a1a2a;
+  --pill-text: #666680;
+  --pill-hover-border: #3a3a5a;
+  --pill-active-all-bg: #2a2a4a;
+  --pill-active-all-border: #4a4a6a;
+
+  /* Theme toggle */
+  --toggle-bg: #1a1a2a;
+  --toggle-knob: #e0e0e8;
+}
+
+/* ── Light theme ───────────────────────────────────────────── */
+
+.light {
+  /* Surfaces — warm paper tones */
+  --bg-root: #f8f7f4;
+  --bg-header: linear-gradient(180deg, #ffffff, #f8f7f4);
+  --bg-sidebar: #f0efe9;
+  --bg-card: #ffffff;
+  --bg-card-hover: #fcfcfa;
+  --bg-input: #ffffff;
+  --bg-deep: #f2f1ec;
+  --bg-trick: linear-gradient(135deg, #f0f9f0, #f2f1ec);
+
+  /* Borders */
+  --border: #ddd9d0;
+  --border-hover: #c5c0b6;
+  --border-active: #a8a29e;
+  --border-accent: #4338ca;
+
+  /* Text — warm neutrals, high readability */
+  --text-primary: #1c1917;
+  --text-heading: #0c0a09;
+  --text-secondary: #292524;
+  --text-muted: #57534e;
+  --text-dimmed: #78716c;
+  --text-faint: #a8a29e;
+  --text-ghost: #d6d3d1;
+
+  /* Accent */
+  --accent: #4338ca;
+  --accent-soft: #6366f1;
+  --accent-bg: #4338ca12;
+  --accent-glow: #4338ca20;
+  --accent-surface: #eef2ff;
+
+  /* Patterns / tags */
+  --tag-bg: #e8e5de;
+  --tag-text: #57534e;
+  --pattern-text: #4338ca;
+
+  /* Difficulty */
+  --easy: #16a34a;
+  --medium: #d97706;
+  --hard: #dc2626;
+
+  /* Quiz */
+  --correct-bg: #f0fdf4;
+  --correct-border: #bbf7d0;
+  --incorrect-bg: #fef2f2;
+  --incorrect-border: #fecaca;
+
+  /* Approach */
+  --approach-bg: #f6f5f1;
+  --approach-optimal-bg: #f0fdf4;
+  --approach-optimal-border: #86efac;
+
+  /* Progress */
+  --progress-track: #e7e5e4;
+  --progress-fill: linear-gradient(90deg, #4338ca, #16a34a);
+
+  /* Misc */
+  --scrollbar-track: #f8f7f4;
+  --scrollbar-thumb: #d6d3d1;
+  --code-bg: #eef2ff;
+  --code-text: #4338ca;
+  --completed-text: #a8a29e;
+  --glow: linear-gradient(90deg, transparent, #4338ca18, transparent);
+
+  /* Check button */
+  --check-border: #d6d3d1;
+  --check-done-bg: #16a34a;
+  --check-done-border: #16a34a;
+  --check-icon: #ffffff;
+
+  /* Topic button */
+  --topic-btn-hover-bg: #e8e5de;
+  --topic-btn-active-bg: #eef2ff;
+
+  /* Diff pill */
+  --pill-border: #ddd9d0;
+  --pill-text: #78716c;
+  --pill-hover-border: #a8a29e;
+  --pill-active-all-bg: #e8e5de;
+  --pill-active-all-border: #a8a29e;
+
+  /* Theme toggle */
+  --toggle-bg: #e8e5de;
+  --toggle-knob: #1c1917;
+}
+
+/* ── Global reset ──────────────────────────────────────────── */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ── Layout shells ─────────────────────────────────────────── */
+
+.app-root {
+  font-family: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+  background: var(--bg-root);
+  color: var(--text-primary);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: background 0.35s ease, color 0.35s ease;
+}
+
+.app-header {
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+  padding: 20px 28px;
+  background: var(--bg-header);
+  z-index: 10;
+  transition: background 0.35s ease, border-color 0.35s ease;
+}
+
+.app-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.app-sidebar {
+  width: 250px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  padding: 16px 12px;
+  background: var(--bg-sidebar);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: background 0.35s ease, border-color 0.35s ease;
+}
+
+.sidebar-topics-scroll {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  margin-bottom: 4px;
+}
+
+.app-main {
+  flex: 1;
+  padding: 20px 28px;
+  overflow-y: auto;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+
+/* ── Theme toggle ──────────────────────────────────────────── */
+
+.theme-toggle {
+  position: relative;
+  width: 52px;
+  height: 28px;
+  border-radius: 14px;
+  background: var(--toggle-bg);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.35s ease;
+  display: flex;
+  align-items: center;
+  padding: 0 3px;
+  flex-shrink: 0;
+}
+.theme-toggle:hover {
+  border-color: var(--border-hover);
+}
+
+.theme-toggle-knob {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--toggle-knob);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  line-height: 1;
+}
+.theme-toggle-knob.is-light {
+  transform: translateX(24px);
+}
+
+/* ── Components ────────────────────────────────────────────── */
+
+.topic-btn {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 13px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.topic-btn:hover {
+  background: var(--topic-btn-hover-bg);
+  border-color: var(--border-hover);
+  color: var(--text-secondary);
+}
+.topic-btn.active {
+  background: var(--topic-btn-active-bg);
+  border-color: var(--border-accent);
+  color: var(--text-heading);
+}
+
+.problem-card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.25s;
+  cursor: pointer;
+  background: var(--bg-card);
+}
+.problem-card:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-card-hover);
+}
+.problem-card.expanded {
+  border-color: var(--border-active);
+  cursor: default;
+}
+
+.tab-btn {
+  padding: 8px 16px;
+  background: transparent;
+  border: none;
+  color: var(--text-dimmed);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.tab-btn:hover {
+  color: var(--text-secondary);
+}
+.tab-btn.active {
+  color: var(--accent-soft);
+  border-bottom-color: var(--accent-soft);
+}
+
+.quiz-option {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12.5px;
+  text-align: left;
+  transition: all 0.2s;
+  width: 100%;
+  display: block;
+  line-height: 1.5;
+}
+.quiz-option:hover:not(.answered) {
+  border-color: var(--border-hover);
+  background: var(--accent-surface);
+}
+.quiz-option.correct {
+  border-color: var(--easy);
+  background: var(--correct-bg);
+  color: var(--easy);
+}
+.quiz-option.incorrect {
+  border-color: var(--hard);
+  background: var(--incorrect-bg);
+  color: var(--hard);
+}
+
+.approach-card {
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--approach-bg);
+  transition: background 0.35s ease, border-color 0.35s ease;
+}
+.approach-card.optimal {
+  border-color: var(--approach-optimal-border);
+  background: var(--approach-optimal-bg);
+}
+
+.pattern-tag {
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  background: var(--tag-bg);
+  color: var(--tag-text);
+  display: inline-block;
+  transition: background 0.35s ease, color 0.35s ease;
+}
+
+.search-input {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 14px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 13px;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.2s, background 0.35s ease;
+}
+.search-input:focus {
+  border-color: var(--border-accent);
+}
+.search-input::placeholder {
+  color: var(--text-ghost);
+}
+
+.check-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--check-border);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.check-btn.done {
+  border-color: var(--check-done-border);
+  background: var(--check-done-bg);
+}
+
+.progress-bar {
+  height: 4px;
+  background: var(--progress-track);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--progress-fill);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.pattern-card {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-card);
+  transition: background 0.35s ease, border-color 0.35s ease;
+}
+
+.glow-line {
+  height: 1px;
+  background: var(--glow);
+}
+
+.badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.diff-pill {
+  padding: 4px 12px;
+  border-radius: 14px;
+  font-size: 11px;
+  cursor: pointer;
+  border: 1px solid var(--pill-border);
+  background: transparent;
+  color: var(--pill-text);
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.diff-pill:hover {
+  border-color: var(--pill-hover-border);
+}
+.diff-pill.active {
+  color: var(--text-heading);
+}
+
+/* ── Reusable inner boxes ──────────────────────────────────── */
+
+.pattern-box {
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: var(--bg-deep);
+  border-radius: 6px;
+  border-left: 3px solid var(--accent);
+  transition: background 0.35s ease;
+}
+
+.trick-box {
+  padding: 16px;
+  background: var(--bg-trick);
+  border-radius: 8px;
+  border: 1px solid var(--correct-border);
+  transition: background 0.35s ease, border-color 0.35s ease;
+}
+
+.complexity-tag {
+  font-size: 11px;
+  color: var(--code-text);
+  background: var(--code-bg);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: inherit;
+  transition: background 0.35s ease, color 0.35s ease;
+}
+
+.quiz-feedback {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.quiz-feedback.is-correct {
+  background: var(--correct-bg);
+  border: 1px solid var(--correct-border);
+}
+.quiz-feedback.is-incorrect {
+  background: var(--incorrect-bg);
+  border: 1px solid var(--incorrect-border);
+}
+
+.card-divider {
+  border-top: 1px solid var(--border);
+}

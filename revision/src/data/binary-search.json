@@ -1,0 +1,317 @@
+{
+  "id": "binary-search",
+  "title": "Binary Search",
+  "icon": "½",
+  "order": 6,
+  "description": "Halve the search space every step — O(log n) on sorted data. Beyond simple array search, binary search applies to monotonic functions, answer spaces, and rotated/modified sorted arrays. The key is identifying WHAT to binary search on.",
+  "patterns": [
+    {
+      "name": "Classic Binary Search (Find Target)",
+      "description": "Search for an exact value in a sorted array. Three variants: exact match, leftmost occurrence, rightmost occurrence. Master the loop invariant and boundary conditions.",
+      "problems": ["binary-search", "search-insert-position", "guess-number", "search-2d-matrix"]
+    },
+    {
+      "name": "Binary Search on Answer Space",
+      "description": "The answer is in a monotonic range [lo, hi]. Binary search on the answer itself — for each candidate mid, check if it's feasible. Also called 'minimize the maximum' or 'maximize the minimum'.",
+      "problems": ["koko-eating-bananas", "capacity-ship-packages", "split-array-largest-sum"]
+    },
+    {
+      "name": "Rotated / Modified Sorted Array",
+      "description": "The sorted array has been rotated or contains duplicates. Identify which half is sorted, determine if the target lies in that half, and adjust accordingly.",
+      "problems": ["find-min-rotated", "search-rotated", "search-rotated-ii"]
+    },
+    {
+      "name": "Monotonic Function Search",
+      "description": "Binary search on a mathematical function that is monotonically increasing or decreasing. Compute f(mid) and adjust search based on the result.",
+      "problems": ["sqrt-x", "guess-number", "find-mountain-array"]
+    },
+    {
+      "name": "Search on Complex Structures",
+      "description": "Apply binary search to matrices (treating 2D as 1D), time-series data, or custom data structures where ordering can be exploited.",
+      "problems": ["search-2d-matrix", "time-based-kv-store"]
+    },
+    {
+      "name": "Binary Search + Divide and Conquer",
+      "description": "Combine binary search with recursive partitioning for problems on multiple sorted sequences or peak-finding.",
+      "problems": ["median-two-sorted-arrays", "find-mountain-array"]
+    }
+  ],
+  "problems": [
+    {
+      "id": "binary-search",
+      "title": "Binary Search",
+      "difficulty": "Easy",
+      "leetcodeNum": 704,
+      "pattern": "Classic Binary Search (Find Target)",
+      "tldr": "Find target in a sorted array. lo=0, hi=n-1. While lo ≤ hi: mid = lo + (hi-lo)/2. If nums[mid] == target, return. If less, lo = mid+1. If greater, hi = mid-1.",
+      "keyTrick": "Use mid = lo + (hi-lo)/2 instead of (lo+hi)/2 to prevent integer overflow. The loop invariant: if target exists, it's in [lo, hi]. When lo > hi, the search space is empty → target not found.",
+      "approaches": [
+        { "name": "Iterative Binary Search", "complexity": "O(log n) time, O(1) space", "description": "lo/hi converge by halving. Standard three-way comparison at mid.", "isOptimal": true },
+        { "name": "Recursive Binary Search", "complexity": "O(log n) time, O(log n) stack", "description": "Recursively search left or right half. Same logic, more stack usage." }
+      ],
+      "quiz": [
+        { "q": "Why is mid = lo + (hi-lo)/2 preferred over mid = (lo+hi)/2?", "options": ["(lo+hi) can overflow int when both are large positive numbers. lo + (hi-lo)/2 avoids this by computing the offset first. In Java: Integer.MAX_VALUE/2 + Integer.MAX_VALUE/2 overflows", "Style preference", "It's faster", "No difference in Java"], "answer": 0, "explanation": "If lo = 2 billion and hi = 2 billion, lo+hi = 4 billion > Integer.MAX_VALUE (2.1B). This causes negative mid. lo + (hi-lo)/2 = 2B + 0 = 2B. Google interviewers look for this." },
+        { "q": "What's the difference between lo ≤ hi and lo < hi as loop conditions?", "options": ["lo ≤ hi: search space includes a single element (lo == hi). lo < hi: terminates with lo == hi, the candidate. The choice affects how mid is computed and how boundaries update", "No difference", "lo < hi is always better", "lo ≤ hi is always better"], "answer": 0, "explanation": "lo ≤ hi: checks every element, returns inside the loop. lo < hi: terminates with lo == hi pointing to the answer (useful for 'leftmost' variants). Both are correct with matching update logic." },
+        { "q": "How many comparisons does binary search make in the worst case for n elements?", "options": ["⌊log₂(n)⌋ + 1 comparisons. Each comparison halves the space. After k comparisons: space = n/2^k. When n/2^k < 1: k > log₂(n)", "Exactly log₂(n)", "n/2", "2·log₂(n)"], "answer": 0, "explanation": "The search tree has depth ⌊log₂(n)⌋ + 1. Each level does one comparison. For n=1000: at most 10 comparisons. For n=1 billion: at most 30. This logarithmic guarantee is the power of binary search." },
+        { "q": "When would linear search beat binary search?", "options": ["For very small n (< ~64), linear search wins due to cache locality and no branch misprediction overhead. Also when data is unsorted (sorting costs O(n log n) for one search)", "Never", "When n < 10", "When elements are strings"], "answer": 0, "explanation": "Binary search has higher constant factors (branch prediction misses, non-sequential memory access). For small n, linear scan is faster. The crossover is around n=32-64 on modern CPUs." },
+        { "q": "In Python, which built-in module implements binary search?", "options": ["bisect module: bisect_left(arr, x) gives leftmost insertion point, bisect_right gives rightmost. In Java: Arrays.binarySearch(). In C++: lower_bound/upper_bound", "No built-in exists", "sort module", "search module"], "answer": 0, "explanation": "Know your language's binary search library. Python's bisect, Java's Arrays.binarySearch, C++'s lower_bound/upper_bound. In interviews, implement from scratch but mention the library to show awareness." }
+      ]
+    },
+    {
+      "id": "search-insert-position",
+      "title": "Search Insert Position",
+      "difficulty": "Easy",
+      "leetcodeNum": 35,
+      "pattern": "Classic Binary Search (Find Target)",
+      "tldr": "Find target index or where it would be inserted to keep sorted order. This is bisect_left — find the leftmost position where target could be placed. When loop ends, lo IS the insertion point.",
+      "keyTrick": "Standard binary search but DON'T return -1 on miss. When the loop ends (lo > hi), lo equals the correct insertion position. This is because lo always advances past elements < target, landing exactly at the first element ≥ target.",
+      "approaches": [
+        { "name": "Binary Search (bisect_left)", "complexity": "O(log n) time, O(1) space", "description": "Standard binary search. On miss, lo naturally points to the insertion index. No special post-processing.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why does lo give the correct insertion position after the loop?", "options": ["The invariant: all elements before lo are < target, all elements from hi+1 onward are ≥ target. When lo > hi, lo = hi+1 = first index where element ≥ target = insertion point", "Coincidence for sorted arrays", "Only works for unique elements", "Need to check hi too"], "answer": 0, "explanation": "lo moves right past elements < target (lo = mid+1 when nums[mid] < target). hi moves left past elements > target. They converge to the boundary between <target and ≥target. lo lands on the ≥ side." },
+        { "q": "How does this relate to lower_bound in C++ STL?", "options": ["They're identical. lower_bound returns iterator to first element ≥ target. Search Insert Position returns index of first element ≥ target. Same algorithm, different interface", "Completely different", "lower_bound finds exact match", "lower_bound is O(n)"], "answer": 0, "explanation": "C++ lower_bound, Python bisect_left, and this problem are all the same: find the leftmost insertion point for target in a sorted sequence. Understanding this equivalence connects interview problems to library code." },
+        { "q": "What if there are duplicates and we want the RIGHTMOST insertion position?", "options": ["Change the condition: when nums[mid] == target, set lo = mid + 1 (continue searching right). This gives bisect_right — the position AFTER all existing copies of target", "Same algorithm works", "Use a different approach", "Duplicates aren't handled"], "answer": 0, "explanation": "bisect_left (this problem): first position ≥ target. bisect_right: first position > target (after all copies). The difference: what to do when nums[mid] == target. Left: go left. Right: go right." },
+        { "q": "This is the foundation for which family of problems?", "options": ["All 'find the first/last occurrence' and 'search in range' problems. Also foundational for binary search on answer space — you're finding where a condition transitions from false to true", "Only insertion problems", "Sorting algorithms", "Graph search"], "answer": 0, "explanation": "The 'leftmost true' binary search pattern: find the first index where a predicate becomes true. This generalizes to: Koko's bananas (first speed that works), ship capacity (first capacity that works), etc." },
+        { "q": "What are the edge cases to verify?", "options": ["Target smaller than all elements (insert at 0), larger than all (insert at n), equal to first/last element, empty array, and single-element array. All should be tested", "No edge cases for binary search", "Only empty array", "Only boundary elements"], "answer": 0, "explanation": "Target < arr[0]: lo never moves from 0. Target > arr[n-1]: lo advances to n. Target = arr[0]: lo stays at 0. Target = arr[n-1]: lo stays at n-1. Verify all four corners." }
+      ]
+    },
+    {
+      "id": "guess-number",
+      "title": "Guess Number Higher Or Lower",
+      "difficulty": "Easy",
+      "leetcodeNum": 374,
+      "pattern": "Monotonic Function Search",
+      "tldr": "Binary search on [1, n] using an API: guess(mid) returns -1 (lower), 0 (correct), 1 (higher). Standard binary search with an oracle function instead of array access.",
+      "keyTrick": "Replace nums[mid] comparison with the guess() API call. The 'sorted array' is the implicit sequence 1..n, and the 'comparison' is the oracle. This is binary search abstracted from arrays — searching on a monotonic function.",
+      "approaches": [
+        { "name": "Binary Search with Oracle", "complexity": "O(log n) time, O(1) space", "description": "lo=1, hi=n. mid = lo+(hi-lo)/2. Call guess(mid). Adjust lo/hi based on result.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why is this problem important despite being trivially easy?", "options": ["It teaches binary search as a CONCEPT (halving a search space via a predicate) rather than a specific TECHNIQUE (searching an array). This abstraction is needed for answer-space binary search", "It's not important", "Only for beginners", "It teaches recursion"], "answer": 0, "explanation": "Once you see binary search as 'halve the space using any yes/no oracle,' you can apply it to Koko's bananas, ship capacity, or any monotonic decision problem. This problem teaches that abstraction." },
+        { "q": "The guess API returns -1, 0, or 1. What's the common mistake with the return value semantics?", "options": ["Confusing which direction -1 and 1 mean. The API says: -1 = my number is lower, 1 = my number is higher. Candidates often reverse the direction and search the wrong half", "No common mistake", "Overflow issues", "Off-by-one errors"], "answer": 0, "explanation": "Read the API carefully: guess(mid) returns -1 means the target is LESS than mid (search left), 1 means target is GREATER (search right). Misinterpreting this inverts the search. Always verify with a small example." },
+        { "q": "How does this generalize to the 'Guess Number Higher or Lower II' (minimax)?", "options": ["Version II asks: what's the minimum cost to guarantee finding the number? This becomes a DP/minimax problem: dp[i][j] = min over all k of (k + max(dp[i][k-1], dp[k+1][j])). Completely different from binary search", "Same binary search", "Just add costs", "Use ternary search"], "answer": 0, "explanation": "Version II is game theory, not binary search. The optimal strategy isn't always guessing the middle — it depends on costs. dp[i][j] = min cost to find any number in [i,j]. O(n³) DP or O(n²) with optimization." },
+        { "q": "In a real system, what's analogous to the 'guess' oracle?", "options": ["A/B testing: deploy a config (the 'guess'), observe metric (the 'oracle response'). Binary search on parameter space to find optimal thresholds. Used in ML hyperparameter tuning", "No real analogy", "Database queries", "Network pings"], "answer": 0, "explanation": "Binary search with an oracle = bisection method. Used in numerical methods (finding roots), ML (hyperparameter tuning), operations (finding capacity thresholds), and A/B testing. The pattern is universal." },
+        { "q": "What's the information-theoretic optimal number of guesses?", "options": ["⌈log₂(n)⌉ guesses. Each guess with a yes/no outcome gives 1 bit of information. n possibilities need log₂(n) bits. Binary search achieves this optimal bound", "n/2", "√n", "n guesses"], "answer": 0, "explanation": "Information theory: n outcomes → log₂(n) bits needed. Each binary question gives 1 bit. Binary search asks exactly ⌈log₂(n)⌉ questions, achieving the theoretical minimum. It's provably optimal." }
+      ]
+    },
+    {
+      "id": "sqrt-x",
+      "title": "Sqrt(x)",
+      "difficulty": "Easy",
+      "leetcodeNum": 69,
+      "pattern": "Monotonic Function Search",
+      "tldr": "Find floor(√x) without using sqrt(). Binary search on [0, x]: if mid*mid ≤ x, it's a candidate (search right for bigger). If mid*mid > x, search left. Return the largest mid where mid*mid ≤ x.",
+      "keyTrick": "Binary search for the largest integer where mid² ≤ x. Use lo=0, hi=x. When mid*mid ≤ x: ans=mid, lo=mid+1. When mid*mid > x: hi=mid-1. Watch for overflow: use long for mid*mid, or check mid ≤ x/mid instead.",
+      "approaches": [
+        { "name": "Binary Search", "complexity": "O(log x) time, O(1) space", "description": "Search [0, x] for largest mid where mid² ≤ x. Use long to prevent overflow.", "isOptimal": true },
+        { "name": "Newton's Method", "complexity": "O(log x) time, O(1) space", "description": "Iterative: x_next = (x_curr + x/x_curr) / 2. Converges quadratically. Faster constant factor." }
+      ],
+      "quiz": [
+        { "q": "Why is overflow a concern and how do you handle it?", "options": ["mid*mid can overflow int when mid > ~46340 (√2³¹). Solutions: cast to long (mid*(long)mid), or compare mid ≤ x/mid (avoids multiplication overflow entirely)", "No overflow possible", "Use double", "x is always small"], "answer": 0, "explanation": "For x = Integer.MAX_VALUE (2.1B), mid could be ~46340. 46341² = 2.1B+ which overflows int. Using long: (long)mid * mid. Or: mid <= x / mid (but beware: division by zero when mid=0)." },
+        { "q": "Newton's method converges quadratically. What does that mean practically?", "options": ["The number of correct digits roughly doubles each iteration. For 32-bit integers, ~5-6 iterations suffice. Binary search needs ~16 iterations (log₂(2³¹)). Newton's is ~3x fewer iterations", "It means O(n²)", "Same as binary search", "It's approximate"], "answer": 0, "explanation": "Quadratic convergence: if error is ε, next error is ~ε². From error 10⁹ to 10⁻¹: about 6 iterations. Binary search: 31 iterations. Newton's wins on iteration count but each iteration is slightly more complex." },
+        { "q": "This is binary search on what kind of function?", "options": ["f(m) = m² is a monotonically increasing function. We're finding the largest m where f(m) ≤ x. This is the 'binary search on a monotonic function' pattern — same as Koko's bananas", "A linear function", "A decreasing function", "Not a function search"], "answer": 0, "explanation": "f(m) = m² is monotonically increasing for m ≥ 0. We want the largest m where m² ≤ x. This is exactly bisect_right on the function f. The same pattern applies to any monotonic function." },
+        { "q": "Why search [0, x] and not [0, x/2]?", "options": ["For x ≤ 1: √0 = 0, √1 = 1. x/2 = 0 which misses the answer 1. For x ≥ 2, √x ≤ x/2 holds, so x/2 works. Using x as upper bound handles all cases uniformly", "x/2 is always sufficient", "Need to search [0, x²]", "Performance doesn't matter at O(log x)"], "answer": 0, "explanation": "Edge case: x=1, x/2=0 (integer division), but √1=1. Using hi=x is safe for all inputs. You could use hi=max(1, x/2) but hi=x is simpler and only costs one extra iteration." },
+        { "q": "How does this extend to computing cube root or nth root?", "options": ["Same pattern: binary search for largest m where m^n ≤ x. The monotonicity of m^n guarantees binary search works. Overflow handling becomes more critical for higher powers", "Only works for square root", "Need different algorithm", "Use logarithms only"], "answer": 0, "explanation": "Binary search on monotonic functions generalizes: m^3 ≤ x for cube root, m^n ≤ x for nth root. Newton's also generalizes: x_{k+1} = ((n-1)*x_k + A/x_k^(n-1))/n. Same pattern, different function." }
+      ]
+    },
+    {
+      "id": "search-2d-matrix",
+      "title": "Search a 2D Matrix",
+      "difficulty": "Medium",
+      "leetcodeNum": 74,
+      "pattern": "Classic Binary Search (Find Target)",
+      "tldr": "Search in a row-sorted matrix where each row's first element > last element of previous row. Treat the 2D matrix as a flattened 1D sorted array. Binary search with index mapping: row = mid/cols, col = mid%cols.",
+      "keyTrick": "The matrix is effectively a sorted 1D array split into rows. Map 1D index to 2D: matrix[mid / cols][mid % cols]. Binary search on [0, rows*cols - 1]. One binary search, O(log(m*n)).",
+      "approaches": [
+        { "name": "Two Binary Searches", "complexity": "O(log m + log n) time", "description": "First binary search: find the row. Second: search within that row. Same as O(log(mn))." },
+        { "name": "Single Binary Search (Flattened)", "complexity": "O(log(m·n)) time, O(1) space", "description": "Treat as 1D array of size m*n. Map mid to [mid/n][mid%n]. Clean and elegant.", "isOptimal": true },
+        { "name": "Staircase Search (Top-Right)", "complexity": "O(m+n) time, O(1) space", "description": "Start at top-right. Go left if target < current, down if target > current. Works for the less constrained 'Search 2D Matrix II'." }
+      ],
+      "quiz": [
+        { "q": "Why can we treat this matrix as a 1D sorted array?", "options": ["The constraint 'first element of each row > last element of previous row' means concatenating rows gives a fully sorted array. Row boundaries don't break the sorted order", "Any matrix can be treated this way", "Only for square matrices", "Only when rows are sorted"], "answer": 0, "explanation": "Row-sorted + 'first > prev last' = globally sorted when flattened. Without the second constraint (Search 2D Matrix II), rows are individually sorted but not globally — different problem, different approach." },
+        { "q": "How does the index mapping mid → [mid/n][mid%n] work?", "options": ["If the matrix has n columns: row = mid / n (which row, counting from 0), col = mid % n (position within that row). This bijectively maps [0, m*n-1] to all matrix cells", "Integer division gives row, modulo gives column", "Both A and B say the same thing — use n (number of columns) for both operations", "It's approximate"], "answer": 2, "explanation": "For a 3×4 matrix: index 7 → row 7/4=1, col 7%4=3 → matrix[1][3]. Index 0 → [0][0]. Index 11 → [2][3]. The mapping is exact and covers every cell. Use COLUMNS (not rows) as the divisor." },
+        { "q": "Search 2D Matrix II has a weaker constraint (each row and column sorted independently). Why doesn't the flattening trick work?", "options": ["Without 'first > prev last', flattened array isn't sorted. Example: [[1,4,7],[2,5,8],[3,6,9]] flattens to [1,4,7,2,5,8,3,6,9] — not sorted. Staircase search is needed instead", "It still works", "Use two binary searches", "Sort the flattened array"], "answer": 0, "explanation": "Matrix II has row-sorted AND column-sorted but no global ordering. The staircase approach (top-right corner, O(m+n)) exploits both orderings. Binary search doesn't directly apply without global sorting." },
+        { "q": "Is O(log m + log n) the same as O(log(m·n))?", "options": ["Yes — log(m·n) = log(m) + log(n). Two binary searches (one for row, one for column) have the same complexity as one binary search on the flattened array", "No — flattened is faster", "No — two searches is faster", "Only for square matrices"], "answer": 0, "explanation": "log(m) + log(n) = log(mn) by logarithm rules. The two approaches have identical asymptotic complexity. The single binary search is cleaner code; the two-search approach is more intuitive." },
+        { "q": "In a Google interview, what follow-up might extend this problem?", "options": ["Count elements ≤ target in the matrix, find kth smallest element, or search in a matrix sorted by rows and columns independently (Matrix II). Each requires different binary search adaptations", "No follow-ups", "Sort the matrix", "Convert to graph"], "answer": 0, "explanation": "Kth smallest in sorted matrix: binary search on value range, count elements ≤ mid using staircase. O(min(m,n) * log(max-min)). This combines binary search on answer space with matrix structure." }
+      ]
+    },
+    {
+      "id": "koko-eating-bananas",
+      "title": "Koko Eating Bananas",
+      "difficulty": "Medium",
+      "leetcodeNum": 875,
+      "pattern": "Binary Search on Answer Space",
+      "tldr": "Find minimum eating speed k such that Koko finishes all piles within h hours. Binary search on k ∈ [1, max(piles)]. For each k, check if total hours = Σ⌈pile/k⌉ ≤ h. Find the leftmost k that satisfies.",
+      "keyTrick": "Binary search on the ANSWER (speed k), not on the array. The feasibility function is monotonic: higher speed → fewer hours. Find the minimum speed where hours ≤ h. This is the 'binary search on answer space' paradigm.",
+      "approaches": [
+        { "name": "Brute Force", "complexity": "O(max(piles) · n) time", "description": "Try k=1, 2, 3,... until feasible. Linear scan of answer space." },
+        { "name": "Binary Search on Answer", "complexity": "O(n · log(max(piles))) time, O(1) space", "description": "Binary search on [1, max(piles)]. For each mid, compute total hours in O(n). Find minimum feasible k.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "What's the key insight that makes binary search applicable here?", "options": ["The feasibility function is MONOTONIC: if speed k works (hours ≤ h), then all speeds > k also work. If speed k fails, all speeds < k also fail. This monotonicity enables binary search", "The piles are sorted", "The answer is in a sorted array", "It's a standard search problem"], "answer": 0, "explanation": "Binary search doesn't require a sorted array — it requires a monotonic predicate. Here: canFinish(k) transitions from false to true at some threshold. We find that threshold. This is the paradigm shift." },
+        { "q": "Why is the upper bound max(piles) and not sum(piles)?", "options": ["At speed max(piles), every pile takes exactly 1 hour. This is always feasible if h ≥ n. Speeds above max(piles) waste capacity — a pile can't be eaten faster than 1 hour regardless of speed", "sum(piles) is also correct but wasteful", "Either works, max(piles) is tighter", "Both A and C"], "answer": 3, "explanation": "Upper bound must guarantee feasibility. max(piles) is sufficient: each pile takes 1 hour. sum(piles) also works but is a much looser bound. Tighter bounds = fewer binary search iterations." },
+        { "q": "How do you compute ⌈pile/k⌉ without floating-point?", "options": ["Integer ceiling division: (pile + k - 1) / k. Or equivalently: (pile - 1) / k + 1. Both give the ceiling using only integer arithmetic. Avoids floating-point precision issues", "Use Math.ceil(pile/(double)k)", "Both integer and float work, but integer is preferred in interviews for precision and performance", "Must use floating point"], "answer": 2, "explanation": "Math.ceil((double)pile/k) works but introduces floating-point imprecision. (pile + k - 1) / k is purely integer and exact. In interviews, the integer version shows careful thinking about numerical issues." },
+        { "q": "This problem is nearly identical to which other binary search on answer problem?", "options": ["Capacity to Ship Packages Within D Days — same structure: binary search on capacity, check if total days ≤ d. The feasibility check differs (consecutive sum vs ceiling division) but the framework is identical", "Two Sum", "Search in Rotated Array", "Binary Search basic"], "answer": 0, "explanation": "Koko and Ship Packages are twins: binary search on answer, monotonic feasibility check, minimize the answer. Recognizing this pattern means solving one gives you the other for free." },
+        { "q": "How would you explain 'binary search on answer space' to someone who only knows array binary search?", "options": ["Instead of searching for a target in an array, you're searching for a threshold in a range [lo, hi]. The 'array' is implicit — each index is a candidate answer. The 'comparison' is a feasibility check instead of equality", "It's completely different", "Same thing with different names", "Need advanced math"], "answer": 0, "explanation": "The mental model: imagine an array where index i maps to canSolve(i). This array looks like [F,F,F,...,T,T,T]. You're finding the first T. The 'array' is virtual, the 'lookup' is a computation. Same binary search." }
+      ]
+    },
+    {
+      "id": "capacity-ship-packages",
+      "title": "Capacity to Ship Packages Within D Days",
+      "difficulty": "Medium",
+      "leetcodeNum": 1011,
+      "pattern": "Binary Search on Answer Space",
+      "tldr": "Find minimum ship capacity to ship all packages within d days. Binary search on capacity ∈ [max(weights), sum(weights)]. Feasibility: greedily pack packages into days without exceeding capacity. Count days ≤ d?",
+      "keyTrick": "Binary search on capacity. Lower bound = max(weights) (must fit the heaviest package). Upper bound = sum(weights) (ship everything in one day). Feasibility check: greedily fill each day until adding the next package exceeds capacity → new day. Count total days.",
+      "approaches": [
+        { "name": "Binary Search on Capacity", "complexity": "O(n · log(sum - max)) time, O(1) space", "description": "Binary search [max, sum]. For each capacity, greedy simulation counts days. Find minimum capacity where days ≤ d.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why is the lower bound max(weights) and not 1?", "options": ["A package of weight w requires capacity ≥ w. If capacity < max(weights), the heaviest package can never be shipped. Starting at max(weights) ensures every individual package fits", "1 would also work (just slower)", "Both are valid, max(weights) is tighter by potentially millions of iterations", "All of the above"], "answer": 3, "explanation": "Starting at 1 gives correct result but wastes log(max) iterations. Starting at max(weights) is the tightest valid lower bound. In interviews, justify your bounds — it shows understanding." },
+        { "q": "The greedy feasibility check packs packages in ORDER. Why can't we rearrange packages?", "options": ["The problem states packages must be shipped in the given order (consecutive groups). This isn't bin packing (NP-hard) — it's consecutive partitioning (linear). The ordering constraint makes it greedy-solvable", "We can rearrange", "Sorting would help", "Order doesn't affect the answer"], "answer": 0, "explanation": "Consecutive constraint is crucial. If we could rearrange, this becomes bin packing (NP-hard). The ordering constraint makes the greedy check O(n): just scan left to right, starting a new day when capacity is exceeded." },
+        { "q": "How does the feasibility function prove monotonicity?", "options": ["Larger capacity → each day holds more packages → fewer days needed. If capacity c needs d days, capacity c+1 needs ≤ d days. The function days(capacity) is monotonically non-increasing", "It's not monotonic", "Larger capacity needs more days", "Need to prove case by case"], "answer": 0, "explanation": "Adding capacity can only help — each day holds the same or more. So days(c) ≥ days(c+1). This monotonicity is what allows binary search. Always verify monotonicity before applying BS on answer." },
+        { "q": "Split Array Largest Sum is the same problem in disguise. How?", "options": ["Split Array Largest Sum: minimize the maximum subarray sum with at most m splits. Ship Packages: minimize capacity with at most d days. Both ask 'minimize the maximum partition sum given k partitions' — identical structure", "Different problems", "Similar but different complexity", "Only the feasibility check differs"], "answer": 0, "explanation": "Both problems minimize the largest group sum when partitioning a consecutive array into k groups. The binary search framework, bounds, and feasibility check are identical. Only the problem narrative differs." },
+        { "q": "What real-world optimization does this model?", "options": ["Load balancing across servers (minimize peak load), scheduling jobs across machines (minimize makespan), and logistics optimization (minimize truck size). All are 'minimize the maximum' partition problems", "Only shipping", "No real applications", "Database sharding only"], "answer": 0, "explanation": "This is the consecutive partitioning / load balancing problem. Data sharding, task scheduling, and resource allocation all reduce to: split a sequence into k parts minimizing the maximum part. Google uses this extensively." }
+      ]
+    },
+    {
+      "id": "find-min-rotated",
+      "title": "Find Minimum In Rotated Sorted Array",
+      "difficulty": "Medium",
+      "leetcodeNum": 153,
+      "pattern": "Rotated / Modified Sorted Array",
+      "tldr": "Find the minimum in a rotated sorted array (no duplicates). Binary search: compare nums[mid] with nums[hi]. If nums[mid] > nums[hi], min is in [mid+1, hi]. If nums[mid] ≤ nums[hi], min is in [lo, mid].",
+      "keyTrick": "Compare mid with RIGHT end (not left). If nums[mid] > nums[hi], the rotation point (minimum) is in the right half. If nums[mid] ≤ nums[hi], the right half is sorted so the min is in [lo, mid] (inclusive — mid itself could be the min).",
+      "approaches": [
+        { "name": "Linear Scan", "complexity": "O(n) time", "description": "Scan for the first element smaller than the previous one. Simple but doesn't use the sorted property." },
+        { "name": "Binary Search", "complexity": "O(log n) time, O(1) space", "description": "Compare mid with right end. Determine which half contains the rotation point. Converge to minimum.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why compare nums[mid] with nums[hi] instead of nums[lo]?", "options": ["Comparing with nums[lo] is ambiguous: nums[mid] > nums[lo] could mean either a normal sorted half OR the minimum is to the right. Comparing with nums[hi] gives a clean binary decision", "Either works", "Compare with nums[lo] is correct too", "Convention"], "answer": 0, "explanation": "If nums[mid] > nums[lo]: array could be [2,3,4,5,1] (min right) OR [1,2,3,4,5] (min left — no rotation). Ambiguous. But nums[mid] > nums[hi] unambiguously means the rotation point is in [mid+1, hi]." },
+        { "q": "Why is hi = mid (not mid-1) when nums[mid] ≤ nums[hi]?", "options": ["mid itself could be the minimum. Setting hi = mid-1 would exclude it. We keep mid in the search space. Example: [2,1], mid=0, nums[0]=2 > nums[1]=1, hi stays", "mid-1 works too", "For even-length arrays only", "To avoid infinite loops"], "answer": 0, "explanation": "When nums[mid] ≤ nums[hi], the right half [mid..hi] is sorted and mid could be its smallest. Excluding mid (hi=mid-1) could skip the answer. Keep it: hi=mid. Loop terminates when lo==hi." },
+        { "q": "What loop condition should be used: lo < hi or lo ≤ hi?", "options": ["lo < hi. The loop converges to lo == hi == minimum index. lo ≤ hi would need a different update strategy and return logic. Using lo < hi with hi=mid and lo=mid+1 guarantees convergence", "lo ≤ hi", "Either works identically", "while(true) with break"], "answer": 0, "explanation": "lo < hi: converges to a single element (lo==hi), which is the answer. lo ≤ hi with hi=mid could cause infinite loops (if lo==mid==hi, nothing changes). The combination lo<hi + hi=mid + lo=mid+1 is safe." },
+        { "q": "For the follow-up with duplicates (LC 154), what changes?", "options": ["When nums[mid] == nums[hi], you can't determine which half contains the min. Solution: hi-- (shrink by one). Worst case becomes O(n) when all elements are equal", "Same algorithm works", "Use a set to remove duplicates first", "Duplicates make it unsolvable"], "answer": 0, "explanation": "[3,3,1,3,3]: mid=2, nums[mid]=1 < nums[hi]=3 → normal case. But [3,3,3,3,1]: mid=2, nums[mid]=3 == nums[hi]=1? No. [3,1,3,3,3]: nums[mid]==nums[hi]==3 → ambiguous. hi-- is safe but costs O(n) worst case." },
+        { "q": "How does the rotation point relate to the number of rotations?", "options": ["The index of the minimum IS the number of rotations. Array rotated k times has its minimum at index k. Finding the min = finding the rotation count. Useful for un-rotating the array", "No relationship", "Rotation count = n - min_index", "Only for left rotations"], "answer": 0, "explanation": "[4,5,1,2,3]: original [1,2,3,4,5] rotated 2 right. Min at index 2 = rotation count. This connects Find Min to Search in Rotated Array: once you know the rotation, searching is trivial." }
+      ]
+    },
+    {
+      "id": "search-rotated",
+      "title": "Search In Rotated Sorted Array",
+      "difficulty": "Medium",
+      "leetcodeNum": 33,
+      "pattern": "Rotated / Modified Sorted Array",
+      "tldr": "Search for target in a rotated sorted array (no duplicates). At each step, ONE half is guaranteed sorted. Determine which half is sorted, then check if target lies in that sorted half.",
+      "keyTrick": "At each mid: if nums[lo] ≤ nums[mid], the LEFT half [lo, mid] is sorted. Check if target is in [nums[lo], nums[mid]). If yes → search left, else → search right. If nums[mid] < nums[lo], the RIGHT half [mid, hi] is sorted. Apply same logic.",
+      "approaches": [
+        { "name": "Find Pivot + Two Binary Searches", "complexity": "O(log n) time", "description": "Find rotation point (min element), then binary search the appropriate sorted half." },
+        { "name": "Single Binary Search", "complexity": "O(log n) time, O(1) space", "description": "At each step, identify the sorted half and check if target is in it. One pass, no pivot finding.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "How do you determine which half is sorted?", "options": ["If nums[lo] ≤ nums[mid], left half [lo..mid] is sorted (no rotation in this half). Otherwise, right half [mid..hi] is sorted. One half is ALWAYS fully sorted in a rotated array", "Compare mid with target", "Check if mid is the pivot", "Both halves could be unsorted"], "answer": 0, "explanation": "In a rotated sorted array, the rotation point splits it into two sorted halves. At any mid, the rotation is in one half but not the other. The half without the rotation is fully sorted." },
+        { "q": "After identifying the sorted half, how do you decide where to search?", "options": ["If target is within the sorted half's range [sorted_start, sorted_end], search that half. Otherwise, search the other half. The sorted half gives a definitive range check; the unsorted half is the fallback", "Always search the sorted half", "Always search the unsorted half", "Search both halves"], "answer": 0, "explanation": "Sorted half: we know its exact range, so we can definitively say if target is there. Unsorted half: we can't easily check, but if target ISN'T in the sorted half, it must be in the unsorted half (if it exists)." },
+        { "q": "Why use ≤ in 'nums[lo] ≤ nums[mid]' (not strict <)?", "options": ["When lo == mid (two-element subarray), nums[lo] == nums[mid]. The left 'half' is a single element, which is trivially sorted. Using < would incorrectly label it unsorted", "Strict < works too", "For duplicates", "Convention"], "answer": 0, "explanation": "Edge case: lo=0, hi=1, mid=0. nums[lo]=nums[mid]. The left half is [lo..mid] = single element = sorted. With strict <, we'd wrongly go to the 'right half sorted' branch. ≤ handles this correctly." },
+        { "q": "Can you solve this with a single modified comparison?", "options": ["Yes: if nums[mid] and target are on the SAME side of the rotation, compare normally. If on DIFFERENT sides, invert the comparison. Determine 'side' by comparing with nums[0]", "No, need the full sorted-half logic", "Only with recursion", "This is the same approach"], "answer": 0, "explanation": "Elegant alternative: same_side = (nums[mid] >= nums[0]) == (target >= nums[0]). If same side: compare mid with target normally. If different sides: if target >= nums[0] → search left, else right. Clever but harder to explain." },
+        { "q": "How does this problem change everything about 'binary search requires sorted array'?", "options": ["It shows binary search needs a DECISION CRITERION at each step, not strict sorting. As long as you can determine which half to discard, binary search works. Rotated arrays provide this via the 'one sorted half' property", "Binary search still requires sorting", "It's a special case", "Rotated arrays are sorted"], "answer": 0, "explanation": "The deeper lesson: binary search = eliminate half the search space per step. Sorted array is one way to enable this. Rotated arrays, bitonic arrays, and answer spaces are others. The principle transcends sorting." }
+      ]
+    },
+    {
+      "id": "search-rotated-ii",
+      "title": "Search In Rotated Sorted Array II",
+      "difficulty": "Medium",
+      "leetcodeNum": 81,
+      "pattern": "Rotated / Modified Sorted Array",
+      "tldr": "Same as Search in Rotated Sorted Array but WITH DUPLICATES. When nums[lo] == nums[mid] == nums[hi], you can't determine the sorted half. Solution: lo++ to shrink. Worst case O(n).",
+      "keyTrick": "Handle the ambiguous case: when nums[lo] == nums[mid] == nums[hi], neither half is identifiably sorted. Shrink with lo++ (or hi--). This costs O(1) per step but the worst case (all equal except one) degrades to O(n). Otherwise, same logic as version I.",
+      "approaches": [
+        { "name": "Modified Binary Search with Shrink", "complexity": "O(log n) avg, O(n) worst, O(1) space", "description": "Same as version I, but when nums[lo]==nums[mid]==nums[hi], increment lo. Handles duplicates at the cost of worst-case degradation.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Give an example where nums[lo] == nums[mid] == nums[hi] is ambiguous:", "options": ["[1,0,1,1,1] and [1,1,1,0,1]. Both have nums[0]=nums[2]=nums[4]=1. In the first, min is left of mid. In the second, min is right. Can't distinguish without looking further", "This case never occurs", "Always search left", "Always search right"], "answer": 0, "explanation": "Both arrays have identical lo/mid/hi values but different rotation points. No amount of comparing lo/mid/hi resolves the ambiguity. You must shrink the window to gain information. This is the fundamental limitation." },
+        { "q": "Why does lo++ not miss the answer?", "options": ["We only do lo++ when nums[lo] == nums[mid]. If nums[lo] were the target, nums[mid] would also equal target, which we check before the shrink. So skipping lo is safe", "It could miss the answer", "Both lo++ and hi-- are needed", "We also check lo before incrementing"], "answer": 0, "explanation": "When nums[lo]==nums[mid]==nums[hi]: if target==nums[lo], we'd have found it already (mid==target). Since we didn't find it, skipping this one duplicate of nums[lo] is safe." },
+        { "q": "What's the worst-case input that forces O(n)?", "options": ["[1,1,1,...,1,0,1,...,1,1] — all 1s except one 0. Every step: nums[lo]==nums[mid]==nums[hi]==1. We shrink one element at a time. n-1 shrinks before finding the 0", "Sorted array", "Fully reversed array", "Alternating values"], "answer": 0, "explanation": "Array of identical elements with one different element buried somewhere. Every binary search step can only shrink by 1 (lo++). This is O(n). Duplicates inherently destroy the logarithmic guarantee in the worst case." },
+        { "q": "In practice, how often does worst-case O(n) occur?", "options": ["Rarely for random data. O(n) requires almost all elements to be identical. Average case is still O(log n). The worst case is theoretical but important to acknowledge in interviews", "Always O(n)", "Never happens", "50% of the time"], "answer": 0, "explanation": "For random data with d distinct values, expected complexity is O(log n) when d is moderate. Pathological cases need nearly all-identical arrays. Acknowledge worst case, note average is logarithmic." },
+        { "q": "Should you always handle duplicates in interview problems, even if not specified?", "options": ["Ask the interviewer. If the array CAN have duplicates, mention the worst-case degradation to O(n). If duplicates are excluded, use the cleaner version I algorithm. Clarifying constraints shows maturity", "Always handle duplicates", "Never worry about duplicates", "Only if the interviewer asks"], "answer": 0, "explanation": "Proactively asking 'can the array have duplicates?' shows you understand the impact on complexity. If yes, discuss the O(n) worst case and the lo++ mitigation. This is the kind of thoroughness Google values." }
+      ]
+    },
+    {
+      "id": "time-based-kv-store",
+      "title": "Time Based Key Value Store",
+      "difficulty": "Medium",
+      "leetcodeNum": 981,
+      "pattern": "Search on Complex Structures",
+      "tldr": "Store (key, value, timestamp) triples. get(key, timestamp) returns the value with the largest timestamp ≤ the given timestamp. HashMap(key → list of (timestamp, value)) with binary search on the timestamp list.",
+      "keyTrick": "Map<String, List<Pair<timestamp, value>>>. Set always appends (timestamps are strictly increasing per key). Get: binary search the list for the largest timestamp ≤ target. This is 'floor' or 'rightmost ≤ target' binary search.",
+      "approaches": [
+        { "name": "HashMap + Binary Search", "complexity": "O(log n) get, O(1) set, O(n) space", "description": "HashMap to sorted list of (timestamp, value). Binary search for floor(timestamp) on get.", "isOptimal": true },
+        { "name": "HashMap + TreeMap", "complexity": "O(log n) get, O(log n) set", "description": "Map<String, TreeMap<Integer, String>>. Use floorEntry(timestamp). Clean but higher constant factors." }
+      ],
+      "quiz": [
+        { "q": "Why can we use a simple list instead of a TreeMap for the timestamps?", "options": ["The problem guarantees timestamps are strictly increasing for each key. So the list is naturally sorted — no insertions in the middle needed. Appending is O(1). Binary search works directly on the sorted list", "TreeMap is required", "Lists aren't sorted", "For thread safety"], "answer": 0, "explanation": "Strictly increasing timestamps = append-only sorted list. O(1) set (append) and O(log n) get (binary search). TreeMap would give O(log n) set too — unnecessary overhead." },
+        { "q": "The binary search variant here is 'find rightmost element ≤ target'. How does it differ from exact match?", "options": ["Instead of returning when nums[mid] == target, continue searching right (lo = mid+1). Track the last seen ≤ target. After loop, return the tracked answer. This is bisect_right - 1", "Same as exact match", "Search for target-1", "Use linear scan after binary search"], "answer": 0, "explanation": "Floor search: when arr[mid] ≤ target, it's a candidate (save it), search right for a closer one. When arr[mid] > target, search left. Result is the last saved candidate. This is the 'rightmost ≤' pattern." },
+        { "q": "What if get is called with a timestamp earlier than any stored timestamp for that key?", "options": ["No valid value exists — return empty string. The binary search finds no element ≤ timestamp. Check if the result index is valid before accessing", "Return the first value", "Return null", "Throw an exception"], "answer": 0, "explanation": "If all stored timestamps are > query timestamp, the floor search finds nothing. Return ''. Edge case: key doesn't exist in the map → also return ''. Handle both gracefully." },
+        { "q": "This design pattern appears in which real-world systems?", "options": ["Time-series databases (InfluxDB, Prometheus), Git's commit history lookup by date, versioned key-value stores (Amazon DynamoDB with version history), and event sourcing systems", "Only in interviews", "Caching only", "Not used in production"], "answer": 0, "explanation": "Almost every time-series system uses this pattern: store events chronologically, query 'what was the value at time T?'. The floor query = 'most recent value before T'. It's a fundamental temporal data access pattern." },
+        { "q": "How would you optimize for frequent gets on the same key?", "options": ["Cache the most recent get result per key. If the new query timestamp ≥ cached timestamp and no new sets occurred, return cached value. Or use interpolation search for time-series data with uniform distribution", "No optimization possible", "Use a bloom filter", "Precompute all answers"], "answer": 0, "explanation": "Caching recent queries exploits temporal locality. Interpolation search (O(log log n) for uniform distribution) exploits the uniform-ish nature of timestamps. Real systems like Prometheus use chunk-based indexing for further optimization." }
+      ]
+    },
+    {
+      "id": "split-array-largest-sum",
+      "title": "Split Array Largest Sum",
+      "difficulty": "Hard",
+      "leetcodeNum": 410,
+      "pattern": "Binary Search on Answer Space",
+      "tldr": "Split array into m subarrays to minimize the maximum subarray sum. Binary search on the answer (max sum) ∈ [max(nums), sum(nums)]. Feasibility: greedily partition — can we make ≤ m groups each with sum ≤ mid?",
+      "keyTrick": "Identical structure to Capacity to Ship Packages. Binary search on the answer. Lower bound = max(nums) (single element can't be split). Upper bound = sum(nums) (one group). Feasibility: greedily accumulate until exceeding mid → new group. Count groups ≤ m?",
+      "approaches": [
+        { "name": "DP", "complexity": "O(m·n²) time, O(m·n) space", "description": "dp[i][j] = min largest sum for first j elements in i groups. Exact but slow for large inputs." },
+        { "name": "Binary Search on Answer", "complexity": "O(n · log(sum - max)) time, O(1) space", "description": "Binary search on max subarray sum. Greedy feasibility check. Same as Ship Packages.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why does the greedy feasibility check give the MINIMUM number of groups for a given max sum?", "options": ["Greedy packs as many elements as possible into each group (maximizes group utilization). This minimizes group count. If greedy needs ≤ m groups, any valid splitting must also use ≤ m groups", "Greedy doesn't minimize groups", "It's approximate", "Need DP for exact count"], "answer": 0, "explanation": "Greedy is optimal for counting minimum groups: pack greedily left-to-right, start a new group only when forced. This provably minimizes the number of groups for a given max-sum constraint. Exchange argument proves it." },
+        { "q": "How is this problem equivalent to Ship Packages (LC 1011)?", "options": ["Both minimize the maximum partition sum of a consecutive sequence split into k parts. Ship: capacity = max partition sum, days = partitions. Split Array: largest sum = max partition sum, subarrays = partitions", "Different problems", "Similar but different constraints", "Only the narrative differs"], "answer": 0, "explanation": "Mathematically identical: minimize max(sum of each consecutive group) given at most k groups. Every 'minimize the maximum with consecutive partitioning' problem reduces to this. Recognize the pattern, solve instantly." },
+        { "q": "The DP approach has what advantage over binary search?", "options": ["DP gives the EXACT optimal partition, not just the optimal value. It can reconstruct which elements go in which group. Binary search only finds the minimum max-sum, not the actual partition", "DP is faster", "DP uses less space", "No advantage"], "answer": 0, "explanation": "If you need the actual groups (not just the optimal value), DP with backtracking is needed. Binary search only answers 'what is the minimum max sum?' For reconstruction, trace back through the DP table." },
+        { "q": "What's the total number of binary search iterations?", "options": ["O(log(sum - max)). sum ≤ n × 10⁹, max ≥ 1. So worst case ~log₂(n × 10⁹) ≈ 30 + log₂(n) ≈ 50 iterations. Each does O(n) work. Total: ~50n", "O(n)", "O(n²)", "O(log n)"], "answer": 0, "explanation": "The search range is [max, sum]. With 32-bit values and n=1000: range ≈ 10¹², about 40 iterations. Each does O(n) feasibility check. Total: 40n ≈ O(n). Very practical." },
+        { "q": "In Google interviews, what's the most common follow-up to this problem?", "options": ["What if the split doesn't have to be consecutive (NP-hard bin packing)? What if you want to minimize the number of groups with max sum ≤ k? What if elements can be negative? Each changes the approach significantly", "No follow-ups", "Implement the DP", "Handle duplicates"], "answer": 0, "explanation": "Non-consecutive: NP-hard. Negative elements: greedy doesn't work (sum isn't monotonic in window size). Min groups with fixed max: becomes a direct greedy. Each variation tests depth of understanding." }
+      ]
+    },
+    {
+      "id": "median-two-sorted-arrays",
+      "title": "Median of Two Sorted Arrays",
+      "difficulty": "Hard",
+      "leetcodeNum": 4,
+      "pattern": "Binary Search + Divide and Conquer",
+      "tldr": "Find the median of two sorted arrays in O(log(min(m,n))). Binary search on a partition of the smaller array. A valid partition splits both arrays such that all left elements ≤ all right elements.",
+      "keyTrick": "Binary search on the smaller array's partition index i (0 to m). Partition the larger array at j = (m+n+1)/2 - i. Valid partition: maxLeft1 ≤ minRight2 AND maxLeft2 ≤ minRight1. If maxLeft1 > minRight2, i is too large (go left). If maxLeft2 > minRight1, i is too small (go right).",
+      "approaches": [
+        { "name": "Merge and Find Middle", "complexity": "O(m+n) time", "description": "Merge both arrays (or virtually merge), find the median. Simple but not O(log)." },
+        { "name": "Binary Search on Partition", "complexity": "O(log(min(m,n))) time, O(1) space", "description": "Binary search on the partition of the smaller array. Find the cut that balances left and right halves.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why binary search on the SMALLER array?", "options": ["Ensures the partition index j = (m+n+1)/2 - i for the larger array stays within bounds (0 ≤ j ≤ n). If we searched the larger array, i could exceed m. Also: O(log(min(m,n))) is better than O(log(max(m,n)))", "Either array works", "Larger array gives better bounds", "Convention"], "answer": 0, "explanation": "If m > n and we search array1: j = (m+n+1)/2 - i could be negative when i is large. Searching the smaller array: i ∈ [0, m], j = (m+n+1)/2 - i ∈ [0, n] is guaranteed. Also gives the tighter log bound." },
+        { "q": "What does the partition represent?", "options": ["A partition at index i means: take the first i elements from array1 and the first j=(m+n+1)/2-i elements from array2 for the 'left half' of the merged array. The rest is the 'right half'", "A split of one array", "The median position", "A comparison threshold"], "answer": 0, "explanation": "We're partitioning the combined array into two halves without actually merging. Left half: first i of arr1 + first j of arr2. Right half: rest. Median = max(left) or avg(max(left), min(right)) depending on total length parity." },
+        { "q": "What are the edge cases with -∞ and +∞?", "options": ["When i=0 (no elements from arr1 in left), maxLeft1 = -∞. When i=m, minRight1 = +∞. Same for j. Sentinels avoid boundary checks: -∞ never violates maxLeft ≤ minRight, +∞ never violates either", "No edge cases needed", "Only for empty arrays", "Use Integer.MIN_VALUE/MAX_VALUE"], "answer": 0, "explanation": "Sentinels: if i=0, left half of arr1 is empty → maxLeft1 = -∞ (any value is ≥ -∞). If i=m, right half is empty → minRight1 = +∞ (any value is ≤ +∞). Eliminates all boundary special cases." },
+        { "q": "Why is this considered one of the hardest LeetCode problems?", "options": ["The partition concept is unintuitive, boundary handling is fiddly, the correctness proof is non-obvious, and the problem requires both understanding median properties and binary search on a non-standard space", "It's not that hard", "Only because of the math", "The code is complex"], "answer": 0, "explanation": "It combines: 1) non-obvious search space (partition of smaller array), 2) complex validity condition (cross-comparisons), 3) edge cases (empty partitions), 4) odd/even total length handling. Each adds difficulty." },
+        { "q": "The O(log(min(m,n))) requirement eliminates which simpler approaches?", "options": ["Merge O(m+n), two-pointer counting to (m+n)/2 = O(m+n), and even binary search on one array O(log(max(m,n))). Only the partition binary search achieves O(log(min(m,n)))", "None — all are O(log)", "Only brute force", "Only sorting"], "answer": 0, "explanation": "The O(log(min(m,n))) constraint forces the partition approach. This is the only known O(log(min(m,n))) algorithm. It's what makes this a Hard problem — simpler approaches don't meet the complexity requirement." }
+      ]
+    },
+    {
+      "id": "find-mountain-array",
+      "title": "Find in Mountain Array",
+      "difficulty": "Hard",
+      "leetcodeNum": 1095,
+      "pattern": "Binary Search + Divide and Conquer",
+      "tldr": "Mountain array: increases then decreases. Find target with minimal API calls. Three steps: 1) Binary search for the peak, 2) Binary search ascending half for target, 3) If not found, binary search descending half.",
+      "keyTrick": "Find peak: binary search where arr[mid] < arr[mid+1] → peak is right, else left. Then search ascending half (normal binary search). If not found, search descending half (reversed comparison binary search). Total: O(log n) API calls.",
+      "approaches": [
+        { "name": "Three Binary Searches", "complexity": "O(log n) time, O(1) space", "description": "1) Find peak index. 2) Search ascending [0, peak]. 3) Search descending [peak, n-1]. Each is O(log n).", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "How does binary search find the peak?", "options": ["Compare arr[mid] with arr[mid+1]. If arr[mid] < arr[mid+1], we're on the ascending slope → peak is right (lo=mid+1). If arr[mid] > arr[mid+1], we're on descending slope or at peak → hi=mid. Converges to peak", "Compare arr[mid] with arr[0]", "Find maximum by scanning", "Use ternary search"], "answer": 0, "explanation": "The comparison arr[mid] vs arr[mid+1] determines the slope direction. Ascending → peak is further right. Descending → peak is at or left of mid. This is binary search on the derivative (slope sign)." },
+        { "q": "Why search ascending half FIRST?", "options": ["The problem asks for the minimum index. If target exists in both halves (possible at the peak), the ascending half has a smaller index. Searching ascending first returns the minimum index", "Order doesn't matter", "Descending first is better", "Only ascending can contain target"], "answer": 0, "explanation": "Target could appear on both sides of the peak (if target = peak value, it's at the boundary). Ascending half has smaller indices. Returning the ascending-half result first gives the minimum index as required." },
+        { "q": "How does binary search on the descending half differ?", "options": ["Comparison is reversed: if arr[mid] > target, the answer is to the RIGHT (values decrease rightward). If arr[mid] < target, search LEFT. Standard binary search with flipped logic", "Same as ascending", "Need to reverse the array", "Use a different algorithm"], "answer": 0, "explanation": "Ascending: mid > target → search left. Descending: mid > target → search RIGHT (because values decrease to the right). The search direction flips. Alternatively, negate all values mentally and search normally." },
+        { "q": "The problem restricts API calls. Why is this constraint important?", "options": ["MountainArray.get(index) is an abstract interface — could be a remote API call, database query, or expensive computation. Minimizing calls tests efficiency awareness. Binary search's O(log n) calls is optimal", "It's just for difficulty", "To prevent brute force", "No practical significance"], "answer": 0, "explanation": "In real systems, data access can be expensive (network round-trips, disk I/O). Minimizing access count is critical. This problem models that: treat each arr.get() as a costly operation. O(log n) is optimal." },
+        { "q": "Could you solve this with ternary search instead of binary search for the peak?", "options": ["Yes — ternary search finds the peak of a unimodal function in O(log n). Compare arr[m1] and arr[m2] where m1=lo+(hi-lo)/3, m2=hi-(hi-lo)/3. But it uses ~2x more API calls per iteration than binary search", "Ternary search doesn't apply", "Ternary is O(n)", "Binary search can't find peaks"], "answer": 0, "explanation": "Ternary search: 2 comparisons per step, reduces by 1/3. Binary search (compare adjacent): 1 comparison per step, reduces by 1/2. Binary search uses fewer API calls: log₂(n) vs 2·log₃(n). Binary wins." }
+      ]
+    }
+  ]
+}

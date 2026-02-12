@@ -1,0 +1,322 @@
+{
+  "id": "stack",
+  "title": "Stack",
+  "icon": "▤",
+  "order": 3,
+  "description": "LIFO structure powering expression evaluation, monotonic patterns, and nested structure parsing. Stacks turn O(n²) brute force into O(n) by maintaining invariants about 'what's still relevant'.",
+  "patterns": [
+    {
+      "name": "Matching / Balancing",
+      "description": "Push opening tokens, pop on matching close. The stack naturally handles nesting depth. Foundation for parsers and compilers.",
+      "problems": ["valid-parentheses", "simplify-path", "decode-string"]
+    },
+    {
+      "name": "Monotonic Stack (Decreasing)",
+      "description": "Maintain a stack where elements are in decreasing order. When a larger element arrives, pop smaller ones — each pop resolves a 'next greater element' query. O(n) total.",
+      "problems": ["daily-temperatures", "online-stock-span", "largest-rectangle-histogram"]
+    },
+    {
+      "name": "Monotonic Stack (Application-Specific)",
+      "description": "Adapt monotonic stack to specific constraints — collision physics, fleet merging, or frequency tracking.",
+      "problems": ["asteroid-collision", "car-fleet"]
+    },
+    {
+      "name": "Simulation / State Tracking",
+      "description": "Use stack to simulate processes with undo/cancel semantics. Each push is an action, each pop is a reversal.",
+      "problems": ["baseball-game", "asteroid-collision"]
+    },
+    {
+      "name": "Stack ↔ Queue Duality",
+      "description": "Implement one using the other. Understand amortized costs of the two-stack queue and the lazy transfer technique.",
+      "problems": ["implement-stack-using-queues", "implement-queue-using-stacks"]
+    },
+    {
+      "name": "Auxiliary Stack (Min/Max/Freq Tracking)",
+      "description": "Maintain a parallel stack tracking metadata (min, max, frequency) at each level. Enables O(1) queries on stack state.",
+      "problems": ["min-stack", "max-frequency-stack"]
+    },
+    {
+      "name": "Expression Evaluation",
+      "description": "Evaluate postfix, infix, or encoded expressions using operand/operator stacks. Foundation for calculator and compiler problems.",
+      "problems": ["eval-reverse-polish-notation", "decode-string"]
+    }
+  ],
+  "problems": [
+    {
+      "id": "baseball-game",
+      "title": "Baseball Game",
+      "difficulty": "Easy",
+      "leetcodeNum": 682,
+      "pattern": "Simulation / State Tracking",
+      "tldr": "Simulate a score record with operations: number (add score), '+' (sum of last two), 'D' (double last), 'C' (invalidate last). Stack tracks valid scores — push for add, pop for cancel.",
+      "keyTrick": "The stack IS the valid score record. 'C' = pop (undo last). 'D' = push(peek * 2). '+' = push(peek + secondFromTop). Numbers = push. Final answer = sum of stack.",
+      "approaches": [
+        { "name": "Stack Simulation", "complexity": "O(n) time, O(n) space", "description": "Process each operation: push scores, pop on 'C', peek for 'D' and '+'. Sum remaining stack.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why is a stack the natural data structure here (not an array with index)?", "options": ["'C' invalidates the LAST valid score (LIFO). Stack's pop directly models this undo semantic without index tracking", "Arrays would work equally well", "Stacks are faster", "The problem requires it"], "answer": 0, "explanation": "The 'C' operation is precisely stack.pop(). With an array, you'd need to track a 'current end' pointer — essentially reimplementing a stack. Use the right abstraction." },
+        { "q": "For the '+' operation, how do you access the second-to-last element?", "options": ["Pop the top, peek the new top, compute sum, push the popped value back, then push the sum", "Use stack.get(size-2) if available, or pop/push pattern. In Java, LinkedList-based stack allows get()", "Both approaches work — language-dependent", "You can't access it"], "answer": 2, "explanation": "In Java, Stack extends Vector so stack.get(size()-2) works. In a pure stack, pop-peek-push is needed. Know your language's stack implementation details." },
+        { "q": "What's the time complexity of summing the final stack?", "options": ["O(n) — iterate through remaining elements. Total algorithm is O(n) since each element is pushed/popped at most once", "O(n²)", "O(1)", "O(n log n)"], "answer": 0, "explanation": "Each of the n operations does O(1) work. Final summation is O(n). Total: O(n). The stack ensures no element is processed more than a constant number of times." },
+        { "q": "How would you extend this to support an 'undo last k operations' command?", "options": ["Maintain a separate operations log (command pattern). To undo k, replay the log without the last k operations", "Pop k times", "Not possible", "Use two stacks"], "answer": 0, "explanation": "This is the Command Pattern from design patterns. Store each operation as a reversible command. Undo = apply inverse commands. This bridges DSA to software design." },
+        { "q": "This problem is a warm-up. What harder problem uses the same simulation-with-undo pattern?", "options": ["Asteroid Collision — objects interact and cancel each other, requiring stack-based simulation with conditional removal", "Two Sum", "Binary Search", "BFS"], "answer": 0, "explanation": "Asteroid Collision is the 'hard mode' of stack simulation — objects don't just cancel; they interact based on direction and size. Same push/pop pattern, more complex conditions." }
+      ]
+    },
+    {
+      "id": "valid-parentheses",
+      "title": "Valid Parentheses",
+      "difficulty": "Easy",
+      "leetcodeNum": 20,
+      "pattern": "Matching / Balancing",
+      "tldr": "Check if brackets are balanced: (), {}, []. Push opening brackets. On closing bracket, check if top matches. Stack must be empty at end.",
+      "keyTrick": "Push opening brackets. On closing bracket: if stack is empty or top doesn't match → invalid. Pop on match. At end, stack must be empty. Pro tip: push the EXPECTED closing bracket instead — then just check top == current.",
+      "approaches": [
+        { "name": "Stack Matching", "complexity": "O(n) time, O(n) space", "description": "Push openers. On closer, verify match with top and pop. Check empty at end.", "isOptimal": true },
+        { "name": "Push Expected Closer (Cleaner)", "complexity": "O(n) time, O(n) space", "description": "On '(' push ')', on '{' push '}', etc. On closer, check if top == current char. Eliminates mapping logic.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why push the expected closing bracket instead of the opening one?", "options": ["Eliminates the need for a mapping function during comparison. Instead of 'if top is ( and current is )' you just check 'top == current'", "It's equivalent", "For Unicode support", "It's slower but clearer"], "answer": 0, "explanation": "Pushing the expected closer simplifies the comparison to a single equality check. Less code, fewer bugs. This is the 'elegant' implementation Google interviewers appreciate." },
+        { "q": "What are the three distinct failure cases?", "options": ["1) Closer with empty stack (extra closer). 2) Closer doesn't match top (wrong type). 3) Stack non-empty at end (extra opener)", "Only mismatched brackets", "Only extra closers", "Only two cases"], "answer": 0, "explanation": "Three failure modes: unmatched closer, wrong bracket type, unmatched opener. Each requires a different check. Missing any one is a bug. Test: '(()', ')(', '([)]'." },
+        { "q": "How does this extend to validating HTML/XML tags?", "options": ["Same pattern: push opening tags, pop on matching closing tags. Tags are strings instead of single chars, but the logic is identical", "Completely different", "Use regex instead", "HTML doesn't need validation"], "answer": 0, "explanation": "HTML/XML validation is this problem with string tokens instead of characters. Browsers use this stack-based approach for DOM parsing. Real-world application of the same pattern." },
+        { "q": "What optimization avoids processing strings that are obviously invalid?", "options": ["If string length is odd, return false immediately — valid brackets always come in pairs", "Sort the string first", "Check first character only", "No useful optimization"], "answer": 0, "explanation": "Odd-length strings can never be balanced. This O(1) check eliminates half of random inputs. Early termination optimizations show attention to detail in interviews." },
+        { "q": "How is this pattern used in compiler design?", "options": ["Compilers use stack-based parsing for nested expressions, scope resolution, and syntax validation. This is the foundation of recursive descent and shift-reduce parsers", "Compilers don't use stacks", "Only for bracket matching", "Only for arithmetic"], "answer": 0, "explanation": "Every compiler uses this pattern. Scope nesting (functions inside functions), expression parsing, and syntax validation all use stack-based matching. This is CS fundamentals." }
+      ]
+    },
+    {
+      "id": "implement-stack-using-queues",
+      "title": "Implement Stack Using Queues",
+      "difficulty": "Easy",
+      "leetcodeNum": 225,
+      "pattern": "Stack ↔ Queue Duality",
+      "tldr": "Implement LIFO using FIFO queues. On push: add to queue, then rotate all previous elements behind it (dequeue and re-enqueue n-1 times). This makes pop/top O(1).",
+      "keyTrick": "Make push expensive: after adding new element, rotate the queue (dequeue and re-enqueue n-1 elements) so the new element is at the front. Now pop and top are O(1). Alternatively, make pop expensive with two queues.",
+      "approaches": [
+        { "name": "One Queue — Expensive Push", "complexity": "Push O(n), Pop O(1)", "description": "Push: add element, then rotate n-1 times. The newest element stays at front. Pop/top are O(1).", "isOptimal": true },
+        { "name": "Two Queues — Expensive Pop", "complexity": "Push O(1), Pop O(n)", "description": "Push to q1. Pop: move all but last from q1 to q2, return last. Swap q1/q2." }
+      ],
+      "quiz": [
+        { "q": "Why does rotating the queue after push make it behave like a stack?", "options": ["Rotation moves all old elements behind the new one. The queue's front always has the most recently pushed element — LIFO order", "It doesn't actually work", "Only for small queues", "It's just a convention"], "answer": 0, "explanation": "After push(x) and rotation: queue = [x, prev_top, prev_second, ...]. Front = most recent = LIFO. The rotation transforms FIFO order to LIFO order at each push." },
+        { "q": "When would the two-queue approach be preferred?", "options": ["When pushes are much more frequent than pops — O(1) push amortizes better in write-heavy workloads", "Never", "Always better", "When memory is limited"], "answer": 0, "explanation": "If push:pop ratio is high, cheap push (two-queue, pop-expensive) is better. If pop-heavy, cheap pop (one-queue, push-expensive) wins. Match the approach to the workload." },
+        { "q": "What's the real-world purpose of this exercise?", "options": ["Teaches data structure interconversion, amortized analysis, and the fundamental difference between LIFO and FIFO. Also appears in systems with only queue primitives", "No practical purpose", "Only for interviews", "For memory management"], "answer": 0, "explanation": "Some systems (message queues, hardware) only provide FIFO. Knowing how to simulate LIFO from FIFO (and vice versa) is practical. Also tests understanding of abstract data types." },
+        { "q": "Can you implement a stack using ONE queue without the rotation trick?", "options": ["Not with O(1) pop — you always need some form of reordering. The rotation is the minimal way to achieve LIFO from FIFO", "Yes, with clever indexing", "Use a deque instead", "Recursion on the queue"], "answer": 0, "explanation": "A queue only gives access to the front. To get LIFO behavior, you must somehow make the back accessible. Rotation (or n-1 transfers) is the only way with a single queue." },
+        { "q": "How does this compare to implementing a queue using stacks (the reverse problem)?", "options": ["Queue-from-stacks has an elegant amortized O(1) solution using lazy transfer. Stack-from-queues has no amortized improvement — one operation must always be O(n)", "Same complexity", "Stack-from-queues is easier", "Both are O(1) amortized"], "answer": 0, "explanation": "Queue-from-stacks achieves amortized O(1) for all operations via lazy reversal. Stack-from-queues cannot — one of push/pop must be O(n). This asymmetry is worth knowing." }
+      ]
+    },
+    {
+      "id": "implement-queue-using-stacks",
+      "title": "Implement Queue using Stacks",
+      "difficulty": "Easy",
+      "leetcodeNum": 232,
+      "pattern": "Stack ↔ Queue Duality",
+      "tldr": "Implement FIFO using two LIFO stacks. Push to input stack. Pop/peek: if output stack is empty, transfer ALL from input to output (reverses order). Amortized O(1) per operation.",
+      "keyTrick": "Lazy transfer: only move elements from input→output when output is empty. The transfer reverses order (LIFO→FIFO). Each element is moved exactly twice (push to input, transfer to output), so amortized O(1).",
+      "approaches": [
+        { "name": "Two Stacks — Lazy Transfer", "complexity": "Amortized O(1) per operation, O(n) space", "description": "Push to inStack. On pop/peek, if outStack empty, pour all from inStack to outStack. Pop from outStack.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why is the amortized cost O(1) even though transfer is O(n)?", "options": ["Each element is pushed to inStack once and transferred to outStack once — exactly 2 moves per element total. Over n operations, total work is O(n), so amortized O(1) per op", "It's not really O(1)", "Only for small inputs", "The transfer is O(1)"], "answer": 0, "explanation": "Amortized analysis: assign each element a 'cost budget' of 2 (one push, one transfer). The expensive O(n) transfer is 'pre-paid' by the n cheap pushes. Banker's method proves this." },
+        { "q": "What happens if you transfer on EVERY pop instead of only when outStack is empty?", "options": ["Operations degrade to O(n) each. The 'lazy' part is critical — only transfer when necessary to maintain amortized O(1)", "Same performance", "It's faster", "It's more correct"], "answer": 0, "explanation": "Eager transfer on every pop means n elements move on every pop = O(n) per pop. Lazy transfer batches the work: one O(n) transfer serves multiple subsequent O(1) pops." },
+        { "q": "This is used in which real-world system?", "options": ["Functional programming languages implement persistent queues using two stacks. Also used in BFS implementations where only stack primitives are available", "No real-world use", "Databases only", "Operating systems only"], "answer": 0, "explanation": "Purely functional queues (Okasaki's design) use two lists (conceptually stacks). Haskell and Clojure use variants of this. It's a fundamental functional data structure technique." },
+        { "q": "What's the worst-case (non-amortized) time for a single pop?", "options": ["O(n) — when outStack is empty and all n elements must transfer from inStack. But this only happens after n pushes, so amortized is O(1)", "O(1)", "O(log n)", "O(n²)"], "answer": 0, "explanation": "Worst case is O(n) for one pop, but this can't happen twice in a row (outStack would have elements after transfer). Understanding worst-case vs amortized is key for Google." },
+        { "q": "How would you implement a thread-safe version of this?", "options": ["Lock both stacks during transfer to prevent race conditions. Or use lock-free CAS operations. The transfer must be atomic to maintain consistency", "No synchronization needed", "Just lock on push", "Use a single stack"], "answer": 0, "explanation": "Concurrent access during transfer could corrupt state. Solutions: mutex around the transfer check, or use a lock-free design with CAS. This bridges to systems design." }
+      ]
+    },
+    {
+      "id": "min-stack",
+      "title": "Min Stack",
+      "difficulty": "Medium",
+      "leetcodeNum": 155,
+      "pattern": "Auxiliary Stack (Min/Max/Freq Tracking)",
+      "tldr": "Design a stack that supports push, pop, top, and getMin — all in O(1). Maintain a parallel min-stack where each entry records the minimum at that stack depth.",
+      "keyTrick": "Push to the min-stack only when new value ≤ current min. Pop from min-stack only when popped value equals current min. This optimization reduces min-stack size. Alternative: store (value, currentMin) pairs on one stack.",
+      "approaches": [
+        { "name": "Two Stacks (Main + Min)", "complexity": "O(1) all operations, O(n) space", "description": "Main stack for values. Min stack tracks minimum at each level. Push to min when new value ≤ minStack.top.", "isOptimal": true },
+        { "name": "Single Stack with Pairs", "complexity": "O(1) all operations, O(n) space", "description": "Each stack entry stores (value, minSoFar). Slightly more space but simpler logic.", "isOptimal": true },
+        { "name": "Encoding Trick (No Extra Stack)", "complexity": "O(1) all operations, O(1) extra space", "description": "Store (2*val - min) when val < min. Decode on pop. Clever but fragile with integer overflow.", "isOptimal": false }
+      ],
+      "quiz": [
+        { "q": "Why must the min-stack push when value EQUALS current min (not just less than)?", "options": ["If the same minimum value is pushed twice and you only track it once, popping one copy would incorrectly remove the min. Duplicates must be counted", "It doesn't matter", "For performance", "Only for sorted input"], "answer": 0, "explanation": "Push [0, 1, 0]. Min stack: [0, 0]. Pop → removes 0, min stack pops to [0], min is still 0. If we'd only pushed once: min stack = [0], after pop it's empty → wrong min." },
+        { "q": "What's the space optimization of the conditional push vs always pushing to min-stack?", "options": ["Conditional push only adds to min-stack when a new min (or equal) appears — saves space when values are increasing. Worst case is still O(n) for decreasing sequences", "No difference", "Always pushing is more correct", "Conditional push is O(1) space"], "answer": 0, "explanation": "For increasing sequences like [1,2,3,...n], min-stack only has [1] vs [1,1,1,...1] with always-push. Average case saves significant space. Worst case (decreasing) is same." },
+        { "q": "The encoding trick stores (2*val - min) when val < min. Why does this work?", "options": ["When val < min, the encoded value is negative (since val < min → 2*val - min < val). On pop, if encoded < min, we know the real value = min, and previous min = 2*min - encoded", "Magic formula", "It's approximate", "Only works for positive numbers"], "answer": 0, "explanation": "The encoding stores the 'delta' from the minimum. When encoded < currentMin, it signals that the currentMin was set by this push. We can reverse-engineer the previous min. Elegant but overflow-prone." },
+        { "q": "How does Min Stack extend to Max Stack (with popMax)?", "options": ["Max Stack is MUCH harder — popMax requires removing an element from the middle. Use a doubly-linked list + TreeMap for O(log n) popMax. No simple O(1) solution exists", "Same approach", "Just track max instead of min", "Use two min stacks"], "answer": 0, "explanation": "Max Stack with popMax is LC 716 (Hard). popMax requires removing a non-top element, breaking stack structure. Doubly-linked list + heap/TreeMap is needed. Very different problem." },
+        { "q": "In a Google interview, what system design concept does Min Stack illustrate?", "options": ["Metadata tracking alongside data — like database indexes, file system metadata, or cache eviction tracking that maintain invariants with O(1) overhead", "No system design relevance", "Only for interviews", "Memory management"], "answer": 0, "explanation": "Maintaining auxiliary metadata (min/max/count) alongside primary data is universal: database indexes, LRU cache freq counts, system monitoring. Min Stack is the simplest form of this pattern." }
+      ]
+    },
+    {
+      "id": "eval-reverse-polish-notation",
+      "title": "Evaluate Reverse Polish Notation",
+      "difficulty": "Medium",
+      "leetcodeNum": 150,
+      "pattern": "Expression Evaluation",
+      "tldr": "Evaluate postfix expression. Push numbers onto stack. On operator, pop two operands, apply operator, push result. Final stack element is the answer.",
+      "keyTrick": "Operand stack: push numbers. On operator: pop b (top), pop a (second), push (a op b). ORDER MATTERS for subtraction and division: a is the first operand, b is the second. Don't swap them.",
+      "approaches": [
+        { "name": "Stack Evaluation", "complexity": "O(n) time, O(n) space", "description": "Single pass: push numbers, on operator pop two operands and push result. Stack depth at most n/2.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why does the order of operands matter when popping?", "options": ["For subtraction and division, a-b ≠ b-a. The first popped element is b (right operand), second popped is a (left operand). Reversing gives wrong results", "Order doesn't matter", "Only for addition", "Only for multiplication"], "answer": 0, "explanation": "'4 13 5 / +' means 4 + (13/5). Pop 5 (b), pop 13 (a), compute 13/5=2. If reversed: 5/13=0. This is the #1 bug in RPN implementations." },
+        { "q": "Why is Reverse Polish Notation used in calculators and some programming languages?", "options": ["No parentheses needed, no operator precedence rules, evaluated in single left-to-right pass. Simpler to parse and evaluate than infix notation", "Historical accident", "It's not used anymore", "Only in HP calculators"], "answer": 0, "explanation": "RPN eliminates ambiguity: no parentheses, no precedence rules. Stack-based evaluation is O(n) with no lookahead. HP calculators, Forth language, and PostScript all use it." },
+        { "q": "How would you convert infix to postfix (Shunting-yard algorithm)?", "options": ["Use an operator stack with precedence rules: push operators, pop higher-precedence operators to output before pushing. Parentheses control scoping", "Direct string manipulation", "Use recursion only", "Not possible in O(n)"], "answer": 0, "explanation": "Dijkstra's Shunting-yard: operator stack manages precedence. Higher-precedence operators on stack get popped before lower-precedence ones are pushed. Classic stack algorithm." },
+        { "q": "What's the truncation rule for division in this problem?", "options": ["Truncate toward zero: 6/(-3) = -2, not -3. In Java, integer division already truncates toward zero. In Python, use int(a/b) not a//b", "Round down", "Round up", "Round to nearest"], "answer": 0, "explanation": "The problem specifies truncation toward zero. Java's / operator does this natively. Python's // floors (rounds toward -∞), so use int(a/b) for truncation toward zero. Language-specific gotcha." },
+        { "q": "How does this relate to how CPUs actually evaluate expressions?", "options": ["CPUs use register-based or stack-based evaluation similar to RPN. The JVM is a stack machine that evaluates bytecode in essentially RPN order", "CPUs don't use stacks", "Only for floating point", "Only old CPUs"], "answer": 0, "explanation": "The JVM and WebAssembly are stack machines. Bytecode instructions push/pop operands like RPN. Understanding RPN = understanding how your code actually executes at the VM level." }
+      ]
+    },
+    {
+      "id": "asteroid-collision",
+      "title": "Asteroid Collision",
+      "difficulty": "Medium",
+      "leetcodeNum": 735,
+      "pattern": "Simulation / State Tracking",
+      "tldr": "Asteroids move in a row. Positive = right, negative = left. Same direction never collide. Opposite direction: larger survives, equal both explode. Use stack to simulate collisions.",
+      "keyTrick": "Stack holds surviving asteroids. For each new asteroid: if it's negative (moving left) and stack top is positive (moving right), they collide. Compare sizes in a while loop — the new asteroid may destroy multiple stack elements before being destroyed or surviving.",
+      "approaches": [
+        { "name": "Stack Simulation", "complexity": "O(n) time, O(n) space", "description": "Push asteroids. When new negative meets positive top, resolve collision: pop smaller, both if equal. New asteroid may survive multiple collisions.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why do only right-moving (positive) and left-moving (negative) asteroids collide?", "options": ["Same direction = never catch each other (same speed). Two left-moving never collide with each other on the stack since they're already resolved. Only right-on-stack + left-incoming collide", "All asteroids collide", "Only same direction collide", "Speed varies"], "answer": 0, "explanation": "Right-movers on the stack haven't hit anything yet. A new left-mover approaches them. Same direction: parallel paths, no collision. Two left-movers: both moving away from the stack." },
+        { "q": "What's the tricky case most people miss?", "options": ["A small positive asteroid followed by a large negative one: the negative destroys the positive AND may continue to destroy more positives behind it. The while loop handles this chain reaction", "Empty stack", "All same direction", "Single asteroid"], "answer": 0, "explanation": "Example: [5, 10, -11]. -11 destroys 10 (|-11|>10), then destroys 5 (|-11|>5). Result: [-11]. The while loop must continue checking until the new asteroid is destroyed or stack is empty/safe." },
+        { "q": "What's the loop termination condition?", "options": ["The new asteroid is destroyed (matched or beaten), OR the stack is empty, OR the stack top is also moving left (no collision possible)", "Just check once", "Fixed number of iterations", "Until stack is empty"], "answer": 0, "explanation": "Three exit conditions: 1) new asteroid explodes (|new| ≤ |top|), 2) stack empty, 3) top is negative (same direction as new, no collision). Missing any condition = infinite loop or wrong result." },
+        { "q": "What's the time complexity despite nested loops?", "options": ["O(n) — each asteroid is pushed at most once and popped at most once. Total push + pop operations ≤ 2n, so amortized O(n)", "O(n²)", "O(n log n)", "Depends on collisions"], "answer": 0, "explanation": "Classic amortized argument: each element enters and leaves the stack at most once. The inner while loop across all iterations does at most n total pops. Total work: O(n)." },
+        { "q": "How would you extend this to 2D asteroid collisions?", "options": ["2D requires tracking positions and trajectories, using event-driven simulation with a priority queue. Fundamentally different from the 1D stack approach", "Same stack approach", "Use two stacks (x and y)", "Not possible"], "answer": 0, "explanation": "1D collision benefits from total ordering (left-to-right). 2D has no such ordering — you need computational geometry (sweep line, event queue). This shows why 1D constraints enable elegant solutions." }
+      ]
+    },
+    {
+      "id": "daily-temperatures",
+      "title": "Daily Temperatures",
+      "difficulty": "Medium",
+      "leetcodeNum": 739,
+      "pattern": "Monotonic Stack (Decreasing)",
+      "tldr": "For each day, find how many days until a warmer temperature. Monotonic decreasing stack of INDICES. When a warmer day arrives, pop all cooler days and record their wait time.",
+      "keyTrick": "Push indices (not values) onto a decreasing stack. When temp[i] > temp[stack.top()], pop and set answer[popped] = i - popped. This resolves the 'next warmer day' for every popped index. Stack stores indices of unresolved days.",
+      "approaches": [
+        { "name": "Brute Force", "complexity": "O(n²) time, O(1) space", "description": "For each day, scan forward for first warmer day." },
+        { "name": "Monotonic Decreasing Stack", "complexity": "O(n) time, O(n) space", "description": "Stack of indices in decreasing temp order. Push current. Pop when current temp > stack top. Set answer on pop.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why store indices on the stack instead of temperatures?", "options": ["We need both the temperature (for comparison) and the index (for computing distance). Index gives both: temp = temps[index], distance = current_index - popped_index", "Either works", "Temperatures are simpler", "For memory efficiency"], "answer": 0, "explanation": "Storing indices is strictly more informative: you can always look up temp[index], but you can't recover the index from a temperature (duplicates exist). Indices are the universal choice for monotonic stacks." },
+        { "q": "What invariant does the monotonic decreasing stack maintain?", "options": ["All temperatures corresponding to stack indices are in non-increasing order from bottom to top. Each index on the stack is 'waiting' for a warmer day", "All elements are sorted", "Stack is always full", "No invariant needed"], "answer": 0, "explanation": "Bottom-to-top: decreasing temperatures. Each stack element hasn't found its next warmer day yet. When a warmer day arrives, it resolves all cooler waiting days via pops." },
+        { "q": "Why is this O(n) despite nested loops (outer for + inner while)?", "options": ["Each index is pushed exactly once and popped at most once. Total pushes + pops ≤ 2n. The while loop across ALL iterations of the for loop does at most n pops total", "It's O(n²)", "The while loop is O(1)", "Amortized by stack size"], "answer": 0, "explanation": "This is the canonical amortized O(n) argument for monotonic stacks. Each of n elements enters and exits the stack exactly once. Total work across all while-loop iterations = n pops." },
+        { "q": "What does a remaining non-empty stack at the end mean?", "options": ["Those indices never found a warmer day — their answer stays 0 (default). No special handling needed if answer array is initialized to 0", "Error in algorithm", "Need another pass", "Should all be popped"], "answer": 0, "explanation": "Leftover stack elements had no subsequent warmer day. Their answer[i] = 0 by default. This is why we initialize the answer array with zeros. Clean handling of the edge case." },
+        { "q": "Name three other problems that use the same monotonic stack pattern:", "options": ["Next Greater Element, Stock Span, Largest Rectangle in Histogram — all use 'next greater/smaller' queries resolved by monotonic stack", "Only this problem uses it", "Binary search problems", "Two pointer problems"], "answer": 0, "explanation": "Monotonic stack is a meta-pattern: any 'for each element, find the next/previous greater/smaller element' is O(n) with a monotonic stack. Recognizing this pattern is essential." }
+      ]
+    },
+    {
+      "id": "online-stock-span",
+      "title": "Online Stock Span",
+      "difficulty": "Medium",
+      "leetcodeNum": 901,
+      "pattern": "Monotonic Stack (Decreasing)",
+      "tldr": "For each day's price, return the span: count of consecutive days before (including today) where price was ≤ today's. Monotonic decreasing stack of (price, span) pairs.",
+      "keyTrick": "Stack stores (price, span) pairs in decreasing price order. When new price ≥ stack top price, pop and ACCUMULATE the popped span into current span. Push (price, accumulated_span). The span carries forward collapsed information.",
+      "approaches": [
+        { "name": "Brute Force", "complexity": "O(n) per call, O(n) total space", "description": "Store all prices. For each call, scan backward counting consecutive ≤ days." },
+        { "name": "Monotonic Stack with Span Accumulation", "complexity": "O(1) amortized per call, O(n) space", "description": "Stack of (price, span) pairs. Pop and accumulate spans when current price ≥ top. Push accumulated result.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why accumulate spans instead of just counting pops?", "options": ["Popped elements may themselves represent multiple days (their own accumulated span). Adding their span captures ALL the days they represent, not just the single pop", "Same thing", "For accuracy", "Counting pops works too"], "answer": 0, "explanation": "A popped (price=50, span=3) represents 3 consecutive days where price ≤ 50. When we pop it for price=60, those 3 days also have price ≤ 60. Must add 3, not 1." },
+        { "q": "How does this relate to 'Previous Greater Element' problem?", "options": ["Stock span = index - index_of_previous_greater_element. The monotonic stack finds the previous greater element. Span is the distance to it", "No relation", "It's the same problem", "Previous smaller element"], "answer": 0, "explanation": "Span(i) = i - prevGreater(i). The stack maintains a decreasing sequence; the first element that stays is the previous greater. All problems in the 'next/previous greater/smaller' family are equivalent." },
+        { "q": "What's the worst-case space usage?", "options": ["O(n) when prices are strictly decreasing — nothing ever gets popped. Every element stays on the stack", "O(1)", "O(log n)", "O(n²)"], "answer": 0, "explanation": "Strictly decreasing prices: [100, 90, 80, 70...]. No element pops any other. Stack grows to size n. This is the worst case. Best case (increasing): stack stays size 1." },
+        { "q": "This is an 'online' algorithm. What does that mean?", "options": ["It processes elements one at a time as they arrive, without needing access to future elements. Suitable for streaming data", "It requires internet", "It processes all data at once", "It needs the full array upfront"], "answer": 0, "explanation": "Online = streaming. Each call to next() processes one price and returns immediately. No need to know future prices. Contrast with 'offline' where all data is available upfront." },
+        { "q": "How would you implement this for a sliding window of size k (last k days only)?", "options": ["Maintain the monotonic stack but also track ages of entries. When an entry becomes older than k days, it must be removed even if not popped naturally. Requires a deque", "Same approach works", "Not possible with a stack", "Use array of size k"], "answer": 0, "explanation": "Sliding window + monotonic stack = monotonic deque. Elements are removed from both ends: front (too old) and back (smaller than new). This is the Sliding Window Maximum pattern." }
+      ]
+    },
+    {
+      "id": "car-fleet",
+      "title": "Car Fleet",
+      "difficulty": "Medium",
+      "leetcodeNum": 853,
+      "pattern": "Monotonic Stack (Application-Specific)",
+      "tldr": "Cars at different positions/speeds drive toward a target. A faster car behind a slower one merges into a fleet. Count the number of fleets that arrive. Sort by position descending, use stack to track arrival times.",
+      "keyTrick": "Sort by position (closest to target first). For each car, compute arrival time = (target - pos) / speed. Push arrival time onto stack. If current car's time ≤ stack top (it catches the car ahead), it joins that fleet — don't push. Otherwise, it forms a new fleet — push.",
+      "approaches": [
+        { "name": "Sort + Stack", "complexity": "O(n log n) time, O(n) space", "description": "Sort by position descending. Compute arrival times. Stack tracks fleet leaders: push only if arrival time > stack top.", "isOptimal": true },
+        { "name": "Sort + Simple Comparison", "complexity": "O(n log n) time, O(1) extra space", "description": "Sort by position descending. Track current fleet's arrival time. Count new fleets when arrival time exceeds current.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why sort by position descending (closest to target first)?", "options": ["Processing from front to back: if a car behind arrives earlier than the car ahead, it's blocked and merges. We need to know the 'wall' (slower car ahead) before processing faster cars behind", "Ascending works too", "For performance", "Convention"], "answer": 0, "explanation": "The car closest to target sets the 'speed limit' for all cars behind it that would catch up. Processing front-to-back lets us establish these limits before encountering faster cars." },
+        { "q": "Why is arrival time = (target - position) / speed sufficient?", "options": ["Without blocking, each car's solo arrival time is (target-pos)/speed. If this time ≤ the fleet ahead's time, it catches up and merges. Merging doesn't change the fleet's arrival time", "It's approximate", "Need to simulate step by step", "Only works for constant speed"], "answer": 0, "explanation": "A fleet travels at the speed of its slowest member (the leader). A faster car that catches the fleet adopts the fleet's arrival time. So we only compare solo times with the current fleet leader." },
+        { "q": "What's the subtle reason we use floating-point division here?", "options": ["Integer division would truncate arrival times, causing incorrect ordering. (target-pos)/speed must be exact to correctly determine which cars catch which fleets", "Integers work fine", "For precision only", "The problem requires it"], "answer": 0, "explanation": "Consider: (10-5)/3 = 1.667 vs (10-2)/4 = 2.0. With integer division: 1 vs 2. With float: 1.667 vs 2.0. The ordering is the same here but edge cases differ. Use doubles." },
+        { "q": "If two cars have the same arrival time, what happens?", "options": ["They form one fleet — the behind car catches the ahead car exactly at the target. Equal arrival time means they merge", "Two separate fleets", "Undefined behavior", "The faster one passes"], "answer": 0, "explanation": "Same arrival time = they meet at the target line. Per the problem, they merge into one fleet. This is why the condition is ≤ (not strictly <) for merging." },
+        { "q": "How does this problem demonstrate the power of problem transformation?", "options": ["The physical simulation (positions, speeds, time) is transformed into a simple stack problem on arrival times. The key insight is finding the right representation to simplify the problem", "It doesn't demonstrate transformation", "The stack is the hard part", "Simulation would be easier"], "answer": 0, "explanation": "Direct simulation is O(n²) or complex. Converting to arrival times reduces it to 'count distinct decreasing segments' — a simple stack problem. Finding the right transformation is the core skill." }
+      ]
+    },
+    {
+      "id": "simplify-path",
+      "title": "Simplify Path",
+      "difficulty": "Medium",
+      "leetcodeNum": 71,
+      "pattern": "Matching / Balancing",
+      "tldr": "Simplify a Unix-style file path. Split by '/', use stack: push directory names, pop on '..', ignore '.' and empty strings. Join stack with '/' for result.",
+      "keyTrick": "Split by '/'. Filter tokens: skip empty strings and '.'. On '..', pop (go up one directory) if stack is non-empty. Push everything else (directory names). Result = '/' + stack joined by '/'.",
+      "approaches": [
+        { "name": "Stack + Split", "complexity": "O(n) time, O(n) space", "description": "Split path by '/'. Process each token with stack: push names, pop on '..', skip '.' and empty. Join result.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why split by '/' first instead of character-by-character processing?", "options": ["Splitting handles consecutive slashes ('///') automatically — they produce empty strings which are filtered. Character-by-character requires manual slash-tracking", "Either works equally well", "Character processing is faster", "Split uses too much memory"], "answer": 0, "explanation": "'/a///b/../c' splits to ['', 'a', '', '', 'b', '..', 'c']. Empty strings from consecutive slashes are easily filtered. Character processing needs a state machine for the same result." },
+        { "q": "What should happen when '..' is encountered with an empty stack (already at root)?", "options": ["Do nothing — you can't go above root. '/../../' simplifies to '/'. The stack stays empty", "Error", "Push '..'", "Return null"], "answer": 0, "explanation": "In Unix, cd .. at root stays at root. The simplified path can't go above /. So '..' with empty stack is a no-op. This edge case is commonly missed." },
+        { "q": "What are the only tokens that modify the stack?", "options": ["Directory names (push) and '..' (pop). Everything else is ignored: '.' (current dir), empty strings (consecutive slashes), and trailing slashes", "All tokens modify it", "Only '..'", "Only directory names"], "answer": 0, "explanation": "Two actions only: push (new directory) and pop (..). All other tokens are noise. This clean separation makes the algorithm simple and correct." },
+        { "q": "How does this relate to how operating systems actually resolve paths?", "options": ["OS path resolution uses essentially this algorithm. Additional considerations: symlinks, permissions, and mount points add complexity but the core logic is stack-based", "OS uses a completely different method", "OS doesn't simplify paths", "OS uses regex"], "answer": 0, "explanation": "The Linux kernel's path resolution (path_lookup) processes components left-to-right, following '..' by going to parent. Same stack logic with additional filesystem checks. This is real systems programming." },
+        { "q": "What if '...' (three dots) appears in the path?", "options": ["It's treated as a regular directory name and pushed onto the stack. Only exactly '..' has special meaning, not '...' or '....'", "Same as '..'", "Error", "Ignored like '.'"], "answer": 0, "explanation": "'...' is a valid directory name (unusual but legal in Unix). Only '.' and '..' have special meanings. This edge case tests careful reading of the problem constraints." }
+      ]
+    },
+    {
+      "id": "decode-string",
+      "title": "Decode String",
+      "difficulty": "Medium",
+      "leetcodeNum": 394,
+      "pattern": "Matching / Balancing",
+      "tldr": "Decode encoded string: '3[a2[c]]' → 'accaccacc'. Use stack: push current string and repeat count on '['. On ']', pop and construct repeated string. Handle nested brackets naturally.",
+      "keyTrick": "Two-item stack frame: (currentString, repeatCount). On '[': push current state and reset. On ']': pop previous state, append current string × count to previous string. Digits may be multi-digit — accumulate them.",
+      "approaches": [
+        { "name": "Stack with State Frames", "complexity": "O(maxK^depth × n) time, O(sum of decoded lengths) space", "description": "Push (string, count) on '['. Pop on ']' and construct. Handle multi-digit numbers.", "isOptimal": true },
+        { "name": "Recursion", "complexity": "Same complexity", "description": "Recursive descent: parse number, expect '[', recurse for content, expect ']'. Cleaner but uses call stack." }
+      ],
+      "quiz": [
+        { "q": "Why are two separate stacks (or a stack of pairs) needed?", "options": ["On '[', we need to save BOTH the string built so far AND the repeat count. On ']', we combine: previous_string + current_string × count. Both pieces of state must be preserved", "One stack suffices", "Need three stacks", "Use a single counter"], "answer": 0, "explanation": "The string-so-far and the repeat count are both context that must be saved/restored on bracket entry/exit. It's like saving registers on a function call — same concept." },
+        { "q": "How do you handle multi-digit numbers like '100[a]'?", "options": ["Accumulate digits: when you see a digit character, multiply running number by 10 and add digit. Reset on '[' after pushing", "Numbers are always single digit", "Parse ahead for all digits", "Use Integer.parseInt on the whole string"], "answer": 0, "explanation": "Build number digit by digit: num = num * 10 + (c - '0'). When '[' is encountered, the accumulated number is the repeat count. Reset number to 0 after pushing." },
+        { "q": "What makes the recursive approach more natural for this problem?", "options": ["The string has recursive structure (brackets inside brackets). Recursive descent parsing directly mirrors this nesting. The stack approach is simulating the recursion explicitly", "Recursion is always better", "No difference", "Stack is more natural"], "answer": 0, "explanation": "The encoded string is essentially a recursive grammar: string = chars | number '[' string ']'. Recursive descent directly parses this grammar. The stack approach is the iterative equivalent." },
+        { "q": "What's the time complexity and why is it hard to analyze?", "options": ["The output string can be exponentially long: '2[2[2[a]]]' = 'aaaaaaaa' (length 8 from input length 11). Time/space is O(output length), which depends on nesting depth and repeat counts", "O(n)", "O(n²)", "O(n log n)"], "answer": 0, "explanation": "The output can be exponentially larger than input. Time is O(|output|) since every character must be produced. This is one of few problems where output size dominates input size in complexity." },
+        { "q": "How does this pattern appear in real-world systems?", "options": ["Template expansion in config files, macro expansion in preprocessors, and compression schemes like run-length encoding all use recursive decode patterns", "Only in interviews", "JSON parsing", "Database queries"], "answer": 0, "explanation": "Template engines (Jinja, Mustache), C preprocessor macro expansion, and decompression algorithms all recursively expand encoded representations. This is a fundamental parsing pattern." }
+      ]
+    },
+    {
+      "id": "max-frequency-stack",
+      "title": "Maximum Frequency Stack",
+      "difficulty": "Hard",
+      "leetcodeNum": 895,
+      "pattern": "Auxiliary Stack (Min/Max/Freq Tracking)",
+      "tldr": "Design FreqStack: push adds element, pop removes the most frequent element (ties broken by most recent). Use frequency map + map of stacks per frequency + track maxFreq.",
+      "keyTrick": "Three structures: 1) freq{} maps value→frequency, 2) freqToStack{} maps frequency→stack of values at that frequency, 3) maxFreq tracks current maximum. Push: increment freq, push to freqToStack[newFreq], update maxFreq. Pop: pop from freqToStack[maxFreq], decrement freq, shrink maxFreq if stack empty.",
+      "approaches": [
+        { "name": "Frequency Map + Frequency-Indexed Stacks", "complexity": "O(1) push and pop, O(n) space", "description": "Map values to frequencies. Map frequencies to stacks. Track maxFreq. Push/pop update all three structures in O(1).", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why does each frequency level need its OWN stack (not a single sorted structure)?", "options": ["Each frequency stack maintains insertion order within that frequency level, giving LIFO for tie-breaking. A sorted structure would lose this temporal ordering", "Any structure works", "For performance only", "Stacks are simpler to implement"], "answer": 0, "explanation": "The problem requires popping the most frequent, with ties broken by most recently pushed. Separate stacks per frequency preserve push-order within each frequency level. LIFO tie-breaking is automatic." },
+        { "q": "Why can maxFreq only decrease by 1 when we pop?", "options": ["We pop one occurrence from the maxFreq stack. This decreases that value's frequency by 1. If the stack at maxFreq becomes empty, the next highest frequency is maxFreq-1 (which is guaranteed non-empty)", "It can decrease by more", "maxFreq never decreases", "It's an approximation"], "answer": 0, "explanation": "When we push, we add to freq f AND freq f-1 (and all lower) stacks. So freqToStack[maxFreq-1] always has at least the elements that were in freqToStack[maxFreq] minus the popped one. It's never empty." },
+        { "q": "Wait — do elements appear in multiple frequency stacks simultaneously?", "options": ["Yes! When we push 'a' three times, 'a' appears in freqToStack[1], freqToStack[2], AND freqToStack[3]. Each push adds to the NEW frequency's stack without removing from old ones", "No — moved between stacks", "Only in the highest", "Only in the lowest"], "answer": 0, "explanation": "This is the non-obvious insight. 'a' pushed 3 times: it's in freq[1], freq[2], freq[3]. When popped from freq[3], it still exists in freq[2]. This is why the approach works without cleanup." },
+        { "q": "What's the space complexity and can it be optimized?", "options": ["O(n) where n = total pushes. Each push adds one entry to a frequency stack. No optimization possible since all entries may be needed", "O(distinct elements)", "O(maxFreq)", "O(1)"], "answer": 0, "explanation": "Each push adds one stack entry. Total entries = total pushes = n. The freq map and freqToStack map are both bounded by n. Space is Θ(n) and can't be reduced." },
+        { "q": "How would you extend this to popMin frequency (least frequent, ties by oldest)?", "options": ["Track minFreq similarly. But minFreq is harder — it can jump unpredictably when frequencies change. Need to find next non-empty frequency level, possibly requiring a TreeMap or ordered set", "Same approach, just pop from minFreq", "Not possible in O(1)", "Use a heap"], "answer": 0, "explanation": "maxFreq only moves ±1, making it O(1) to maintain. minFreq can jump arbitrarily (e.g., if the only freq-1 element gets a second push). Finding new min requires O(log n) with TreeMap." }
+      ]
+    },
+    {
+      "id": "largest-rectangle-histogram",
+      "title": "Largest Rectangle In Histogram",
+      "difficulty": "Hard",
+      "leetcodeNum": 84,
+      "pattern": "Monotonic Stack (Decreasing)",
+      "tldr": "Find the largest rectangle in a histogram. For each bar, find how far it extends left and right (until a shorter bar). Monotonic increasing stack: on smaller bar, pop and compute area using popped height × (right - left - 1).",
+      "keyTrick": "Monotonic INCREASING stack of indices. When heights[i] < heights[stack.top()], pop: the popped bar's height is the rectangle height. Width = i - stack.peek() - 1 (or i if stack is empty). This computes the max rectangle for each bar as its height.",
+      "approaches": [
+        { "name": "Brute Force", "complexity": "O(n²) time", "description": "For each bar, expand left and right to find max rectangle with that bar as the shortest." },
+        { "name": "Monotonic Increasing Stack", "complexity": "O(n) time, O(n) space", "description": "Push indices while heights increase. On decrease, pop and compute area. Handle remaining stack at end.", "isOptimal": true },
+        { "name": "Divide and Conquer", "complexity": "O(n log n) avg, O(n²) worst", "description": "Find min bar, max rectangle = max(min×width, left half, right half). O(n²) worst case without segment tree." }
+      ],
+      "quiz": [
+        { "q": "When we pop index j because heights[i] < heights[j], what is the width of the rectangle with height heights[j]?", "options": ["Width = i - stack.peek() - 1. The left boundary is the index below j on the stack (the previous shorter bar). Right boundary is i. If stack is empty, width = i", "Width = i - j", "Width = j", "Width = n - j"], "answer": 0, "explanation": "The popped bar j's rectangle extends from the bar after stack.peek() to the bar before i. Width = i - stack.peek() - 1. If stack is empty after pop, it extends to index 0, so width = i." },
+        { "q": "Why use an INCREASING stack (not decreasing like Daily Temperatures)?", "options": ["We want the 'previous smaller' and 'next smaller' elements for each bar. An increasing stack: push while heights increase, pop on smaller — the pop tells us both boundaries of the rectangle", "Decreasing works too", "Convention", "The problem specifies it"], "answer": 0, "explanation": "Increasing stack ensures each pop is triggered by a SMALLER bar (right boundary). The element below on the stack is the previous SMALLER bar (left boundary). Both boundaries found simultaneously." },
+        { "q": "What happens to elements remaining on the stack after processing all bars?", "options": ["They have no smaller bar to the right. Pop each one: right boundary = n (end of array). Width = n - stack.peek() - 1 (or n if stack becomes empty)", "Discard them", "They form the answer", "Process them left-to-right"], "answer": 0, "explanation": "Remaining bars extend all the way to the right edge. Use n as the right boundary. This 'cleanup' phase is often forgotten. Some solutions add a sentinel height 0 at the end to trigger all remaining pops." },
+        { "q": "The sentinel trick (appending height 0) eliminates which edge case?", "options": ["The cleanup phase for remaining stack elements. Height 0 is smaller than everything, forcing all remaining elements to pop. No separate cleanup loop needed", "No effect", "Handles empty array", "Prevents overflow"], "answer": 0, "explanation": "Appending 0 at the end: all remaining stack elements are popped during the main loop (since 0 < any positive height). Cleaner code with one loop instead of two. A common implementation trick." },
+        { "q": "How does this directly connect to 'Maximal Rectangle' in a binary matrix?", "options": ["Treat each row as the base of a histogram: height[j] = consecutive 1s above including current row. Run Largest Rectangle for each row. O(m×n) total", "No connection", "Maximal Rectangle uses DP only", "Different algorithm entirely"], "answer": 0, "explanation": "Maximal Rectangle (LC 85) builds histograms row by row and runs this algorithm on each. O(m×n). This is a classic problem decomposition: reduce 2D to repeated 1D. Google favorite." }
+      ]
+    }
+  ]
+}

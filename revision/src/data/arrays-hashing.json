@@ -1,0 +1,508 @@
+{
+  "id": "arrays-hashing",
+  "title": "Arrays & Hashing",
+  "icon": "⧉",
+  "order": 1,
+  "description": "Foundation of DSA — master hash maps, frequency counting, prefix sums, and in-place manipulation.",
+  "patterns": [
+    {
+      "name": "Frequency Counting",
+      "description": "Use a hash map to count occurrences. Unlocks problems involving duplicates, majorities, and top-K.",
+      "problems": ["contains-duplicate", "valid-anagram", "majority-element", "majority-element-ii", "top-k-frequent-elements"]
+    },
+    {
+      "name": "Hash Map Lookup (Value → Index)",
+      "description": "Store complements or mappings to enable O(1) lookups. Core pattern for Two Sum variants and grouping.",
+      "problems": ["two-sum", "group-anagrams", "longest-common-prefix"]
+    },
+    {
+      "name": "Prefix Sum / Cumulative",
+      "description": "Precompute cumulative sums to answer range queries in O(1). Extends to 2D and subarray problems.",
+      "problems": ["range-sum-query-2d", "product-of-array-except-self", "subarray-sum-equals-k"]
+    },
+    {
+      "name": "In-Place Array Manipulation",
+      "description": "Use the array itself as storage — index-as-hash, swap-sort, or overwrite patterns to achieve O(1) space.",
+      "problems": ["remove-element", "sort-colors", "first-missing-positive", "concatenation-of-array"]
+    },
+    {
+      "name": "Set / Sequence Detection",
+      "description": "Use hash sets for O(1) membership tests to find sequences, validate constraints, or detect patterns.",
+      "problems": ["longest-consecutive-sequence", "valid-sudoku", "design-hashset"]
+    },
+    {
+      "name": "Design & Encoding",
+      "description": "Implement core data structures from scratch or design custom serialization schemes.",
+      "problems": ["design-hashset", "design-hashmap", "encode-decode-strings"]
+    },
+    {
+      "name": "Sorting Variants",
+      "description": "Understand when to use comparison sorts vs. counting/bucket sorts and their trade-offs.",
+      "problems": ["sort-an-array", "sort-colors"]
+    },
+    {
+      "name": "Greedy with State",
+      "description": "Track running state (min/max so far) to make locally optimal decisions.",
+      "problems": ["best-time-buy-sell-stock-ii"]
+    }
+  ],
+  "problems": [
+    {
+      "id": "concatenation-of-array",
+      "title": "Concatenation of Array",
+      "difficulty": "Easy",
+      "leetcodeNum": 1929,
+      "pattern": "In-Place Array Manipulation",
+      "tldr": "Create an array of length 2n where ans[i] == ans[i+n] == nums[i]. Simply append nums to itself.",
+      "keyTrick": "The answer is just nums repeated twice. No clever logic — the real skill is recognizing when a problem is trivial and moving on fast in an interview.",
+      "approaches": [
+        {
+          "name": "Direct Construction",
+          "complexity": "O(n) time, O(n) space",
+          "description": "Allocate result array of size 2n. For each index i, set result[i] = result[i+n] = nums[i].",
+          "isOptimal": true
+        }
+      ],
+      "quiz": [
+        { "q": "Why is this problem included in interview prep despite being trivial?", "options": ["It tests array indexing fundamentals", "It's a warm-up to verify you can handle simple I/O without overcomplicating", "It tests memory allocation", "It tests recursion"], "answer": 1, "explanation": "Google interviewers note candidates who overthink simple problems. Recognizing trivial problems and solving them quickly is itself a skill." },
+        { "q": "If nums = [1,2,3], what is ans[4]?", "options": ["1", "2", "3", "undefined"], "answer": 1, "explanation": "ans = [1,2,3,1,2,3]. ans[4] = nums[4 % 3] = nums[1] = 2." },
+        { "q": "How would you generalize this to k concatenations?", "options": ["Use modular indexing: ans[i] = nums[i % n]", "Copy k times in nested loops", "Use recursion to build k copies", "Not possible in O(kn)"], "answer": 0, "explanation": "Modular arithmetic generalizes elegantly: ans[i] = nums[i % n] for any k repetitions." },
+        { "q": "What's the space complexity if done in-place (modifying original)?", "options": ["O(1)", "O(n) — you must allocate new space", "O(log n)", "O(n²)"], "answer": 1, "explanation": "You cannot concatenate an array to itself in-place without allocating at least O(n) additional space for the result." },
+        { "q": "In Java, which is more efficient for this: System.arraycopy or manual loop?", "options": ["System.arraycopy — it uses native memcpy", "Manual loop — JIT optimizes it better", "Identical performance", "Depends on array size"], "answer": 0, "explanation": "System.arraycopy uses native memory copy operations and is consistently faster for bulk array operations." }
+      ]
+    },
+    {
+      "id": "contains-duplicate",
+      "title": "Contains Duplicate",
+      "difficulty": "Easy",
+      "leetcodeNum": 217,
+      "pattern": "Frequency Counting",
+      "tldr": "Return true if any value appears at least twice. HashSet insertion + membership check in one pass.",
+      "keyTrick": "Add elements to a HashSet one by one. If add() returns false (element already exists), you found a duplicate. Early termination is key.",
+      "approaches": [
+        { "name": "Brute Force — Nested Loops", "complexity": "O(n²) time, O(1) space", "description": "Compare every pair (i, j). Return true if nums[i] == nums[j]." },
+        { "name": "Sort First", "complexity": "O(n log n) time, O(1) space", "description": "Sort the array. Adjacent equal elements indicate duplicates. Good when space is restricted." },
+        { "name": "HashSet", "complexity": "O(n) time, O(n) space", "description": "Insert into a set. If the element is already present, return true. Classic time-space tradeoff.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "When would the sorting approach be preferred over HashSet at Google scale?", "options": ["When n is very small", "When memory is constrained (embedded systems, huge datasets)", "Never — HashSet is always better", "When the array is already sorted"], "answer": 1, "explanation": "At Google scale, O(n) extra memory can be prohibitive. Sorting in-place uses O(1) extra space. This trade-off question is common in Google interviews." },
+        { "q": "What's the worst-case time for HashSet approach?", "options": ["O(n)", "O(n²) due to hash collisions", "O(n log n)", "O(1)"], "answer": 1, "explanation": "With pathological hash collisions (all elements hash to same bucket), HashSet degrades to O(n²). In practice with good hash functions, it's amortized O(n)." },
+        { "q": "If the constraint is nums[i] ∈ [0, n-1], what O(n) time, O(1) space solution exists?", "options": ["Use index-as-hash: negate nums[abs(nums[i])]", "Use XOR of all elements", "Use modular arithmetic", "Not possible"], "answer": 0, "explanation": "Mark visited indices by negating the value at that index. If you find an already-negative value, it's a duplicate. This is the index-as-hash pattern." },
+        { "q": "How does Java's HashSet.add() help here vs. contains() + add()?", "options": ["add() returns false if element exists — one operation instead of two", "No difference", "add() is O(1) but contains() is O(n)", "add() auto-resizes but contains() doesn't"], "answer": 0, "explanation": "HashSet.add() returns boolean — false if element was already present. Using just add() halves the hash lookups compared to contains() then add()." },
+        { "q": "For the follow-up: contains duplicate within distance k — what changes?", "options": ["Use a sliding window HashSet of size k", "Sort and check adjacent k elements", "Use two HashSets", "Use a stack"], "answer": 0, "explanation": "Maintain a HashSet of the last k elements. When window exceeds k, remove the oldest element. This is the sliding window + set pattern." }
+      ]
+    },
+    {
+      "id": "valid-anagram",
+      "title": "Valid Anagram",
+      "difficulty": "Easy",
+      "leetcodeNum": 242,
+      "pattern": "Frequency Counting",
+      "tldr": "Two strings are anagrams if they have identical character frequencies. Use a frequency array of size 26 (for lowercase) — increment for s, decrement for t, check all zeros.",
+      "keyTrick": "Use a single int[26] array. Increment for each char in s, decrement for each char in t. If all entries are 0, it's an anagram. One array, two passes — cleaner than two maps.",
+      "approaches": [
+        { "name": "Sort Both Strings", "complexity": "O(n log n) time, O(n) space", "description": "Sort both strings and compare. Simple but slower." },
+        { "name": "Two Frequency Maps", "complexity": "O(n) time, O(1) space*", "description": "Build frequency maps for both strings and compare. Space is O(1) since alphabet is fixed." },
+        { "name": "Single Frequency Array", "complexity": "O(n) time, O(1) space", "description": "One array: increment for s, decrement for t. All zeros means anagram. Most elegant.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why is the space complexity O(1) even though we use an array?", "options": ["The array is always size 26, independent of input size", "We reuse the input array", "Java optimizes small arrays", "The array is on the stack"], "answer": 0, "explanation": "The frequency array is bounded by the alphabet size (constant 26), not input size n. This makes it O(1) space. Google interviewers expect you to articulate this clearly." },
+        { "q": "How would you handle Unicode strings (follow-up)?", "options": ["Use a HashMap<Character, Integer> instead of int[26]", "Use int[65536]", "Convert to ASCII first", "Unicode strings can't be anagrams"], "answer": 0, "explanation": "HashMap handles arbitrary character sets. int[26] only works for lowercase English letters. This follow-up tests your awareness of character encoding." },
+        { "q": "Can you solve this with a single pass through both strings simultaneously?", "options": ["Yes — if strings are equal length, iterate both and update one frequency array", "No — you must process s fully before t", "Only if sorted first", "Only with two arrays"], "answer": 0, "explanation": "If len(s) ≠ len(t), return false immediately. Otherwise, iterate both simultaneously: freq[s[i]]++ and freq[t[i]]-- in the same loop." },
+        { "q": "What's the relationship between anagram checking and the Group Anagrams problem?", "options": ["Anagram check is the building block — Group Anagrams uses sorted string or frequency as a hash key", "No relationship", "Group Anagrams uses graph theory", "Group Anagrams is easier"], "answer": 0, "explanation": "Group Anagrams groups strings by their 'canonical form' — either sorted string or frequency signature. Valid Anagram is the pairwise version of this." },
+        { "q": "If the input contains only lowercase letters and you use XOR of all chars for both strings, does equal XOR guarantee anagram?", "options": ["No — XOR can collide. 'ab' and 'cd' might have same XOR", "Yes — XOR is unique per character set", "Only if strings are same length", "Only for strings ≤ 26 chars"], "answer": 0, "explanation": "XOR is not a reliable hash for anagram detection. Different character multisets can produce the same XOR value. This is a common pitfall to mention." }
+      ]
+    },
+    {
+      "id": "two-sum",
+      "title": "Two Sum",
+      "difficulty": "Easy",
+      "leetcodeNum": 1,
+      "pattern": "Hash Map Lookup (Value → Index)",
+      "tldr": "Find two indices where nums[i] + nums[j] = target. Use a hash map storing {value → index}. For each element, check if (target - nums[i]) exists in the map.",
+      "keyTrick": "Build the map as you iterate — check complement BEFORE inserting current element. This handles duplicates correctly and solves it in a single pass.",
+      "approaches": [
+        { "name": "Brute Force", "complexity": "O(n²) time, O(1) space", "description": "Check all pairs (i, j). Simple but too slow for Google." },
+        { "name": "Sort + Two Pointers", "complexity": "O(n log n) time, O(n) space", "description": "Sort with original indices. Use two pointers. Good for the sorted variant." },
+        { "name": "Hash Map (One Pass)", "complexity": "O(n) time, O(n) space", "description": "Store complement map. For each num, check if target-num exists. Single pass.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why must you check the complement BEFORE inserting the current element?", "options": ["To avoid using the same element twice (i ≠ j requirement)", "For performance reasons", "The map doesn't allow updates", "It doesn't matter"], "answer": 0, "explanation": "If target=6 and nums[i]=3, checking after inserting would find nums[i] as its own complement. Checking before ensures you only match with previously seen elements." },
+        { "q": "How does Two Sum change if the array is sorted?", "options": ["Use two pointers — O(n) time, O(1) space", "Still need hash map", "Binary search each complement — O(n log n)", "Both A and C work, A is optimal"], "answer": 3, "explanation": "Both work. Two pointers is O(n) time O(1) space (optimal). Binary search is O(n log n). Google expects you to identify the optimal for sorted input." },
+        { "q": "What if the problem asks for ALL pairs summing to target (not just one)?", "options": ["Hash map still works — store list of indices per value", "Two pointers on sorted array handles duplicates better", "Both work, choice depends on whether output needs indices or values", "Neither works efficiently"], "answer": 2, "explanation": "For index pairs: hash map with value→list. For value pairs without duplicates: sorted + two pointers with skip logic. Understanding the output format drives the approach." },
+        { "q": "In a Google system design context, how would you handle Two Sum on a dataset that doesn't fit in memory?", "options": ["External sort + two pointers with file I/O", "MapReduce: map phase emits (complement, index), reduce phase finds matches", "Both are valid distributed approaches", "Not possible efficiently"], "answer": 2, "explanation": "External sort + two pointers works for single-machine large files. MapReduce scales horizontally. Google interviews often extend coding problems to system design." },
+        { "q": "What's the significance of the problem guaranteeing exactly one solution?", "options": ["It means we can return immediately on first match — no need to track multiple answers", "It doesn't affect the algorithm", "It means we need special handling", "It means the array is sorted"], "answer": 0, "explanation": "The guarantee of a unique solution enables early return, simplifying code. Without it, you'd need to handle no-solution and multiple-solution cases." }
+      ]
+    },
+    {
+      "id": "longest-common-prefix",
+      "title": "Longest Common Prefix",
+      "difficulty": "Easy",
+      "leetcodeNum": 14,
+      "pattern": "Hash Map Lookup (Value → Index)",
+      "tldr": "Find the longest string that is a prefix of all strings. Compare character by character across all strings at each position, or sort and compare only first and last.",
+      "keyTrick": "Sort the array lexicographically. The LCP of the entire array equals the LCP of the first and last strings (most dissimilar pair). Reduces to one comparison.",
+      "approaches": [
+        { "name": "Vertical Scanning", "complexity": "O(S) time, O(1) space", "description": "Compare characters column by column across all strings. S = sum of all characters. Stops early." },
+        { "name": "Sort + Compare First/Last", "complexity": "O(n·m·log n) time, O(1) space", "description": "Sort lexicographically. LCP of entire array = LCP of first and last strings after sorting." },
+        { "name": "Divide and Conquer", "complexity": "O(S) time, O(m·log n) space", "description": "Split array in half, find LCP of each half, merge. Useful for distributed systems." },
+        { "name": "Trie", "complexity": "O(S) time, O(S) space", "description": "Insert all strings into a Trie. Walk from root until a node has >1 child or is end-of-word. Overkill here but connects to Trie pattern." }
+      ],
+      "quiz": [
+        { "q": "After sorting [\"flower\",\"flow\",\"flight\"], why does comparing only first and last work?", "options": ["After sorting: [\"flight\",\"flow\",\"flower\"]. If first and last share prefix 'fl', all middle strings must too since they're lexicographically between", "It's just a coincidence", "Sorting puts similar strings together", "It doesn't always work"], "answer": 0, "explanation": "Lexicographic ordering guarantees that the first and last strings are the most dissimilar pair. Any prefix shared by them must be shared by all strings in between." },
+        { "q": "When would the Divide and Conquer approach be preferred?", "options": ["When processing strings distributed across multiple machines (MapReduce)", "When strings are very short", "When there are only 2 strings", "Never — it's always slower"], "answer": 0, "explanation": "D&C maps to distributed computing: each worker finds LCP of its partition, results are merged. Google-scale problems often motivate D&C even when linear scan works locally." },
+        { "q": "What's the time complexity difference between vertical scanning and horizontal scanning?", "options": ["Same worst case O(S), but vertical scanning short-circuits better on mismatches early in strings", "Vertical is always faster", "Horizontal is always faster", "They're identical in all cases"], "answer": 0, "explanation": "Vertical scanning stops at the first mismatch position across all strings. Horizontal scanning fully processes string pairs sequentially. Vertical has better average case." },
+        { "q": "If this problem allowed finding the longest common SUBSTRING (not prefix), how would complexity change?", "options": ["Becomes O(n²·m) with DP or O(n·m) with suffix array — fundamentally harder", "Same complexity", "Easier than prefix", "O(n log n)"], "answer": 0, "explanation": "Longest Common Substring is a different problem class. It requires suffix arrays/trees or DP, and is significantly harder. Recognizing this distinction matters." },
+        { "q": "How does binary search apply to this problem?", "options": ["Binary search on the length of the prefix: check if all strings share a prefix of length mid", "Binary search on the strings array", "It doesn't apply", "Binary search on characters"], "answer": 0, "explanation": "Binary search on prefix length [0, minLen]. For each mid, check if all strings share the first mid characters. O(S·log m) where m is min string length." }
+      ]
+    },
+    {
+      "id": "group-anagrams",
+      "title": "Group Anagrams",
+      "difficulty": "Medium",
+      "leetcodeNum": 49,
+      "pattern": "Frequency Counting",
+      "tldr": "Group strings that are anagrams. Use sorted string or character frequency as hash key → map to list of anagrams.",
+      "keyTrick": "The canonical form of an anagram group is its sorted string OR its character count signature (e.g., \"#1#0#0...#1\" for counts). The frequency key avoids O(k log k) sorting per string.",
+      "approaches": [
+        { "name": "Sort Each String as Key", "complexity": "O(n·k·log k) time, O(n·k) space", "description": "For each string, sort it to get canonical form. Use as hash map key. Simple and readable." },
+        { "name": "Frequency Count as Key", "complexity": "O(n·k) time, O(n·k) space", "description": "For each string, compute char frequency array and convert to string key. Avoids per-string sorting.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why is the frequency count key faster than sorting for long strings?", "options": ["Frequency counting is O(k) per string vs O(k log k) for sorting — significant when k is large", "It uses less memory", "Sorting is unstable", "No difference in practice"], "answer": 0, "explanation": "For strings of length k: sorting is O(k log k), frequency counting is O(k). When strings are long (e.g., k=1000), this difference matters. Google expects you to know this optimization." },
+        { "q": "What's a good frequency key format to avoid collisions?", "options": ["Delimit counts: '2#1#0#...' — without delimiters, '12' could be count=12 or count=1 then count=2", "Just concatenate digits", "Use the raw array as key", "Comma-separated is fine"], "answer": 0, "explanation": "Delimiter-separated keys prevent ambiguity. '1#2' vs '12' matters. In Java, Arrays.toString() works. In Python, tuple(counts) is idiomatic." },
+        { "q": "How would you handle this if strings could contain Unicode (not just a-z)?", "options": ["Use HashMap<Character, Integer> for frequency, serialize to string key", "Can't be solved with hashing", "Use int[65536]", "Sort-based key still works for Unicode"], "answer": 3, "explanation": "Sorting works universally regardless of character set. For frequency approach with Unicode, use a HashMap for counts. Both generalize, but sorting is simpler for Unicode." },
+        { "q": "In a distributed system processing billions of strings, how would you group anagrams?", "options": ["MapReduce: map emits (sorted_string, original_string), reduce groups by key", "Single machine with more RAM", "Use a database GROUP BY", "Not possible at scale"], "answer": 0, "explanation": "MapReduce naturally maps to this: the map function computes the canonical key, shuffle groups by key, reduce collects the group. Classic Google-style distributed thinking." },
+        { "q": "What's the relationship between Group Anagrams and bucket sort?", "options": ["Both use a key function to distribute items into groups — Group Anagrams is conceptually a bucket sort by anagram class", "No relationship", "Bucket sort is used internally", "Group Anagrams requires sorting"], "answer": 0, "explanation": "Group Anagrams is fundamentally a bucketing/partitioning problem. The 'bucket' is the anagram equivalence class. This connects to many distributed systems concepts." }
+      ]
+    },
+    {
+      "id": "remove-element",
+      "title": "Remove Element",
+      "difficulty": "Easy",
+      "leetcodeNum": 27,
+      "pattern": "In-Place Array Manipulation",
+      "tldr": "Remove all instances of val in-place. Return new length k with first k elements being the non-val elements. Two-pointer: slow pointer for write position, fast pointer for read.",
+      "keyTrick": "Classic read/write two-pointer pattern. Fast pointer reads every element; slow pointer only advances when we write a non-val element. This is the foundation of many in-place array problems.",
+      "approaches": [
+        { "name": "Two Pointers (Same Direction)", "complexity": "O(n) time, O(1) space", "description": "Slow pointer marks write position. Fast pointer scans. Copy non-val elements to slow position.", "isOptimal": true },
+        { "name": "Swap with End", "complexity": "O(n) time, O(1) space", "description": "When you find val, swap with last element and shrink array. Fewer copies when removals are rare.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "When is the swap-with-end approach better than the standard two-pointer?", "options": ["When the value to remove is rare — fewer copy operations needed", "Always better", "When the array is sorted", "Never — same performance"], "answer": 0, "explanation": "If val appears rarely, swap-with-end does O(k) swaps where k is count of val. Standard approach copies O(n-k) elements. Better when k << n." },
+        { "q": "How does this pattern extend to 'Remove Duplicates from Sorted Array'?", "options": ["Same read/write pointer, but condition changes: write when nums[fast] ≠ nums[slow]", "Completely different approach", "Need a hash set", "Need sorting first"], "answer": 0, "explanation": "Remove Duplicates uses the identical pattern — just changes the write condition from 'not equal to val' to 'not equal to last written'. Mastering this pattern is key." },
+        { "q": "Why does the problem say 'order doesn't matter' for the remaining elements?", "options": ["It enables the swap-with-end optimization which disrupts order", "It's just for clarity", "It makes the problem easier", "It's a mistake"], "answer": 0, "explanation": "The 'order doesn't matter' relaxation enables the swap-with-end approach. If order mattered, only the standard sequential copy approach would work." },
+        { "q": "What happens if every element equals val?", "options": ["Slow pointer never advances, returns 0 — correct behavior", "Array becomes empty (error)", "Stack overflow", "Infinite loop"], "answer": 0, "explanation": "Fast pointer scans all elements, none pass the condition, slow pointer stays at 0. Returns 0 correctly. Edge cases like this should be verified." },
+        { "q": "This read/write pointer technique is fundamental to which other problems?", "options": ["Move Zeroes, Remove Duplicates, String Compression — all in-place filtering problems", "Only array problems", "Only string problems", "Only linked list problems"], "answer": 0, "explanation": "The read/write two-pointer pattern is universal for in-place filtering. Recognizing this pattern across problems is exactly what Google interviewers look for." }
+      ]
+    },
+    {
+      "id": "majority-element",
+      "title": "Majority Element",
+      "difficulty": "Easy",
+      "leetcodeNum": 169,
+      "pattern": "Frequency Counting",
+      "tldr": "Find the element appearing more than ⌊n/2⌋ times. Boyer-Moore Voting Algorithm: maintain a candidate and count. When count drops to 0, switch candidate.",
+      "keyTrick": "Boyer-Moore Voting: the majority element can 'survive' being cancelled out by all other elements because it appears more than n/2 times. Think of it as an elimination tournament.",
+      "approaches": [
+        { "name": "Hash Map Count", "complexity": "O(n) time, O(n) space", "description": "Count frequencies, return element with count > n/2." },
+        { "name": "Sort", "complexity": "O(n log n) time, O(1) space", "description": "After sorting, the majority element must be at index n/2." },
+        { "name": "Boyer-Moore Voting", "complexity": "O(n) time, O(1) space", "description": "Track candidate and count. If count=0, new candidate. Increment if same, decrement if different.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why does Boyer-Moore work — what's the intuition?", "options": ["The majority element has > n/2 occurrences, so even if every minority element cancels one occurrence, the majority still has votes remaining", "It's a statistical approximation", "It only works on sorted arrays", "It uses randomization"], "answer": 0, "explanation": "If you pair each minority element with a majority element for 'cancellation', fewer than n/2 majority elements get cancelled, leaving the majority standing. This is a proof by pairing." },
+        { "q": "Does Boyer-Moore work if no majority element exists?", "options": ["No — it returns a candidate but you must verify with a second pass", "Yes — it returns null", "Yes — it always returns the most frequent", "It throws an error"], "answer": 0, "explanation": "Boyer-Moore always returns a candidate. If no majority exists, the candidate is meaningless. A verification pass (count the candidate) is required unless guaranteed by the problem." },
+        { "q": "How does this relate to Majority Element II (> n/3)?", "options": ["Extend to two candidates with two counters — at most 2 elements can exceed n/3", "Completely different algorithm", "Run Boyer-Moore twice", "Not related"], "answer": 0, "explanation": "Generalized Boyer-Moore: maintain k-1 candidates for > n/k threshold. For n/3, maintain 2 candidates. This generalization is a common Google follow-up." },
+        { "q": "Why is the sorting approach O(n log n) time but only O(1) extra space?", "options": ["In-place sorting algorithms like heapsort achieve this", "Sorting always needs O(n) space", "It uses the input array", "It's not actually O(1) space"], "answer": 0, "explanation": "Heapsort is O(n log n) time and O(1) auxiliary space. The sort approach then checks index n/2. This trade-off (time vs space) is worth discussing." },
+        { "q": "In a stream of elements where you can only make one pass, which approach works?", "options": ["Boyer-Moore — it's inherently a streaming algorithm using O(1) space", "Hash map with bounded size", "Sorting doesn't work for streams", "None work in one pass"], "answer": 0, "explanation": "Boyer-Moore is a streaming algorithm — it processes each element once and uses O(1) space. This makes it ideal for data stream applications, a common Google scenario." }
+      ]
+    },
+    {
+      "id": "design-hashset",
+      "title": "Design HashSet",
+      "difficulty": "Easy",
+      "leetcodeNum": 705,
+      "pattern": "Design & Encoding",
+      "tldr": "Implement HashSet without built-in hash libraries. Use an array of buckets with chaining (linked lists) for collision resolution. Choose a prime bucket count.",
+      "keyTrick": "Use a fixed-size bucket array with linked list chaining. Prime number bucket count (e.g., 769) distributes keys more uniformly. This tests your understanding of hash table internals.",
+      "approaches": [
+        { "name": "Boolean Array (Naive)", "complexity": "O(1) time, O(range) space", "description": "If key range is small, use boolean[range+1]. Too much memory for large ranges." },
+        { "name": "Bucket Array + Chaining", "complexity": "O(n/k) avg time, O(k+n) space", "description": "Array of k buckets (linked lists). Hash function: key % k. Choose k = prime number.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why use a prime number for bucket count?", "options": ["Primes reduce clustering — non-prime sizes cause patterns in key%size that lead to uneven distribution", "Primes are faster to compute modulo", "Convention only", "Primes use less memory"], "answer": 0, "explanation": "If keys have common factors with bucket count, they'll cluster. Primes minimize this. E.g., bucket_count=10 causes all even numbers to map to even buckets." },
+        { "q": "What are alternatives to chaining for collision resolution?", "options": ["Open addressing (linear probing, quadratic probing, double hashing)", "Ignore collisions", "Increase array size automatically", "Use a tree instead"], "answer": 0, "explanation": "Open addressing stores all entries in the bucket array itself, probing for empty slots. Java's HashMap uses chaining; Python's dict uses open addressing. Know both." },
+        { "q": "What's the load factor and why does it matter?", "options": ["n/k (entries/buckets). When it exceeds ~0.75, resize to maintain O(1) average. Too high = long chains, too low = wasted space", "It's the hash function quality", "It's the collision rate", "It's the memory usage"], "answer": 0, "explanation": "Load factor determines when to resize. Java's HashMap resizes at 0.75. This is a critical implementation detail Google expects you to know for design questions." },
+        { "q": "How does Java's HashMap handle buckets that get too long?", "options": ["Converts linked list to balanced BST (red-black tree) when chain length > 8", "Just resizes the whole map", "Uses open addressing fallback", "Drops elements"], "answer": 0, "explanation": "Since Java 8, long chains (>8) convert to TreeNodes (red-black tree), changing worst-case from O(n) to O(log n). This is a frequent Java interview question." },
+        { "q": "Why not just use key % array.length as the hash function?", "options": ["Direct modulo works for integers, but real hash functions must also handle distribution, negative numbers, and non-integer types", "It's fine for all cases", "Modulo is too slow", "It causes overflow"], "answer": 0, "explanation": "For integers, key % size works but needs abs() for negatives. For objects, you need hashCode() that distributes well. Poor hash functions negate the O(1) guarantee." }
+      ]
+    },
+    {
+      "id": "design-hashmap",
+      "title": "Design HashMap",
+      "difficulty": "Easy",
+      "leetcodeNum": 706,
+      "pattern": "Design & Encoding",
+      "tldr": "Implement HashMap with put, get, remove. Same as HashSet but each bucket node stores (key, value) pairs. Use chaining for collisions.",
+      "keyTrick": "Identical structure to HashSet but nodes hold key-value pairs. On put(), if key exists in chain, UPDATE the value instead of adding a duplicate. This update-vs-insert logic is the key detail.",
+      "approaches": [
+        { "name": "Array of Buckets + Chaining", "complexity": "O(n/k) avg time, O(k+n) space", "description": "Array of linked lists. Each node stores (key, value). Hash: key % bucket_count. Handle updates on put.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "What's the critical difference between put() in HashMap vs add() in HashSet?", "options": ["HashMap.put() must check if key already exists and UPDATE the value, not create a duplicate node", "No difference", "HashMap is faster", "HashSet doesn't have chaining"], "answer": 0, "explanation": "Forgetting to update existing keys is the #1 bug in HashMap implementations. Always traverse the chain to check for existing key before appending." },
+        { "q": "How would you implement resize/rehash?", "options": ["Create new bucket array of 2x size, rehash ALL entries (key % newSize), insert into new array", "Just append new buckets", "Copy buckets directly", "Resize isn't needed"], "answer": 0, "explanation": "Rehashing is O(n) and changes every entry's bucket assignment (since bucket = key % size changes). This amortizes to O(1) per operation with doubling strategy." },
+        { "q": "Why does HashMap use (key, value) nodes instead of two parallel arrays?", "options": ["Chaining requires nodes to be in the same linked list — parallel arrays can't handle variable-length chains", "Style preference", "Memory efficiency", "Parallel arrays are faster"], "answer": 0, "explanation": "Collision chains vary in length per bucket. Linked list nodes naturally handle this. Parallel arrays would need complex indexing to manage variable-length chains." },
+        { "q": "What happens if two different keys have the same hashCode in Java?", "options": ["They go in the same bucket. get() uses equals() to find the right key in the chain", "They overwrite each other", "Java prevents this", "An exception is thrown"], "answer": 0, "explanation": "Hash collision puts both in the same bucket. The chain is traversed using equals() to find the matching key. This is why equals() and hashCode() must be consistent." },
+        { "q": "For Google-scale: how would you design a distributed hash map?", "options": ["Consistent hashing to assign key ranges to nodes, with replication for fault tolerance", "Just use a bigger single machine", "Shard by first character", "Round-robin distribution"], "answer": 0, "explanation": "Consistent hashing minimizes re-distribution when nodes join/leave. Google's systems (Bigtable, Spanner) use variants. This bridges DS implementation to system design." }
+      ]
+    },
+    {
+      "id": "sort-an-array",
+      "title": "Sort an Array",
+      "difficulty": "Medium",
+      "leetcodeNum": 912,
+      "pattern": "Sorting Variants",
+      "tldr": "Implement a sorting algorithm without built-in sort. Merge Sort is the go-to: O(n log n) guaranteed, stable, and demonstrates divide-and-conquer mastery.",
+      "keyTrick": "Use Merge Sort for guaranteed O(n log n). Quick Sort is O(n²) worst case (fails LeetCode TLE on sorted input). Know both, implement Merge Sort for reliability.",
+      "approaches": [
+        { "name": "Quick Sort", "complexity": "O(n log n) avg, O(n²) worst", "description": "Partition around pivot, recurse on halves. Fast in practice but worst case on sorted/nearly-sorted input." },
+        { "name": "Merge Sort", "complexity": "O(n log n) time, O(n) space", "description": "Divide in half, sort each, merge. Guaranteed O(n log n). Stable sort.", "isOptimal": true },
+        { "name": "Heap Sort", "complexity": "O(n log n) time, O(1) space", "description": "Build max-heap, extract max repeatedly. O(1) extra space but not stable." },
+        { "name": "Counting/Radix Sort", "complexity": "O(n+k) time", "description": "Non-comparison sort. O(n+k) when range k is manageable. Best for bounded integers." }
+      ],
+      "quiz": [
+        { "q": "Why does LeetCode's test cases TLE on naive Quick Sort?", "options": ["Test cases include sorted/reverse-sorted arrays that trigger O(n²) worst case with first/last element pivot", "Quick Sort is always slow", "LeetCode's time limit is too strict", "The test cases are too large"], "answer": 0, "explanation": "Naive pivot selection (first/last element) degrades to O(n²) on sorted input. Fix: random pivot, median-of-three, or just use Merge Sort for guaranteed performance." },
+        { "q": "When would you choose Heap Sort over Merge Sort?", "options": ["When O(1) extra space is critical and stability isn't needed", "Always — it's faster", "When the array is already sorted", "When you need a stable sort"], "answer": 0, "explanation": "Heap Sort is in-place (O(1) space) but unstable. Merge Sort is stable but uses O(n) space. The trade-off between space and stability drives the choice." },
+        { "q": "What makes Merge Sort 'stable' and why does stability matter?", "options": ["Equal elements maintain original relative order. Matters when sorting by multiple keys (e.g., sort by name, then by age)", "It doesn't crash", "It's deterministic", "It uses less memory"], "answer": 0, "explanation": "Stability preserves order of equal elements. Critical for multi-key sorting (e.g., database records). Java's Arrays.sort uses TimSort (stable) for objects." },
+        { "q": "For sorting 1 billion 32-bit integers with limited RAM, what approach works?", "options": ["External merge sort: sort chunks that fit in RAM, merge sorted chunks from disk", "Quick Sort with random pivot", "Radix Sort", "Heap Sort"], "answer": 0, "explanation": "External merge sort is the standard for data exceeding RAM. Sort manageable chunks in memory, write to disk, then k-way merge. Core Google infrastructure concept." },
+        { "q": "What's the theoretical lower bound for comparison-based sorting?", "options": ["Ω(n log n) — proven via decision tree argument", "O(n)", "O(n²)", "O(log n)"], "answer": 0, "explanation": "Any comparison-based sort needs at least n log n comparisons (information-theoretic lower bound). Non-comparison sorts (counting, radix) bypass this but need assumptions about input." }
+      ]
+    },
+    {
+      "id": "sort-colors",
+      "title": "Sort Colors",
+      "difficulty": "Medium",
+      "leetcodeNum": 75,
+      "pattern": "In-Place Array Manipulation",
+      "tldr": "Sort array of 0s, 1s, 2s in-place with one pass. Dutch National Flag algorithm: three pointers (low, mid, high) partition into three regions.",
+      "keyTrick": "Dutch National Flag (Dijkstra): low tracks boundary of 0s, high tracks boundary of 2s, mid scans. Swap 0s to low, 2s to high. Mid only advances when it processes a 0 or 1 (NOT after swapping from high, since swapped element is unexamined).",
+      "approaches": [
+        { "name": "Counting Sort", "complexity": "O(n) time, O(1) space — two passes", "description": "Count 0s, 1s, 2s in first pass. Overwrite array in second pass." },
+        { "name": "Dutch National Flag", "complexity": "O(n) time, O(1) space — one pass", "description": "Three pointers: low, mid, high. Partition in single pass by swapping.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why shouldn't mid advance after swapping with high?", "options": ["The element swapped from high is unexamined — it could be 0, 1, or 2 and needs processing", "It causes array out of bounds", "It's just convention", "Mid should always advance"], "answer": 0, "explanation": "After swap with high, the new nums[mid] hasn't been seen yet. After swap with low, the swapped element must be 1 (since low ≤ mid, mid already processed it), so mid CAN advance." },
+        { "q": "How does Dutch National Flag generalize to k colors?", "options": ["For k colors, use k-1 pointers or apply DNF recursively for each boundary — extends to k-way partition", "Only works for 3 colors", "Use counting sort instead", "Use k separate passes"], "answer": 0, "explanation": "k-way partitioning generalizes DNF but gets complex. In practice, counting sort in two passes is simpler for k>3. However, DNF concepts appear in quicksort's 3-way partition." },
+        { "q": "What's the connection to Quick Sort's partition step?", "options": ["DNF is essentially 3-way partition (< pivot, = pivot, > pivot) — used in Quick Sort to handle duplicates efficiently", "No connection", "Quick Sort uses DNF directly", "DNF replaces Quick Sort"], "answer": 0, "explanation": "3-way partition (Bentley-McIlroy) uses DNF logic to handle duplicates in Quick Sort, making it O(n) on arrays with many duplicates. This is why it's important." },
+        { "q": "The counting sort approach uses two passes. Why is one-pass considered better?", "options": ["In streaming/hardware contexts, minimizing passes matters. Also demonstrates deeper algorithmic thinking in interviews", "Two passes is actually better", "No practical difference", "One pass uses less memory"], "answer": 0, "explanation": "Single-pass algorithms are preferred in streaming scenarios and hardware. In interviews, the one-pass solution demonstrates mastery of invariant-based reasoning." },
+        { "q": "What invariant does the Dutch National Flag algorithm maintain?", "options": ["[0..low-1] are 0s, [low..mid-1] are 1s, [high+1..n-1] are 2s, [mid..high] are unexamined", "[0..mid] are sorted", "All 0s before all 2s", "The array is always partially sorted"], "answer": 0, "explanation": "The precise invariant is: everything left of low is 0, between low and mid is 1, right of high is 2, and between mid and high is unprocessed. This invariant drives correctness." }
+      ]
+    },
+    {
+      "id": "top-k-frequent-elements",
+      "title": "Top K Frequent Elements",
+      "difficulty": "Medium",
+      "leetcodeNum": 347,
+      "pattern": "Frequency Counting",
+      "tldr": "Find k most frequent elements. Count frequencies, then use bucket sort (frequency → elements) for O(n) solution, or min-heap of size k for O(n log k).",
+      "keyTrick": "Bucket Sort by frequency: create buckets[0..n] where buckets[i] = list of elements with frequency i. Walk from highest bucket. O(n) time, O(n) space. Avoids heap entirely.",
+      "approaches": [
+        { "name": "Sort by Frequency", "complexity": "O(n log n) time", "description": "Count frequencies, sort entries by count, take top k." },
+        { "name": "Min-Heap of Size K", "complexity": "O(n log k) time, O(n+k) space", "description": "Count frequencies. Maintain min-heap of size k. For each entry, push and pop if size > k." },
+        { "name": "Bucket Sort", "complexity": "O(n) time, O(n) space", "description": "Create array of n+1 buckets indexed by frequency. Walk from highest frequency, collect k elements.", "isOptimal": true },
+        { "name": "Quickselect", "complexity": "O(n) avg time, O(n) space", "description": "After counting, use Quickselect to find kth most frequent. O(n²) worst case." }
+      ],
+      "quiz": [
+        { "q": "Why is bucket sort O(n) here when comparison sort is Ω(n log n)?", "options": ["Frequencies are bounded integers in [1, n] — bucket sort exploits this bounded range to avoid comparisons", "It's an approximation", "The problem is special", "Bucket sort is always O(n)"], "answer": 0, "explanation": "Bucket sort works in O(n) when the key range is O(n). Since frequencies are in [1, n], we can bucket by frequency directly. This bypasses the comparison sort lower bound." },
+        { "q": "When would you prefer the heap approach over bucket sort?", "options": ["When you want to process elements in a stream — heap handles online input; bucket sort needs all data upfront", "Never", "When k is large", "When memory is unlimited"], "answer": 0, "explanation": "Heap approach works in streaming: maintain a size-k heap as elements arrive. Bucket sort requires knowing all frequencies first. Streaming is common at Google scale." },
+        { "q": "How does Quickselect achieve O(n) average time?", "options": ["Like QuickSort but only recurse on the partition containing index k — halves the work each time, geometric series sums to O(n)", "It's not O(n)", "It uses hashing internally", "It sorts only k elements"], "answer": 0, "explanation": "Quickselect recurses on one side: n + n/2 + n/4 + ... = 2n = O(n) average. The key insight is that we don't need to sort everything, just partition around the kth element." },
+        { "q": "What if we need top-k from a continuous data stream?", "options": ["Use a min-heap of size k + a frequency map updated per element", "Bucket sort on each arrival", "Sort on each arrival", "Not possible efficiently"], "answer": 0, "explanation": "Maintain a HashMap for frequencies and a min-heap of (freq, element) of size k. On each new element, update frequency and adjust heap. O(log k) per element." },
+        { "q": "How does this problem connect to the Median of Data Stream problem?", "options": ["Both use heaps to maintain partial ordering — Top K uses one heap, Median uses two heaps", "No connection", "Both use bucket sort", "Both require full sorting"], "answer": 0, "explanation": "Both are 'partial ordering' problems solved with heaps. Top K needs one min-heap; Median needs two heaps (max-heap for lower half, min-heap for upper half). Pattern recognition!" }
+      ]
+    },
+    {
+      "id": "encode-decode-strings",
+      "title": "Encode and Decode Strings",
+      "difficulty": "Medium",
+      "leetcodeNum": 271,
+      "pattern": "Design & Encoding",
+      "tldr": "Design encode/decode for a list of strings into a single string. Use length-prefixed encoding: each string is preceded by its length and a delimiter (e.g., '4#leet5#code').",
+      "keyTrick": "Length-prefix encoding: prepend each string with its length followed by a delimiter like '#'. This handles ALL characters including the delimiter itself because the parser reads exactly 'length' characters after '#'.",
+      "approaches": [
+        { "name": "Delimiter-Based (Fragile)", "complexity": "O(n) time", "description": "Join with a special delimiter. Breaks if strings contain the delimiter. Not robust." },
+        { "name": "Length-Prefixed (Robust)", "complexity": "O(n) time, O(n) space", "description": "Format: 'len#string' for each string. Decoder reads len, then extracts exactly len characters. Handles all characters.", "isOptimal": true },
+        { "name": "Escaping", "complexity": "O(n) time", "description": "Escape special characters. More complex parsing, harder to implement correctly." }
+      ],
+      "quiz": [
+        { "q": "Why can't you just use a delimiter like ',' or '|'?", "options": ["Strings might contain the delimiter character, making decoding ambiguous", "It would work fine", "Delimiters are too slow", "Memory issues"], "answer": 0, "explanation": "If a string contains the delimiter, you can't tell if it's a boundary or part of the string. This is why HTTP uses Content-Length headers, not just delimiters." },
+        { "q": "How does length-prefixed encoding handle the '#' character inside strings?", "options": ["After reading the length, the parser reads exactly that many characters regardless of content — '#' inside the string is just data", "It escapes '#'", "It fails on '#'", "It uses a different delimiter"], "answer": 0, "explanation": "The parser knows exactly how many characters to read. It doesn't scan for '#' — it reads the number before '#', then takes exactly that many chars. Elegant and robust." },
+        { "q": "This encoding scheme is used in real-world protocols. Which one?", "options": ["HTTP Content-Length header, Protocol Buffers, Redis RESP protocol", "Only in this LeetCode problem", "JSON", "XML"], "answer": 0, "explanation": "Length-prefixed encoding is fundamental to binary protocols. HTTP's Content-Length, Protocol Buffers' wire format, and Redis' RESP all use variants. This is practical knowledge." },
+        { "q": "What's the time complexity of encoding and decoding?", "options": ["Both O(total characters across all strings) — linear in total input size", "O(n²)", "O(n log n)", "O(n × max_length)"], "answer": 0, "explanation": "Both operations process each character exactly once. Encoding writes length prefix + string. Decoding reads length + extracts substring. Both are O(sum of all string lengths)." },
+        { "q": "If you needed to support random access (get kth string without decoding all), how would you modify the encoding?", "options": ["Add an index header with offsets: store byte offsets of each string's start position at the beginning", "Not possible with length-prefix", "Use a tree structure", "Use fixed-width encoding"], "answer": 0, "explanation": "An offset index at the start enables O(1) access to any string. This is how file formats like ZIP and databases work — an index/header followed by data." }
+      ]
+    },
+    {
+      "id": "range-sum-query-2d",
+      "title": "Range Sum Query 2D Immutable",
+      "difficulty": "Medium",
+      "leetcodeNum": 304,
+      "pattern": "Prefix Sum / Cumulative",
+      "tldr": "Answer sum queries over 2D submatrices in O(1). Precompute 2D prefix sum matrix where prefix[i][j] = sum of all elements in rectangle (0,0) to (i-1,j-1).",
+      "keyTrick": "2D prefix sum with inclusion-exclusion: sum(r1,c1,r2,c2) = prefix[r2+1][c2+1] - prefix[r1][c2+1] - prefix[r2+1][c1] + prefix[r1][c1]. Draw it out to see the overlapping rectangle logic.",
+      "approaches": [
+        { "name": "Brute Force Per Query", "complexity": "O(m·n) per query", "description": "Sum all elements in the submatrix for each query. Too slow for many queries." },
+        { "name": "1D Prefix Sums Per Row", "complexity": "O(m) per query after O(m·n) preprocessing", "description": "Precompute row prefix sums. For each query, sum prefix differences across rows." },
+        { "name": "2D Prefix Sum", "complexity": "O(1) per query after O(m·n) preprocessing", "description": "Precompute full 2D prefix sum. Answer any rectangle query with 4 lookups and inclusion-exclusion.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why do we add prefix[r1][c1] back in the inclusion-exclusion formula?", "options": ["The top-left rectangle gets subtracted twice (once for each side), so we add it back to correct the over-subtraction", "It's an arbitrary convention", "It handles negative numbers", "It's for boundary cases"], "answer": 0, "explanation": "Classic inclusion-exclusion: subtracting the top and left rectangles double-counts their intersection (top-left corner). Adding it back corrects this. Draw it!" },
+        { "q": "How would you handle updates (mutable version)?", "options": ["Use a 2D Binary Indexed Tree (Fenwick Tree) or 2D Segment Tree — O(log m · log n) per update and query", "Recompute prefix sums", "Not possible efficiently", "Use a hash map"], "answer": 0, "explanation": "For mutable 2D range sums, BIT/Fenwick Tree in 2D supports O(log m · log n) updates and queries. Segment tree with lazy propagation is another option. Common Google follow-up." },
+        { "q": "What's the space trade-off if the matrix is sparse?", "options": ["Sparse matrices waste space with prefix sums. Use a hash map of non-zero elements + 2D Fenwick tree instead", "Same space regardless", "Sparse matrices are faster", "Use a 1D prefix sum"], "answer": 0, "explanation": "Dense prefix sum uses O(m·n) regardless of sparsity. For sparse matrices, coordinate compression or sparse segment trees are more space-efficient." },
+        { "q": "Why is the prefix sum array often sized (m+1) × (n+1)?", "options": ["The extra row and column of zeros eliminates boundary checks — no special cases for first row/column", "Tradition", "To store the total sum", "For 1-indexed access"], "answer": 0, "explanation": "The 0th row/column are all zeros, serving as base cases. Without them, you'd need if-checks for r1=0 or c1=0. The padding simplifies code significantly." },
+        { "q": "In Google Maps, how might this concept apply?", "options": ["Precomputed regional statistics (population density, traffic volume) over geographic tiles for instant range queries", "It doesn't apply", "For routing only", "For image rendering"], "answer": 0, "explanation": "2D prefix sums power geographic analytics: sum crime reports, average temperatures, or aggregate metrics over arbitrary rectangles on a map grid. Real Google application." }
+      ]
+    },
+    {
+      "id": "product-of-array-except-self",
+      "title": "Product of Array Except Self",
+      "difficulty": "Medium",
+      "leetcodeNum": 238,
+      "pattern": "Prefix Sum / Cumulative",
+      "tldr": "For each index, compute the product of all other elements WITHOUT division. Use prefix products from left and right. answer[i] = leftProduct[i] × rightProduct[i].",
+      "keyTrick": "Two passes: first pass builds left prefix products (product of all elements before i). Second pass multiplies by right suffix products (product of all elements after i). Use the output array for left products, then a running variable for right. O(1) extra space.",
+      "approaches": [
+        { "name": "Division (if allowed)", "complexity": "O(n) time, O(1) space", "description": "Compute total product, divide by each element. Fails with zeros." },
+        { "name": "Two Separate Arrays", "complexity": "O(n) time, O(n) space", "description": "Build left[] and right[] prefix/suffix product arrays. answer[i] = left[i] * right[i]." },
+        { "name": "Single Output Array + Running Variable", "complexity": "O(n) time, O(1) extra space", "description": "Store left products in output. Second pass multiplies right running product. Most elegant.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why does the problem specifically forbid division?", "options": ["Division fails with zeros (divide by zero) and the real learning goal is the prefix/suffix product pattern", "Division is too easy", "Division is slow", "No reason"], "answer": 0, "explanation": "Division with zeros is tricky (need to count zeros and handle cases). More importantly, the prefix/suffix pattern is the reusable skill that transfers to other problems." },
+        { "q": "How do you handle zeros in the array?", "options": ["If one zero: only the zero index has non-zero product. If two+ zeros: all products are zero", "Zeros don't affect the answer", "Skip zeros", "Replace zeros with ones"], "answer": 0, "explanation": "Zero count analysis: 0 zeros = normal case. 1 zero = only answer[zero_index] is nonzero (product of rest). 2+ zeros = everything is 0. The prefix/suffix approach handles this naturally." },
+        { "q": "Why is the O(1) extra space solution valid even though the output array is O(n)?", "options": ["The problem states the output array doesn't count toward extra space — it's required for the answer", "It's not really O(1)", "The output is reused", "Convention"], "answer": 0, "explanation": "Standard convention: the output array is not counted as 'extra' space since it's mandatory. Extra space refers to auxiliary data structures beyond the input and required output." },
+        { "q": "This is conceptually similar to which other prefix pattern?", "options": ["Prefix sums — replace addition with multiplication. Both use the idea of precomputing cumulative operations from both directions", "Binary search", "Two pointers", "Sliding window"], "answer": 0, "explanation": "Prefix products and prefix sums are the same pattern with different operators. Both enable 'range queries' by combining forward and backward passes." },
+        { "q": "How would you extend this to a 2D matrix (product of all elements except current)?", "options": ["Compute total product of all elements. For each cell, answer = totalProduct / matrix[i][j]. With zeros, use zero-count logic", "Not possible in O(m·n)", "Use 4 prefix arrays", "Use recursion"], "answer": 0, "explanation": "2D version: compute total product. Handle 0/1/2+ zero cases. This is simpler than the 1D no-division constraint. The 2D prefix approach would be very complex." }
+      ]
+    },
+    {
+      "id": "valid-sudoku",
+      "title": "Valid Sudoku",
+      "difficulty": "Medium",
+      "leetcodeNum": 36,
+      "pattern": "Set / Sequence Detection",
+      "tldr": "Check if a partially filled 9×9 Sudoku is valid. Each row, column, and 3×3 box must contain no duplicate digits. Use HashSets for each row, column, and box.",
+      "keyTrick": "Map each cell to its 3×3 box using boxIndex = (row/3) * 3 + (col/3). Use 9 sets for rows, 9 for columns, 9 for boxes. One pass through the board.",
+      "approaches": [
+        { "name": "Three Sets", "complexity": "O(81) = O(1) time, O(81) = O(1) space", "description": "9 row sets + 9 column sets + 9 box sets. For each cell, check and add to all three sets.", "isOptimal": true },
+        { "name": "Encoded String Set", "complexity": "O(1) time, O(1) space", "description": "Use a single HashSet with encoded strings like '5 in row 0', '5 in col 1', '5 in box 0-0'. Elegant one-set solution." },
+        { "name": "Bit Manipulation", "complexity": "O(1) time, O(1) space", "description": "Use 9 integers as bitmasks for rows, columns, and boxes. Bit k set means digit k is present." }
+      ],
+      "quiz": [
+        { "q": "How is boxIndex = (row/3)*3 + (col/3) derived?", "options": ["The board has 3×3 grid of boxes. (row/3) gives box row (0,1,2), (col/3) gives box col. Flatten to single index.", "Trial and error", "It's arbitrary", "Based on modular arithmetic"], "answer": 0, "explanation": "The 9×9 board has a 3×3 grid of boxes. Integer division by 3 maps cell coordinates to box coordinates. Flattening 2D box coords to 1D gives the formula." },
+        { "q": "Why is the bitmask approach interesting for Google interviews?", "options": ["It uses O(1) space with just 27 integers (vs HashSets), demonstrates bit manipulation fluency, and is cache-friendly", "It's not interesting", "It's faster", "It uses less code"], "answer": 0, "explanation": "Bitmask encoding: if digit d appears in row r, set bit d in rows[r]. Check with (rows[r] & (1 << d)) != 0. This is compact, fast, and shows systems-level thinking." },
+        { "q": "The encoded string approach uses one set with strings like '(5, row, 0)'. What's the downside?", "options": ["String creation and hashing is slower than integer/set operations. Elegant but less performant than direct sets", "No downside", "Uses more memory", "Doesn't handle all cases"], "answer": 0, "explanation": "String concatenation + hashing has overhead. Direct integer-based sets avoid string operations. In an interview, mention the trade-off between code elegance and performance." },
+        { "q": "This problem only validates, not solves Sudoku. How would you extend to solve?", "options": ["Backtracking with constraint propagation: try digits 1-9, validate, recurse, backtrack on failure", "Just check more carefully", "Use dynamic programming", "Linear scan"], "answer": 0, "explanation": "Sudoku solving is a constraint satisfaction problem. Backtracking + pruning (arc consistency) is the standard approach. Google might ask this as a follow-up." },
+        { "q": "What's the time complexity, really?", "options": ["O(1) — the board is always 9×9 (81 cells), making it constant regardless of input. But discuss it as O(n²) for an n×n board", "O(n²)", "O(n³)", "O(n)"], "answer": 0, "explanation": "For fixed 9×9, it's O(1). For generalized n²×n² Sudoku, it's O(n⁴). In interviews, clarify whether to analyze fixed or parameterized board size." }
+      ]
+    },
+    {
+      "id": "longest-consecutive-sequence",
+      "title": "Longest Consecutive Sequence",
+      "difficulty": "Medium",
+      "leetcodeNum": 128,
+      "pattern": "Set / Sequence Detection",
+      "tldr": "Find the length of the longest consecutive element sequence in O(n) time. Use a HashSet. For each number, only start counting if (num-1) is NOT in the set (it's the start of a sequence).",
+      "keyTrick": "The key insight: only start counting from sequence STARTS — numbers where (num-1) doesn't exist in the set. This ensures each element is visited at most twice total, giving O(n) despite nested loops.",
+      "approaches": [
+        { "name": "Sort", "complexity": "O(n log n) time, O(1) space", "description": "Sort the array. Walk through counting consecutive elements. Handle duplicates by skipping." },
+        { "name": "HashSet + Smart Start", "complexity": "O(n) time, O(n) space", "description": "Add all to set. For each num where num-1 doesn't exist, count upward. Total work is O(n).", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why is the HashSet approach O(n) despite the nested while loop?", "options": ["Each element is visited at most twice: once in the outer loop, once as part of a sequence count. Total iterations across all while loops = n", "It's not really O(n)", "The while loop is bounded by log n", "HashSet makes everything O(1)"], "answer": 0, "explanation": "Every number is either a sequence start (counted once in while loop) or not (skipped by the if-check). The sum of all sequence lengths equals n. Amortized O(n)." },
+        { "q": "What's the purpose of the (num-1) not in set check?", "options": ["It identifies sequence STARTS. Without it, you'd count from every element, degrading to O(n²)", "Performance optimization only", "It handles duplicates", "It prevents infinite loops"], "answer": 0, "explanation": "This check is the core insight. Starting only from sequence starts avoids redundant counting. A sequence 1,2,3,4 is only counted starting from 1, not from 2, 3, or 4." },
+        { "q": "If the array has duplicates like [1,2,2,3], how are they handled?", "options": ["HashSet automatically deduplicates. Duplicates don't affect consecutive sequence detection", "Need special handling", "Duplicates break the algorithm", "Use a HashMap to count occurrences"], "answer": 0, "explanation": "The Set eliminates duplicates by definition. Consecutive sequences are about the presence of values, not their frequency. The Set is the perfect data structure." },
+        { "q": "How would you solve this with Union-Find?", "options": ["For each num, union it with num+1 if present. The largest connected component gives the answer", "Union-Find doesn't apply", "Union all elements together", "Union by index"], "answer": 0, "explanation": "Union-Find: when inserting num, if num+1 or num-1 exists in the set, union them. Track component sizes. The max component size is the answer. O(n·α(n)) ≈ O(n)." },
+        { "q": "This problem requires O(n) time. Why isn't sorting acceptable even though it's simple?", "options": ["The problem specifically requires O(n). In a Google interview, this tests whether you know techniques beyond sorting for achieving linear time", "Sorting is acceptable", "O(n log n) = O(n) for practical purposes", "Sorting uses too much space"], "answer": 0, "explanation": "The O(n) requirement is the challenge. Any candidate can sort. The HashSet approach tests deeper insight: using set membership to identify sequence boundaries." }
+      ]
+    },
+    {
+      "id": "best-time-buy-sell-stock-ii",
+      "title": "Best Time to Buy And Sell Stock II",
+      "difficulty": "Medium",
+      "leetcodeNum": 122,
+      "pattern": "Greedy with State",
+      "tldr": "Maximize profit with unlimited transactions. Greedy: capture every upward price movement. Add (prices[i] - prices[i-1]) whenever prices[i] > prices[i-1].",
+      "keyTrick": "Sum all positive differences. Every price increase is a profitable trade. You don't need to track buy/sell points — just add all upswings. Equivalent to buying every valley and selling every peak.",
+      "approaches": [
+        { "name": "DP with State Machine", "complexity": "O(n) time, O(1) space", "description": "Track two states: holding stock, not holding stock. Transition based on buy/sell/hold decisions." },
+        { "name": "Greedy: Sum Positive Differences", "complexity": "O(n) time, O(1) space", "description": "For each consecutive pair, add the difference if positive. Captures every upswing.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why is summing all positive consecutive differences equivalent to optimal trading?", "options": ["Every upward slope can be captured by buying at the start and selling at the end. Consecutive differences decompose any slope into unit steps", "It's an approximation", "It only works for monotonic prices", "It misses some profitable trades"], "answer": 0, "explanation": "An increase from 1→5 = (2-1)+(3-2)+(4-3)+(5-4) = 4. The sum of consecutive differences equals the total increase. You capture every profitable sub-movement." },
+        { "q": "How does this differ from Best Time to Buy and Sell Stock I (one transaction)?", "options": ["Stock I: track running minimum, maximize (current - min). Stock II: no limit on transactions, so capture every upswing", "Same approach", "Stock II is easier", "Stock II requires DP"], "answer": 0, "explanation": "Stock I with one transaction needs the 'max profit seen so far' approach. Stock II's unlimited transactions enable the simpler greedy. Recognizing this difference is crucial." },
+        { "q": "How would you solve this with a cooldown period (Stock with Cooldown)?", "options": ["State machine DP: states are {hold, sold (cooldown), rest}. Can't use simple greedy because of constraints between transactions", "Same greedy approach", "Add a delay to the greedy", "Not possible"], "answer": 0, "explanation": "Cooldown introduces dependencies between transactions that break the greedy approach. DP with explicit states (hold/sold/rest) is required. Classic DP state machine problem." },
+        { "q": "For Stock III (at most 2 transactions), what approach works?", "options": ["DP with states: buy1, sell1, buy2, sell2. Track max profit at each state. O(n) time, O(1) space", "Run Stock I twice", "Greedy doesn't work", "Both A and B conceptually, A is cleaner"], "answer": 3, "explanation": "Stock III can be solved by splitting the array at every point and finding max(Stock_I_profit_left + Stock_I_profit_right), or more elegantly with 4-state DP tracking buy1/sell1/buy2/sell2." },
+        { "q": "In the greedy approach, do you need to actually track when to buy and sell?", "options": ["No — the problem asks for max profit, not the actual trades. Just sum positive differences. If trades are needed, record the valley-to-peak pairs", "Yes, always", "Only for verification", "The trades are implicit"], "answer": 0, "explanation": "The problem asks for maximum profit, not the trades themselves. This simplification is key to the elegant greedy solution. If trades are needed, merge consecutive positive differences into valley→peak trades." }
+      ]
+    },
+    {
+      "id": "majority-element-ii",
+      "title": "Majority Element II",
+      "difficulty": "Medium",
+      "leetcodeNum": 229,
+      "pattern": "Frequency Counting",
+      "tldr": "Find all elements appearing more than ⌊n/3⌋ times. At most 2 such elements can exist. Use Generalized Boyer-Moore with 2 candidates and 2 counters, then verify.",
+      "keyTrick": "Generalize Boyer-Moore to 2 candidates. Maintain candidate1, candidate2, count1, count2. When neither matches, decrement both. This 'triple cancellation' ensures true majority elements survive. MUST verify with a second pass.",
+      "approaches": [
+        { "name": "Hash Map Count", "complexity": "O(n) time, O(n) space", "description": "Count all frequencies, filter those > n/3." },
+        { "name": "Generalized Boyer-Moore", "complexity": "O(n) time, O(1) space", "description": "Two candidates, two counters. Elimination then verification. At most 2 results.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why can there be at most 2 elements appearing more than n/3 times?", "options": ["If 3 elements each appeared more than n/3 times, the total count would exceed n. So at most 2 can satisfy the condition", "It's a property of the algorithm", "Depends on the array", "There could be 3"], "answer": 0, "explanation": "Pigeonhole principle: 3 × (n/3 + 1) = n + 3 > n. At most ⌊n/(n/3)⌋ - 1 = 2 elements can exceed the n/3 threshold. This generalizes to k-1 elements for n/k." },
+        { "q": "Why is the verification pass mandatory for this variant?", "options": ["Unlike n/2 majority (guaranteed to exist), n/3 majority elements may not exist. The algorithm always produces 2 candidates, but they might not actually exceed n/3", "It's optional", "For correctness with duplicates", "For performance"], "answer": 0, "explanation": "Boyer-Moore for n/2 can skip verification IF a majority is guaranteed. For n/3, neither candidate may actually exceed the threshold. Verification is essential." },
+        { "q": "How does the 'triple cancellation' work?", "options": ["When the current element matches neither candidate, decrement both counters — effectively canceling one of each 'type'. This is a 3-way elimination", "Elements are removed in groups of 3", "Three passes are needed", "Triple hashing"], "answer": 0, "explanation": "When num ≠ cand1 and num ≠ cand2, decrement both counts. This removes one occurrence of each of three distinct values. Elements appearing > n/3 times can't be fully cancelled." },
+        { "q": "How would you generalize to elements appearing more than n/k times?", "options": ["Maintain k-1 candidates with k-1 counters. Same elimination logic: decrement all when no match. Then verify. O(n) time, O(k) space", "Not possible for arbitrary k", "Use k hash maps", "Sort and partition"], "answer": 0, "explanation": "Generalized Boyer-Moore: k-1 candidates for the n/k threshold. This is the Misra-Gries frequency estimation algorithm. Foundational for streaming data analysis." },
+        { "q": "Where is this algorithm used in practice?", "options": ["Network traffic analysis (finding heavy hitters in data streams), database query optimization, and distributed systems monitoring", "Only in interviews", "Operating systems", "Compiler design"], "answer": 0, "explanation": "Heavy hitter detection in network monitoring, finding frequent items in data streams (Misra-Gries), and database approximate query processing all use this algorithm." }
+      ]
+    },
+    {
+      "id": "subarray-sum-equals-k",
+      "title": "Subarray Sum Equals K",
+      "difficulty": "Medium",
+      "leetcodeNum": 560,
+      "pattern": "Prefix Sum / Cumulative",
+      "tldr": "Count subarrays with sum equal to k. Use prefix sum + hash map: for each prefix sum, check how many previous prefix sums equal (currentSum - k). That count = number of subarrays ending here with sum k.",
+      "keyTrick": "Prefix Sum + Hash Map of prefix sum frequencies. If prefixSum[j] - prefixSum[i] = k, then subarray (i,j] has sum k. Count how many previous prefix sums equal (currentSum - k). Initialize map with {0: 1} for subarrays starting at index 0.",
+      "approaches": [
+        { "name": "Brute Force", "complexity": "O(n²) time, O(1) space", "description": "Check all subarrays, compute each sum. Straightforward but slow." },
+        { "name": "Prefix Sum + HashMap", "complexity": "O(n) time, O(n) space", "description": "Store frequency of each prefix sum. For current sum, count of (sum-k) in map = new valid subarrays.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why initialize the hash map with {0: 1}?", "options": ["To count subarrays starting from index 0. If prefixSum[j] = k, then prefixSum[j] - k = 0, which must be in the map to count this valid subarray", "Convention", "Prevents null pointer", "It's optional"], "answer": 0, "explanation": "Without {0: 1}, you'd miss subarrays like [k] where the prefix sum itself equals k. The initial 0 represents the 'empty prefix' — a subarray from the start." },
+        { "q": "Why can't you use the sliding window technique here?", "options": ["Sliding window requires all positive values to maintain monotonicity of the window sum. Negative values break the grow/shrink logic", "You can use sliding window", "Sliding window is slower", "The window would be too large"], "answer": 0, "explanation": "Sliding window works when expanding always increases and shrinking always decreases the sum. With negatives, you can't decide whether to expand or shrink. Prefix sum + hash is needed." },
+        { "q": "How does this relate to Two Sum?", "options": ["It IS Two Sum on prefix sums. Instead of 'two elements sum to target', it's 'two prefix sums differ by k'. Same hash map technique.", "Completely different", "Similar name only", "Two Sum is simpler"], "answer": 0, "explanation": "Subarray Sum = K is literally the Two Sum pattern applied to prefix sums. current - previous = k ↔ current + previous = target. Recognizing this connection is powerful." },
+        { "q": "Can you modify this for 'count subarrays with sum divisible by k'?", "options": ["Yes — use (prefixSum % k) as the hash map key. Subarrays where both endpoints have same remainder have sum divisible by k", "Not with prefix sums", "Need a different algorithm", "Only for positive arrays"], "answer": 0, "explanation": "If prefixSum[j] % k == prefixSum[i] % k, then (prefixSum[j] - prefixSum[i]) % k == 0. Count pairs with same remainder. Handle negative remainders carefully." },
+        { "q": "Why do we need a frequency COUNT (not just a set) for prefix sums?", "options": ["The same prefix sum can occur multiple times. Each occurrence represents a different starting point for a valid subarray. We need to count ALL valid pairs", "A set would work too", "For edge cases only", "To handle duplicates in input"], "answer": 0, "explanation": "If prefix sum S appears at indices 2, 5, and 8, and current prefix sum is S+k, there are 3 valid subarrays (one ending at each of those indices). Count matters, not just presence." }
+      ]
+    },
+    {
+      "id": "first-missing-positive",
+      "title": "First Missing Positive",
+      "difficulty": "Hard",
+      "leetcodeNum": 41,
+      "pattern": "In-Place Array Manipulation",
+      "tldr": "Find the smallest missing positive integer in O(n) time and O(1) extra space. Use the array itself as a hash table: place each value v at index v-1. Then scan for the first index where nums[i] ≠ i+1.",
+      "keyTrick": "Index-as-hash / Cyclic Sort: for value v in range [1, n], it should live at index v-1. Swap nums[i] to its correct position nums[nums[i]-1] until no more swaps possible. Then linear scan for the first mismatch.",
+      "approaches": [
+        { "name": "HashSet", "complexity": "O(n) time, O(n) space", "description": "Add all to set. Check 1, 2, 3... until one is missing. Easy but uses extra space." },
+        { "name": "Index-as-Hash (Cyclic Sort)", "complexity": "O(n) time, O(1) space", "description": "Place each number at its 'correct' index. Scan for first mismatch. Hardest part: getting the swap loop right.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why is the answer guaranteed to be in the range [1, n+1]?", "options": ["An array of size n can contain at most n distinct positive integers (1 to n). If all are present, answer is n+1. Otherwise, one in [1,n] is missing", "It could be larger", "Depends on the values", "Mathematical proof required"], "answer": 0, "explanation": "Pigeonhole principle: n slots can hold at most n values from {1,...,n}. The missing positive must be in {1,...,n+1}. This bounds the search and makes index-as-hash possible." },
+        { "q": "In the swap loop, why must you check nums[i] != nums[nums[i]-1] (not just nums[i] != i+1)?", "options": ["To handle duplicates. If two positions have the same value, swapping them creates an infinite loop. This check prevents it", "For performance", "Either check works", "To handle negative numbers"], "answer": 0, "explanation": "If nums[0]=1 and nums[1]=1, swapping positions 0 and 1 repeatedly creates an infinite loop. Checking nums[i] != nums[target] catches this case." },
+        { "q": "Why can we ignore negative numbers and numbers > n?", "options": ["They can't be the first missing positive in [1, n+1] and can't be placed at any valid index. Treat them as 'don't care' values", "They need special handling", "They cause errors", "We can't ignore them"], "answer": 0, "explanation": "Negatives and values > n don't map to valid indices [0, n-1]. They can never be placed 'correctly' and don't affect the answer (which is in [1, n+1])." },
+        { "q": "What's the time complexity of the swap phase despite nested loops?", "options": ["O(n) — each element is swapped at most once to its correct position. Total swaps ≤ n", "O(n²)", "O(n log n)", "Depends on input"], "answer": 0, "explanation": "Each swap places exactly one element in its final correct position. Since there are n positions, at most n swaps occur total. The while loop doesn't repeat work — it's amortized O(n)." },
+        { "q": "How does this problem appear in system design?", "options": ["Ticket/ID allocation systems need to find the first available slot. This is the algorithmic core of resource pool management", "It doesn't apply to systems", "Only for databases", "Only for networking"], "answer": 0, "explanation": "Finding the first available ID in a pool (process IDs, connection slots, ticket numbers) is this problem in disguise. Understanding it helps design efficient allocation systems." }
+      ]
+    }
+  ]
+}

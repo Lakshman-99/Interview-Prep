@@ -1,0 +1,328 @@
+{
+  "id": "linked-list",
+  "title": "Linked List",
+  "icon": "⟠",
+  "order": 5,
+  "description": "Master pointer manipulation, in-place rewiring, and the fast/slow paradigm. Linked lists test your ability to reason about references without random access — the foundation for trees, graphs, and system-level data structures.",
+  "patterns": [
+    {
+      "name": "Fast / Slow Pointers (Floyd's)",
+      "description": "Two pointers at different speeds detect cycles, find midpoints, and locate positions relative to the end. The tortoise-and-hare technique is the most important linked list pattern.",
+      "problems": ["linked-list-cycle", "reorder-list", "remove-nth-from-end", "find-duplicate-number"]
+    },
+    {
+      "name": "Reversal (Full / Partial)",
+      "description": "Reverse a linked list by rewiring next pointers. Master iterative and recursive reversal — partial reversal in a range is the building block for reorder, k-group reverse, and palindrome checks.",
+      "problems": ["reverse-linked-list", "reverse-linked-list-ii", "reorder-list", "reverse-nodes-k-group"]
+    },
+    {
+      "name": "Merge / Combine",
+      "description": "Merge sorted lists using a dummy head and a moving pointer. Extends to k-way merge with a min-heap. Same two-pointer merge logic as merge sort.",
+      "problems": ["merge-two-sorted-lists", "merge-k-sorted-lists"]
+    },
+    {
+      "name": "Pointer Cloning / Deep Copy",
+      "description": "Copy a complex linked list structure. Interleave cloned nodes or use a hash map to map original→copy. Tests understanding of reference vs value semantics.",
+      "problems": ["copy-list-random-pointer"]
+    },
+    {
+      "name": "Arithmetic on Lists",
+      "description": "Perform math treating linked lists as digit sequences. Handle carry propagation and unequal lengths. Least-significant digit first simplifies carry handling.",
+      "problems": ["add-two-numbers"]
+    },
+    {
+      "name": "Circular / Design",
+      "description": "Design linked-list-backed data structures: circular queues, LRU/LFU caches. Doubly-linked list + hash map is the universal pattern for O(1) ordered operations.",
+      "problems": ["design-circular-queue", "lru-cache", "lfu-cache"]
+    },
+    {
+      "name": "K-Group Processing",
+      "description": "Process a linked list in groups of k nodes. Requires tracking group boundaries, reversing within groups, and reconnecting groups. Tests precise pointer management.",
+      "problems": ["reverse-nodes-k-group"]
+    }
+  ],
+  "problems": [
+    {
+      "id": "reverse-linked-list",
+      "title": "Reverse Linked List",
+      "difficulty": "Easy",
+      "leetcodeNum": 206,
+      "pattern": "Reversal (Full / Partial)",
+      "tldr": "Reverse a singly linked list. Iterative: maintain prev, curr, next pointers — rewire curr.next = prev, advance all three. Recursive: reverse the rest, then point next node back to current.",
+      "keyTrick": "Iterative three-pointer dance: save next = curr.next, rewire curr.next = prev, advance prev = curr, advance curr = next. Four lines in a loop. prev ends up as the new head. This is the atomic operation for ALL linked list reversal problems.",
+      "approaches": [
+        { "name": "Iterative (Three Pointers)", "complexity": "O(n) time, O(1) space", "description": "prev=null, curr=head. Each step: save next, rewire curr→prev, advance prev and curr. Return prev.", "isOptimal": true },
+        { "name": "Recursive", "complexity": "O(n) time, O(n) stack space", "description": "Base: if head is null or single node, return head. Recurse on head.next. Set head.next.next = head, head.next = null. Return new head.", "isOptimal": false }
+      ],
+      "quiz": [
+        { "q": "Why must you save curr.next BEFORE rewiring curr.next = prev?", "options": ["Rewiring curr.next destroys the forward link. Without saving it first, you lose access to the rest of the list — it becomes unreachable", "For readability", "To avoid null pointer", "Order doesn't matter"], "answer": 0, "explanation": "curr.next is your only connection to the remaining list. Setting curr.next = prev severs it. Save it first: next = curr.next. This is the most fundamental pointer manipulation lesson." },
+        { "q": "In the recursive approach, what does head.next.next = head accomplish?", "options": ["It makes the next node point BACK to the current node, reversing the link between them. If 1→2→3 and we're at node 1 after recursion reversed 2→3, we set 2.next = 1", "It skips a node", "It creates a cycle temporarily", "Both A and C — it creates a temporary cycle that head.next = null fixes"], "answer": 3, "explanation": "head.next.next = head creates 1→2→1 (cycle). Then head.next = null breaks it: null←1←2←3. The temporary cycle is resolved in the same call. Understanding this is crucial." },
+        { "q": "What's the return value in both approaches?", "options": ["The LAST node of the original list, which becomes the new head. Iterative: prev (after loop, curr is null, prev is last node). Recursive: the return value propagates the tail back up", "The first node", "null", "The middle node"], "answer": 0, "explanation": "The original tail is the new head. Iterative: when curr becomes null, prev points to the original tail. Recursive: the base case returns the tail, and it's passed through all recursive returns." },
+        { "q": "How does this extend to 'reverse from position m to n' (Reverse Linked List II)?", "options": ["Navigate to position m-1 (connection point). Reverse n-m+1 nodes using the same technique. Reconnect: connection.next = new_head_of_reversed, old_head_of_reversed.next = remaining", "Completely different algorithm", "Reverse entire list then fix", "Use recursion only"], "answer": 0, "explanation": "Partial reversal = navigate to start + reverse a segment + reconnect. The reversal logic is identical. The added complexity is bookkeeping the connection points before and after the reversed segment." },
+        { "q": "In a Google interview, what follow-up might combine reversal with another pattern?", "options": ["Palindrome Linked List: find middle (fast/slow), reverse second half, compare with first half. Combines two core patterns in one problem", "Sort the linked list", "Find duplicates", "Convert to array"], "answer": 0, "explanation": "Palindrome check combines: 1) fast/slow to find middle, 2) reverse second half, 3) compare halves. It's the ultimate linked list problem testing multiple patterns. Google loves it." }
+      ]
+    },
+    {
+      "id": "merge-two-sorted-lists",
+      "title": "Merge Two Sorted Lists",
+      "difficulty": "Easy",
+      "leetcodeNum": 21,
+      "pattern": "Merge / Combine",
+      "tldr": "Merge two sorted linked lists into one sorted list. Use a dummy head node and a tail pointer. Compare current nodes, attach the smaller one, advance that list's pointer. Attach remaining nodes at the end.",
+      "keyTrick": "Dummy head eliminates edge cases for the first node. Tail pointer always points to the last merged node. Compare list1.val and list2.val, attach smaller to tail.next, advance that list. After loop, attach the non-null remainder.",
+      "approaches": [
+        { "name": "Iterative with Dummy Head", "complexity": "O(n+m) time, O(1) space", "description": "Dummy node avoids null head checks. Compare, attach smaller, advance. Attach remaining tail.", "isOptimal": true },
+        { "name": "Recursive", "complexity": "O(n+m) time, O(n+m) stack space", "description": "If list1.val ≤ list2.val: list1.next = merge(list1.next, list2). Elegant but uses stack space.", "isOptimal": false }
+      ],
+      "quiz": [
+        { "q": "Why use a dummy head node?", "options": ["Without it, you need special logic to initialize the merged list head (which list provides the first node?). The dummy avoids this: result is always dummy.next", "For extra safety", "It's required by the problem", "To handle empty lists only"], "answer": 0, "explanation": "The dummy node is a universal linked list trick. It eliminates the 'is the head null?' check on every insert. The real result starts at dummy.next. Use it whenever you're building a new list." },
+        { "q": "After the main loop, why can you attach the remainder with one assignment?", "options": ["One list is exhausted (null). The other's remaining nodes are already sorted and linked together. A single tail.next = remaining_list attaches the entire remaining chain", "Need to copy each node", "Need to reverse the remainder", "Can't attach directly"], "answer": 0, "explanation": "The remaining nodes are already a sorted linked list. Since we're merging (not copying), we just point to them. One pointer assignment reuses the existing structure. O(1) for the remainder." },
+        { "q": "How does this extend to merging k sorted lists?", "options": ["Use a min-heap of size k holding one node from each list. Extract min, attach to result, push that node's next into the heap. O(n log k) total", "Merge pairs iteratively", "Both min-heap and pairwise merging work — heap is O(n log k), pairwise is also O(n log k)", "Sort all nodes"], "answer": 2, "explanation": "Min-heap: O(n log k). Pairwise merge (divide-and-conquer): merge pairs in rounds, log k rounds of O(n) work each = O(n log k). Both optimal, different trade-offs (heap = simpler, D&C = less space)." },
+        { "q": "The recursive approach uses O(n+m) stack space. Why is this a concern?", "options": ["For very long lists (millions of nodes), recursive depth can cause stack overflow. Iterative approach uses O(1) extra space. In production (Google scale), iterative is required", "No concern", "Stack is unlimited", "Only for small lists"], "answer": 0, "explanation": "Default stack size is typically 1-8 MB. Each recursive call uses ~40-100 bytes. For 10M nodes, that's 400MB+ of stack — guaranteed overflow. Google-scale lists demand iterative solutions." },
+        { "q": "This problem is the merge step of which sorting algorithm?", "options": ["Merge Sort on linked lists. Split list in half (fast/slow pointer), recursively sort each half, merge. Linked list merge sort is O(n log n) with O(log n) stack space (no O(n) auxiliary array needed)", "Quick Sort", "Heap Sort", "Insertion Sort"], "answer": 0, "explanation": "Merge sort is the natural sort for linked lists: no random access needed, merge is O(1) extra space (just rewire pointers), and split uses fast/slow. Arrays need O(n) temp space for merge; lists don't." }
+      ]
+    },
+    {
+      "id": "linked-list-cycle",
+      "title": "Linked List Cycle",
+      "difficulty": "Easy",
+      "leetcodeNum": 141,
+      "pattern": "Fast / Slow Pointers (Floyd's)",
+      "tldr": "Detect if a linked list has a cycle. Fast pointer moves 2 steps, slow moves 1. If they meet, there's a cycle. If fast reaches null, no cycle. Floyd's Tortoise and Hare algorithm.",
+      "keyTrick": "Fast moves 2x speed of slow. If a cycle exists, fast will 'lap' slow and they'll meet inside the cycle. If no cycle, fast hits null. To find the cycle START (follow-up): reset one pointer to head, move both at speed 1 — they meet at the cycle entry.",
+      "approaches": [
+        { "name": "HashSet", "complexity": "O(n) time, O(n) space", "description": "Store visited nodes. If you revisit one, cycle exists. Simple but uses O(n) space." },
+        { "name": "Floyd's Cycle Detection", "complexity": "O(n) time, O(1) space", "description": "Fast and slow pointers. If they meet → cycle. If fast reaches null → no cycle.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why does fast moving at 2x guarantee they'll meet if a cycle exists?", "options": ["Once both are in the cycle, the gap between them decreases by 1 each step (fast gains 1 step per iteration). So they must meet within at most cycle_length steps", "They might not meet", "Only works for small cycles", "Mathematical coincidence"], "answer": 0, "explanation": "In the cycle: each step, fast moves 2, slow moves 1. Relative speed = 1. The gap decreases by 1 per step. Starting from any gap g ≤ cycle_length, they meet in exactly g steps." },
+        { "q": "For Linked List Cycle II (find cycle start): why does resetting one pointer to head work?", "options": ["When fast and slow meet, slow has traveled d+k steps (d = distance to cycle start, k = steps inside cycle). Math shows: moving one pointer from head and one from meeting point, both at speed 1, they meet at the cycle start", "Empirical observation", "It doesn't always work", "Need to reset both pointers"], "answer": 0, "explanation": "Let d = distance to cycle entry, c = cycle length, k = meeting point offset. slow = d+k, fast = 2(d+k). fast-slow = d+k = multiple of c. So d = nc - k. Walking d from head = walking nc-k from meeting point = cycle entry." },
+        { "q": "Can fast move at speed 3 instead of 2?", "options": ["Speed 2 guarantees meeting in every cycle. Speed 3 may skip over slow (relative speed 2 means gap decreases by 2, might jump from 1 to -1). Speed 2 is the only safe choice", "Any speed > 1 works", "Speed 3 is faster", "Speed must be prime"], "answer": 0, "explanation": "At relative speed 2 (fast=3, slow=1): gap changes by 2 each step. If cycle length is odd, they may never align (gap oscillates between 1 and cycle_length-1). Speed 2 gives relative speed 1 — always converges." },
+        { "q": "What's the time complexity when a cycle exists?", "options": ["O(n) where n = total nodes. Slow enters cycle after d steps. In the cycle, fast catches slow within c steps (cycle length). Total: d + c ≤ n", "O(n²)", "O(n·c)", "Depends on cycle length"], "answer": 0, "explanation": "Slow traverses at most d (to enter cycle) + c (until caught) = d + c ≤ n steps. Fast traverses at most 2n steps. Both O(n). The cycle length doesn't add complexity." },
+        { "q": "Floyd's algorithm appears in which non-linked-list problem?", "options": ["Find the Duplicate Number (LC 287) — treat array values as 'next pointers'. Index i points to index nums[i]. A duplicate creates a cycle. Floyd's finds the duplicate without modifying the array", "Only linked lists", "Graph cycle detection", "String matching"], "answer": 0, "explanation": "LC 287 uses Floyd's on an array interpreted as an implicit linked list. If nums has a duplicate value d, then two indices point to d, creating a cycle. Brilliant application of the same algorithm." }
+      ]
+    },
+    {
+      "id": "reorder-list",
+      "title": "Reorder List",
+      "difficulty": "Medium",
+      "leetcodeNum": 143,
+      "pattern": "Fast / Slow Pointers (Floyd's)",
+      "tldr": "Reorder L0→L1→...→Ln to L0→Ln→L1→Ln-1→.... Three steps: 1) find middle with fast/slow, 2) reverse second half, 3) merge/interleave the two halves.",
+      "keyTrick": "Decompose into three sub-problems you already know: find middle (fast/slow → LC 876), reverse list (LC 206), merge alternately. Each is a solved pattern. The key insight is recognizing this decomposition.",
+      "approaches": [
+        { "name": "Array + Reindex", "complexity": "O(n) time, O(n) space", "description": "Store nodes in array. Reorder using two pointers from both ends." },
+        { "name": "Find Middle + Reverse + Merge", "complexity": "O(n) time, O(1) space", "description": "Three-step in-place: fast/slow for middle, reverse second half, interleave merge.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why must you find the middle before reversing?", "options": ["You need to split the list into two halves. Without finding the middle, you can't isolate the second half to reverse it. The split + reverse + merge is sequential and order-dependent", "You could reverse first", "Middle finding is optional", "Any order works"], "answer": 0, "explanation": "Reversing the whole list then splitting doesn't help — you need the first half in original order and second half reversed. Finding the middle first enables clean separation." },
+        { "q": "For an odd-length list, which half gets the extra node?", "options": ["The first half. Fast/slow: when fast reaches end, slow is at the middle. First half is head→...→slow, second half is slow.next→...→end. First half has ⌈n/2⌉ nodes", "Second half", "Doesn't matter", "Error for odd lengths"], "answer": 0, "explanation": "For [1,2,3,4,5]: slow stops at 3. First half: 1→2→3, second half: 4→5. After reversing second: 5→4. Merge: 1→5→2→4→3. The middle node stays at the end of the first half." },
+        { "q": "During the merge step, what's the termination condition?", "options": ["The second half is exhausted. Since second half is shorter or equal, it ends first. The remaining node(s) from the first half are already correctly positioned", "First half exhausted", "Both exhausted simultaneously", "Fixed number of iterations"], "answer": 0, "explanation": "Second half has ⌊n/2⌋ nodes, first half has ⌈n/2⌉. The merge alternates: take from first, take from second. Second runs out first. The last node of first half is already the tail." },
+        { "q": "This problem combines how many fundamental linked list operations?", "options": ["Three: find middle (fast/slow), reverse list (three-pointer), and merge/interleave two lists. Each is a standalone Easy problem. The Medium difficulty comes from combining them", "One", "Two", "Four"], "answer": 0, "explanation": "The power of this problem: it's three Easy problems composed. Google interviewers watch for candidates who recognize the decomposition rather than trying to solve it monolithically." },
+        { "q": "Why not just use an array to store nodes and reorder with indices?", "options": ["It works but uses O(n) extra space. The in-place approach demonstrates deeper linked list mastery and is expected at Google for a linked list problem. Both are O(n) time", "Array is better", "Array doesn't work", "Same space complexity"], "answer": 0, "explanation": "Converting to array is the 'escape hatch' — valid but unsatisfying. In a Google interview, the follow-up would be 'can you do it in O(1) space?' The in-place solution shows true linked list fluency." }
+      ]
+    },
+    {
+      "id": "remove-nth-from-end",
+      "title": "Remove Nth Node From End of List",
+      "difficulty": "Medium",
+      "leetcodeNum": 19,
+      "pattern": "Fast / Slow Pointers (Floyd's)",
+      "tldr": "Remove the nth node from the end in one pass. Advance fast pointer n steps ahead. Then move both fast and slow together until fast reaches the end. Slow is now at the node BEFORE the target. Rewire.",
+      "keyTrick": "Use a dummy head to handle removing the first node. Advance fast n+1 steps from dummy. Move both until fast is null. Now slow.next is the target — set slow.next = slow.next.next. The dummy head eliminates the edge case where the head itself is removed.",
+      "approaches": [
+        { "name": "Two Pass", "complexity": "O(n) time, O(1) space", "description": "First pass: count length L. Second pass: advance to node L-n-1, remove next node." },
+        { "name": "One Pass with Gap", "complexity": "O(n) time, O(1) space", "description": "Fast leads slow by n nodes. When fast reaches end, slow is at the predecessor of the target.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why advance fast n+1 steps (not n) when using a dummy head?", "options": ["We need slow to stop at the node BEFORE the target (predecessor) to rewire. n+1 gap ensures slow.next is the target node, not slow itself", "n steps is correct", "For safety", "To handle even/odd lengths"], "answer": 0, "explanation": "To remove a node, you need its predecessor. If the gap is n, slow lands ON the target. With n+1 gap (or equivalently n steps from dummy), slow lands on the predecessor. Rewire slow.next = slow.next.next." },
+        { "q": "Why is the dummy head essential for this problem?", "options": ["If n equals the list length, the HEAD is removed. Without a dummy, slow starts at null (no predecessor for head). The dummy provides a predecessor for every node including the head", "It's optional", "For code style", "Only for empty lists"], "answer": 0, "explanation": "List [1,2,3], remove 3rd from end (node 1 = head). Without dummy: who points to the head? With dummy: dummy→1→2→3. slow stops at dummy, removes dummy.next (node 1). Clean." },
+        { "q": "What happens if n > length of the list?", "options": ["The problem guarantees n is valid (1 ≤ n ≤ length). In production code, fast would reach null before n steps — you'd return the original list or throw an error", "Algorithm handles it naturally", "Returns empty list", "Undefined behavior"], "answer": 0, "explanation": "Always clarify constraints. The problem guarantees valid n, but in production: validate input. Fast reaching null early means n is invalid. Defensive programming matters at Google." },
+        { "q": "Could you solve this with a stack instead?", "options": ["Yes: push all nodes, pop n times, the next node on stack is the predecessor. O(n) time, O(n) space. Works but less elegant than the two-pointer approach", "Stacks don't apply", "Same space complexity", "Stack is faster"], "answer": 0, "explanation": "Stack approach: push all nodes, pop n to find the target, peek for predecessor. Valid O(n)/O(n) solution. The two-pointer approach achieves the same in O(1) space — clearly better." },
+        { "q": "How does this 'gap' technique generalize?", "options": ["Finding the kth node from the end, detecting if list length ≥ k, and splitting a list into two halves all use the same 'lead by k' technique. It's the position-from-end pattern", "Only for removal", "Only for singly linked lists", "No generalization"], "answer": 0, "explanation": "The 'lead by k' pattern answers any question about positions relative to the end in one pass: is there a kth-from-end? What's its value? Split at that point? Same technique, different applications." }
+      ]
+    },
+    {
+      "id": "copy-list-random-pointer",
+      "title": "Copy List With Random Pointer",
+      "difficulty": "Medium",
+      "leetcodeNum": 138,
+      "pattern": "Pointer Cloning / Deep Copy",
+      "tldr": "Deep copy a linked list where each node has a next pointer and a random pointer. Three approaches: HashMap(original→copy), or interleave cloned nodes into original list for O(1) space.",
+      "keyTrick": "Interleaving method (O(1) space): 1) Insert clone of each node right after the original: A→A'→B→B'→C→C'. 2) Set random pointers: clone.random = original.random.next. 3) Separate into two lists. No extra hash map needed.",
+      "approaches": [
+        { "name": "HashMap (Original → Copy)", "complexity": "O(n) time, O(n) space", "description": "First pass: create all cloned nodes, map original→copy. Second pass: set next and random using the map." },
+        { "name": "Interleaving (O(1) Extra Space)", "complexity": "O(n) time, O(1) extra space", "description": "Weave clones into original list. Set random via original.random.next. Unweave to separate lists.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why can't you just traverse and copy nodes one by one?", "options": ["The random pointer might point to a node you haven't created yet (forward reference). You need all cloned nodes to exist before setting random pointers, or use a map for lazy creation", "You can — it's straightforward", "Random pointers are always backward", "Order doesn't matter"], "answer": 0, "explanation": "Node 1's random might point to node 5. When copying node 1, node 5's clone doesn't exist yet. You either pre-create all clones (two-pass) or use a map for on-demand creation." },
+        { "q": "In the interleaving method, why does clone.random = original.random.next work?", "options": ["After interleaving, each original node is immediately followed by its clone. So original.random.next IS the clone of the original's random target. The interleaving creates a built-in mapping", "It's an approximation", "Only works for some cases", "Random pointer math"], "answer": 0, "explanation": "A→A'→B→B'→C→C'. If A.random = C, then A'.random should be C'. C.next = C' (interleaved). So A.random.next = C.next = C'. The interleaving IS the hash map, encoded in the list structure." },
+        { "q": "What's the tricky part of the unweaving step?", "options": ["Restoring both the original AND clone lists simultaneously without breaking either. Must save references before rewiring: original.next = original.next.next and clone.next = clone.next.next", "It's straightforward", "Only the clone list matters", "Use a temporary array"], "answer": 0, "explanation": "A→A'→B→B'→null. Unweave: A.next = B (skip A'), A'.next = B' (skip B). Must process both lists in the same loop. Breaking one list while reading the other causes bugs." },
+        { "q": "The HashMap approach handles which edge case more naturally?", "options": ["Null random pointers. With the map: if original.random is null, clone.random = null (map lookup returns null). Interleaving: must explicitly check for null before accessing .next", "No difference in edge cases", "Self-referencing random", "Both handle it equally"], "answer": 0, "explanation": "When random is null: map.get(null) returns null in most implementations. Interleaving: null.next causes NullPointerException. Must guard: clone.random = original.random != null ? original.random.next : null." },
+        { "q": "Where does this deep copy pattern appear in real systems?", "options": ["Serialization/deserialization of graph structures, Git's snapshot-based version control, and virtual memory page table cloning (fork) all face the same 'copy structure with cross-references' challenge", "Only in interviews", "Database cloning", "Not used in practice"], "answer": 0, "explanation": "Unix fork() copies the process's page table (a structure with pointers to shared pages). Serializing graphs requires similar identity-preserving deep copy. The pattern is fundamental to systems programming." }
+      ]
+    },
+    {
+      "id": "add-two-numbers",
+      "title": "Add Two Numbers",
+      "difficulty": "Medium",
+      "leetcodeNum": 2,
+      "pattern": "Arithmetic on Lists",
+      "tldr": "Add two numbers represented as linked lists (digits in REVERSE order, least significant first). Traverse both lists simultaneously, sum digits + carry. Create new nodes for each digit of the result.",
+      "keyTrick": "Least-significant digit first means natural left-to-right addition with carry. Process both lists in parallel: sum = l1.val + l2.val + carry. New digit = sum % 10. New carry = sum / 10. Don't forget the final carry after both lists are exhausted.",
+      "approaches": [
+        { "name": "Iterative with Dummy Head", "complexity": "O(max(m,n)) time, O(max(m,n)) space", "description": "Traverse both lists, sum digits + carry, create result nodes. Dummy head simplifies list construction. Handle remaining carry.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why is reverse order (least significant first) easier to handle?", "options": ["Addition starts from the least significant digit. Reverse order aligns with natural left-to-right traversal of the list, so carry propagates naturally forward through the list", "Forward order is easier", "No difference", "Reverse is harder"], "answer": 0, "explanation": "If digits were most-significant first (Add Two Numbers II, LC 445), you'd need to reverse both lists first or use a stack. LSD-first aligns traversal with addition direction. Elegant problem design." },
+        { "q": "What's the most commonly missed edge case?", "options": ["The final carry: 999 + 1 = 1000. After both lists are exhausted, carry = 1. Must create one more node. The loop condition should be (l1 || l2 || carry)", "Empty lists", "Different lengths", "Single digit numbers"], "answer": 0, "explanation": "Including 'carry > 0' in the loop condition handles the final carry naturally. Without it, 999+1=000 (missing the leading 1). This edge case catches ~30% of first submissions." },
+        { "q": "How do you handle lists of different lengths?", "options": ["Treat the shorter list's exhausted nodes as 0. In the loop: val1 = l1 != null ? l1.val : 0, val2 = l2 != null ? l2.val : 0. Continue until both are null AND carry is 0", "Pad the shorter list with zeros", "Process only the shorter length", "Error case"], "answer": 0, "explanation": "No actual padding needed — just treat null nodes as value 0. The loop naturally handles unequal lengths. 342 + 65 = [2,4,3] + [5,6] = [7,0,4]. After the shorter list ends, it contributes 0." },
+        { "q": "Add Two Numbers II has digits in forward order (most significant first). How to solve it?", "options": ["Use stacks to reverse the traversal order: push all digits of each list onto separate stacks, then pop and add like the reverse order version. Or reverse both lists first", "Same algorithm", "Cannot be solved with linked lists", "Use recursion only"], "answer": 0, "explanation": "Forward order (445): digits come MSB first, but addition starts from LSB. Two stacks reverse the access order. Or physically reverse both lists, add (this problem), reverse result. Both work." },
+        { "q": "How does this problem relate to arbitrary-precision arithmetic (BigInteger)?", "options": ["This IS arbitrary-precision addition. Libraries like Java's BigInteger store digits similarly and use the same carry-propagation algorithm. Linked lists allow unbounded precision", "Not related", "BigInteger is different", "Only for demonstration"], "answer": 0, "explanation": "BigInteger internally stores digits in arrays (similar to linked list). Addition with carry is identical. Multiplication, division extend this. Understanding linked list addition = understanding BigInteger internals." }
+      ]
+    },
+    {
+      "id": "find-duplicate-number",
+      "title": "Find The Duplicate Number",
+      "difficulty": "Medium",
+      "leetcodeNum": 287,
+      "pattern": "Fast / Slow Pointers (Floyd's)",
+      "tldr": "Array of n+1 integers in [1,n] with one duplicate. Find it WITHOUT modifying the array. Treat array as an implicit linked list: index i → index nums[i]. A duplicate means two indices point to the same value, creating a cycle. Use Floyd's.",
+      "keyTrick": "Reframe the array as a linked list: node i's 'next' is nums[i]. A duplicate value d means two nodes point to node d → cycle exists. The cycle entry point IS the duplicate number. Apply Floyd's cycle detection + cycle start finding.",
+      "approaches": [
+        { "name": "Sort", "complexity": "O(n log n) time, O(1) space", "description": "Sort, find adjacent duplicates. Modifies array." },
+        { "name": "HashSet", "complexity": "O(n) time, O(n) space", "description": "Track seen numbers. First repeat is the duplicate." },
+        { "name": "Floyd's Cycle Detection", "complexity": "O(n) time, O(1) space", "description": "Treat array as implicit linked list. Find cycle entry = duplicate number. No modification, O(1) space.", "isOptimal": true },
+        { "name": "Binary Search on Value Range", "complexity": "O(n log n) time, O(1) space", "description": "Binary search on [1,n]: count numbers ≤ mid. If count > mid, duplicate is in [1, mid]." }
+      ],
+      "quiz": [
+        { "q": "Why does a duplicate create a cycle in the implicit linked list?", "options": ["If nums[a] = nums[b] = d, then both index a and index b have 'next' pointing to index d. Two arrows into the same node = cycle. The cycle starts at node d (the duplicate value)", "Duplicates don't create cycles", "Only for consecutive duplicates", "The cycle is in the values, not indices"], "answer": 0, "explanation": "In the implicit graph: edges are i→nums[i]. If two indices map to the same value d, node d has in-degree 2. Following the chain from any starting point, you'll eventually enter a cycle through d." },
+        { "q": "Why start from index 0 and not from index nums[0]?", "options": ["Index 0 is guaranteed to be outside the cycle (no value in [1,n] maps back to 0). Starting from 0 ensures we approach the cycle from outside, which is required for the cycle-start algorithm", "Either works", "Must start from 1", "Start from any index"], "answer": 0, "explanation": "Values are in [1,n], so no edge leads to index 0. Index 0 is like the 'head' of a linked list with a cycle deeper in. Starting outside the cycle is necessary for the second phase (finding cycle entry)." },
+        { "q": "The binary search approach doesn't use the linked list analogy. How does it work?", "options": ["If the duplicate is ≤ mid, then count(values ≤ mid) > mid (pigeonhole). If count ≤ mid, duplicate is in [mid+1, n]. Binary search on the value range, not the index range", "Binary search on indices", "Sort then binary search", "Doesn't actually work"], "answer": 0, "explanation": "Pigeonhole on value ranges: [1, mid] has mid slots. If count > mid values fall in this range, a duplicate must be there. O(n) count per step × O(log n) steps = O(n log n). No modification, O(1) space." },
+        { "q": "Can there be multiple duplicates or is there always exactly one?", "options": ["The problem guarantees exactly one number repeats (possibly multiple times). If there could be multiple different duplicates, Floyd's approach wouldn't necessarily find all of them", "Always exactly one", "Could be multiple", "Both A and B are relevant — problem guarantees one, but understanding why matters"], "answer": 3, "explanation": "Problem constraint: one repeated number (may repeat 2+ times). Floyd's finds the cycle entry = this duplicate. With multiple distinct duplicates, the implicit graph structure changes and Floyd's might not find all." },
+        { "q": "This problem's brilliance lies in what cognitive leap?", "options": ["Seeing an array as a linked list — reframing the data structure enables applying Floyd's algorithm, which was designed for linked lists, to an array problem. The abstraction barrier is the insight", "It's just a trick question", "The math is complex", "Knowing Floyd's algorithm is enough"], "answer": 0, "explanation": "The key isn't knowing Floyd's — it's SEEING the linked list in the array. i→nums[i] is a function graph. Duplicate values = converging arrows = cycle. This reframing ability is what Google tests for." }
+      ]
+    },
+    {
+      "id": "reverse-linked-list-ii",
+      "title": "Reverse Linked List II",
+      "difficulty": "Medium",
+      "leetcodeNum": 92,
+      "pattern": "Reversal (Full / Partial)",
+      "tldr": "Reverse nodes from position left to right in one pass. Navigate to position left-1 (connection point). Reverse right-left+1 nodes. Reconnect: connection→new_head, old_head→node_after_reversed.",
+      "keyTrick": "Four key pointers: 1) conn = node before position left (connection point), 2) tail = node at position left (becomes tail after reversal), 3) reverse right-left+1 nodes with standard three-pointer, 4) reconnect: conn.next = new_head, tail.next = remaining. Use dummy head if left=1.",
+      "approaches": [
+        { "name": "Iterative One-Pass", "complexity": "O(n) time, O(1) space", "description": "Navigate to left-1, reverse the sublist, reconnect. Dummy head handles left=1 edge case.", "isOptimal": true },
+        { "name": "Recursive", "complexity": "O(n) time, O(n) stack space", "description": "Recursive reversal of first n nodes, adapted for the sublist starting at position left." }
+      ],
+      "quiz": [
+        { "q": "Why is a dummy head helpful when left = 1?", "options": ["If left=1, there's no node before the reversal starts (no connection point). A dummy head provides a consistent predecessor for position 1, eliminating the special case", "It's not needed", "Only for left > 1", "For performance"], "answer": 0, "explanation": "Without dummy: if left=1, the head changes. You'd need special logic to return the new head. With dummy: dummy→original_head. After reversal, dummy.next = new_head. Return dummy.next. Clean and uniform." },
+        { "q": "After reversing the sublist, which node becomes the new tail of the reversed section?", "options": ["The original first node of the sublist (position left). Before reversal it was the head of the sublist; after reversal it's the tail. This tail must connect to the rest of the list", "The original last node", "A new node", "The connection node"], "answer": 0, "explanation": "Reversal flips a→b→c to c→b→a. The original first node 'a' becomes the tail. It must point to what came after 'c' originally. Save this reference before reversing: tail.next = remaining." },
+        { "q": "How many pointers do you need to track during the operation?", "options": ["Four: conn (predecessor of sublist), tail (first node of sublist, becomes tail), plus the standard prev/curr for reversal. Some implementations track 'remaining' (node after sublist) separately", "Two", "Three", "Six"], "answer": 0, "explanation": "conn (before sublist), tail (sublist start, will be tail), prev/curr (reversal variables), and implicitly remaining = curr after reversal loop. Managing these precisely is what makes this Medium." },
+        { "q": "An alternative approach 'inserts' nodes one at a time. How does it work?", "options": ["Keep conn and tail fixed. Repeatedly take tail.next and insert it right after conn. This gradually builds the reversed sublist. No separate reversal loop needed", "Remove and re-insert all nodes", "Use a stack", "Sort the sublist"], "answer": 0, "explanation": "conn→1→2→3→4→5. To reverse 2-4: take 3, insert after conn: conn→3→1→2→4→5. Take 4: conn→4→3→1→2→5. Wait — that's not quite right. The correct version: repeatedly move tail.next to right after conn." },
+        { "q": "This is a building block for which harder problem?", "options": ["Reverse Nodes in K-Group (LC 25, Hard) — applies this partial reversal repeatedly for each group of k nodes throughout the list", "Sort linked list", "LRU Cache", "Palindrome linked list"], "answer": 0, "explanation": "K-Group Reverse is this problem applied iteratively: identify each k-group, reverse it, reconnect, repeat. If you can do partial reversal cleanly, K-Group is just orchestration." }
+      ]
+    },
+    {
+      "id": "design-circular-queue",
+      "title": "Design Circular Queue",
+      "difficulty": "Medium",
+      "leetcodeNum": 622,
+      "pattern": "Circular / Design",
+      "tldr": "Implement a fixed-size circular queue with enqueue, dequeue, front, rear, isEmpty, isFull. Use an array with head and tail pointers, modular arithmetic for wrapping. Track size or use (tail+1)%cap == head for full detection.",
+      "keyTrick": "Array of size k, head index, tail index, count variable. Enqueue: arr[tail] = val, tail = (tail+1)%k, count++. Dequeue: head = (head+1)%k, count--. Using a count variable is simpler than the 'waste one slot' or 'boolean flag' alternatives for distinguishing full vs empty.",
+      "approaches": [
+        { "name": "Array + Head/Tail + Count", "complexity": "O(1) all operations, O(k) space", "description": "Fixed array with modular head/tail pointers. Count variable distinguishes full/empty.", "isOptimal": true },
+        { "name": "Linked List Based", "complexity": "O(1) all operations, O(k) space", "description": "Circular linked list with head/tail pointers. Count variable. More memory overhead per element than array." }
+      ],
+      "quiz": [
+        { "q": "Why is distinguishing 'full' from 'empty' the main design challenge?", "options": ["In both full and empty states, head == tail (if not using a count). Three solutions: 1) waste one slot (full when (tail+1)%k == head), 2) count variable, 3) boolean flag", "It's not challenging", "Full and empty look different", "Just check the array values"], "answer": 0, "explanation": "The circular buffer paradox: head == tail means either empty (0 elements) or full (k elements). The count variable is cleanest. Wasting a slot (capacity k+1 array for k elements) is the classic C approach." },
+        { "q": "What does tail point to — the last element or the next empty slot?", "options": ["Convention varies. Most implementations: tail = next insertion position (empty slot). Alternatives: tail = last inserted element. Be consistent and clarify in the interview", "Always the last element", "Always the next empty slot", "Doesn't matter"], "answer": 0, "explanation": "Both conventions work. 'tail = next empty' is more common (enqueue writes to tail then advances). 'tail = last element' requires advancing before writing. Choose one and be consistent." },
+        { "q": "Why use modular arithmetic instead of if-statements for wrapping?", "options": ["(index + 1) % capacity is one operation and handles wrapping automatically. if (index == capacity - 1) index = 0; else index++ is equivalent but more code and branches", "If-statements are faster", "Modulo is required", "No difference"], "answer": 0, "explanation": "Modular arithmetic is cleaner and branch-free. In performance-critical code (OS buffers, network rings), branch-free is preferred. In interviews, it's more elegant and less error-prone." },
+        { "q": "Where are circular queues used in real systems?", "options": ["Network packet ring buffers, OS keyboard/mouse input buffers, producer-consumer queues, and audio streaming buffers all use circular queues for fixed-size FIFO with O(1) operations", "Only in interviews", "Database transactions", "Not used in modern systems"], "answer": 0, "explanation": "Linux's io_uring, network card DMA ring buffers, and audio circular buffers are all production circular queues. The fixed-size, no-allocation property is crucial for real-time systems." },
+        { "q": "How does this compare to Java's ArrayDeque?", "options": ["ArrayDeque IS a circular buffer that resizes. It uses head/tail with modular arithmetic, exactly like this design. When full, it doubles capacity and copies. This problem is implementing ArrayDeque without resizing", "ArrayDeque uses linked list", "Completely different design", "ArrayDeque doesn't wrap around"], "answer": 0, "explanation": "Java's ArrayDeque is a resizable circular buffer. This problem implements the core: fixed-size ring with modular wrapping. ArrayDeque adds dynamic resizing. Understanding the core is key." }
+      ]
+    },
+    {
+      "id": "lru-cache",
+      "title": "LRU Cache",
+      "difficulty": "Medium",
+      "leetcodeNum": 146,
+      "pattern": "Circular / Design",
+      "tldr": "Design a cache with O(1) get and put, evicting least recently used when full. Use HashMap(key → DLL node) + Doubly Linked List (ordered by recency). Access moves node to front. Eviction removes from back.",
+      "keyTrick": "HashMap for O(1) key lookup. Doubly-linked list for O(1) reordering (move to front on access, remove from back on eviction). Combined: get = map lookup + move to front. put = map insert + add to front + evict from back if over capacity.",
+      "approaches": [
+        { "name": "HashMap + Doubly Linked List", "complexity": "O(1) get/put, O(capacity) space", "description": "Map: key→node. DLL: ordered by recency. Sentinel head/tail nodes eliminate edge cases. Move-to-front, remove-from-back, add-after-head are O(1) operations.", "isOptimal": true },
+        { "name": "LinkedHashMap (Java shortcut)", "complexity": "O(1) get/put", "description": "Java's LinkedHashMap with accessOrder=true + override removeEldestEntry. Not recommended for interviews — too high-level." }
+      ],
+      "quiz": [
+        { "q": "Why doubly-linked list specifically (not singly-linked)?", "options": ["Moving a node to the front requires removing it from its current position. Removal in a singly-linked list is O(n) (need predecessor). Doubly-linked list: node has prev pointer, so removal is O(1)", "Singly-linked works too", "For bidirectional traversal", "Convention"], "answer": 0, "explanation": "To move node X to front: remove X from its position (need X.prev and X.next) then insert at front. Without X.prev (singly-linked), you'd need to scan from head to find the predecessor. O(n) kills the design." },
+        { "q": "Why use sentinel (dummy) head and tail nodes?", "options": ["Sentinel nodes eliminate null checks for add/remove at boundaries. Without them: adding to an empty list or removing the only node requires special-case code. Sentinels make all operations uniform", "They waste memory", "Not needed", "For doubly-linked only"], "answer": 0, "explanation": "Without sentinels: if head or tail is null, every operation needs if-checks. With sentinels: the list always has head↔...↔tail. Add-after-head and remove-before-tail are always valid. Cleaner and bug-free." },
+        { "q": "On a 'put' with a key that already exists, what happens?", "options": ["Update the value AND move the node to the front (most recently used). Common bug: forgetting to move to front, or adding a duplicate node instead of updating the existing one", "Only update value", "Remove and re-insert", "Ignore the put"], "answer": 0, "explanation": "Existing key: update value + move to front. Both are required. Bug 1: updating value but not moving (stale order). Bug 2: creating a new node without removing the old one (two nodes for one key)." },
+        { "q": "What's the eviction flow when capacity is exceeded?", "options": ["Remove the node just before the tail sentinel (LRU node). Also remove its key from the HashMap. Then add the new node normally. Must remove from BOTH data structures", "Just remove from list", "Just remove from map", "Remove the newest node"], "answer": 0, "explanation": "The node stores its key so you can remove the corresponding map entry. Without the key in the node, you'd need to reverse-lookup key from value, which is O(n). The node struct is {key, value, prev, next}." },
+        { "q": "LRU Cache appears in Google interviews AND Google systems. Where?", "options": ["CDN caches, CPU L1/L2 caches (approximated with pseudo-LRU), database buffer pools, and browser caches all use LRU or LRU variants. It's the most commonly implemented cache policy", "Only in interviews", "Only web caches", "Not used at Google scale"], "answer": 0, "explanation": "Memcached uses LRU. Linux page cache uses a modified LRU (two-list). CPU caches use pseudo-LRU (true LRU is too expensive in hardware). This is THE cache eviction interview question because it's THE real-world cache policy." }
+      ]
+    },
+    {
+      "id": "lfu-cache",
+      "title": "LFU Cache",
+      "difficulty": "Hard",
+      "leetcodeNum": 460,
+      "pattern": "Circular / Design",
+      "tldr": "Like LRU but evicts the LEAST FREQUENTLY USED (ties broken by LRU). O(1) get/put. Use HashMap(key→node) + HashMap(freq→DLL) + track minFreq. On access: move node from freq-f list to freq-(f+1) list.",
+      "keyTrick": "Three structures: 1) keyMap: key→Node(key, val, freq), 2) freqMap: freq→DoublyLinkedList of nodes at that frequency, 3) minFreq: tracks current minimum frequency. On get/put: increment node's freq, move to new freq list, update minFreq if old freq's list is now empty.",
+      "approaches": [
+        { "name": "Two HashMaps + DLL per Frequency", "complexity": "O(1) get/put, O(capacity) space", "description": "keyMap for O(1) lookup. freqMap for O(1) access to each frequency's LRU list. minFreq for O(1) eviction target.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why does minFreq only decrease to 1 (on new inserts) and never needs scanning?", "options": ["New inserts always have freq=1, so minFreq resets to 1. On access, if the node was the only one at minFreq and its freq increases, minFreq++ (the next freq list must be non-empty since we just added to it)", "minFreq can be any value", "Need to scan all frequencies", "Use a heap for minFreq"], "answer": 0, "explanation": "Two cases: 1) Insert new key: minFreq = 1 always. 2) Access existing key at minFreq: move it to freq+1. If old freq list is now empty, minFreq++. No scanning needed because we only increment by 1." },
+        { "q": "Why is a regular HashMap + PriorityQueue NOT O(1)?", "options": ["PriorityQueue operations (insert, delete, update priority) are O(log n). To achieve O(1), we need the freq→DLL structure which provides O(1) insertion, removal, and min-freq access", "It is O(1)", "PQ is O(1) for min", "PQ works with lazy deletion"], "answer": 0, "explanation": "Heap gives O(log n) per operation. Updating a node's frequency in a heap is O(log n) at best (decrease-key). The freq→DLL design avoids heaps entirely, achieving true O(1) per operation." },
+        { "q": "What happens when a node's frequency increases from f to f+1?", "options": ["Remove node from freqMap[f]'s DLL. Add node to freqMap[f+1]'s DLL (create if needed). Update node.freq = f+1. If freqMap[f] is now empty AND f == minFreq, increment minFreq", "Just update the counter", "Move to a different map", "Recreate the node"], "answer": 0, "explanation": "Three operations: remove from old freq list, add to new freq list, conditionally update minFreq. All O(1) with DLL. The DLL at each frequency level is itself an LRU list (most recent at head)." },
+        { "q": "How does the tie-breaking (LRU among same frequency) work?", "options": ["Each frequency's DLL is ordered by recency (most recent at head, least recent at tail). When evicting, remove from freqMap[minFreq]'s TAIL — the least recently used among least frequently used", "Random selection", "Alphabetical order", "Oldest inserted"], "answer": 0, "explanation": "The DLL at each frequency IS an LRU list. New accesses go to the head. Eviction takes from the tail. This gives LFU primary ordering with LRU tie-breaking. Two levels of ordering in one structure." },
+        { "q": "LRU vs LFU: when is each preferred in practice?", "options": ["LRU: good for temporal locality (recent items likely reused). LFU: good for frequency-based workloads (popular items stay cached). LFU can 'pollute' cache with historically frequent but no longer relevant items", "LFU is always better", "LRU is always better", "No practical difference"], "answer": 0, "explanation": "LFU's weakness: an item accessed 1000 times last week but never again still dominates the cache. LRU forgets quickly. Real systems use hybrids: LRFU, ARC, or LFU with frequency decay. Know the trade-offs." }
+      ]
+    },
+    {
+      "id": "merge-k-sorted-lists",
+      "title": "Merge K Sorted Lists",
+      "difficulty": "Hard",
+      "leetcodeNum": 23,
+      "pattern": "Merge / Combine",
+      "tldr": "Merge k sorted linked lists into one. Min-heap of size k: push one node from each list, extract-min, push its next. Alternatively, divide-and-conquer pairwise merging. Both O(n log k).",
+      "keyTrick": "Min-heap approach: push the head of each list into a min-heap. Extract-min gives the globally smallest node — add to result. Push that node's next into the heap. Repeat until heap is empty. Heap always has ≤ k elements → O(log k) per operation.",
+      "approaches": [
+        { "name": "Brute Force: Collect and Sort", "complexity": "O(n log n) time, O(n) space", "description": "Collect all values, sort, create new list. Ignores the sorted property." },
+        { "name": "Merge One by One", "complexity": "O(n·k) time, O(1) space", "description": "Merge list1+list2, then result+list3, etc. Each merge is O(n), done k-1 times. Too slow." },
+        { "name": "Min-Heap (Priority Queue)", "complexity": "O(n log k) time, O(k) space", "description": "Heap of k nodes. Extract-min, push next. Each of n nodes: O(log k) heap operation.", "isOptimal": true },
+        { "name": "Divide and Conquer (Pairwise Merge)", "complexity": "O(n log k) time, O(1) space", "description": "Merge pairs of lists in rounds. log k rounds, each processing n total nodes. Like merge sort's merge phase.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why is merge-one-by-one O(n·k) and not O(n log k)?", "options": ["After merging i lists, the result has up to i·(n/k) nodes. Merging this with list i+1 costs O(i·n/k). Total: sum(i·n/k) for i=1..k = O(n·k). The merged list grows each round, increasing merge cost", "It is O(n log k)", "Each merge is O(1)", "Only k merges happen"], "answer": 0, "explanation": "Merge 1+2: cost n/k + n/k = 2n/k. Merge result+3: 2n/k + n/k = 3n/k. ... Merge result+k: kn/k = n. Total: sum = n/k·(2+3+...+k) ≈ O(nk). Not balanced." },
+        { "q": "Why does pairwise (D&C) merging avoid this problem?", "options": ["Pairwise merging keeps all intermediate lists roughly equal size. Round 1: k/2 merges of 2n/k each. Round 2: k/4 merges of 4n/k each. Each round totals O(n). log k rounds: O(n log k)", "It doesn't avoid it", "Same complexity", "Only for even k"], "answer": 0, "explanation": "Balanced merging: each round does O(n) total work (all nodes touched once). log k rounds. Total: O(n log k). Versus sequential: each round does increasing work. The balance is key." },
+        { "q": "In Java, how do you handle the heap's comparison for ListNode?", "options": ["Pass a Comparator to PriorityQueue: (a, b) -> a.val - b.val. Or implement Comparable on ListNode. The heap needs to compare node values to maintain min-heap order", "Heap compares by default", "Compare references", "Use toString()"], "answer": 0, "explanation": "PriorityQueue<ListNode>((a, b) -> a.val - b.val). Without a comparator, Java can't compare ListNode objects and throws ClassCastException. A one-line lambda solves it." },
+        { "q": "When would you prefer D&C pairwise merge over the heap approach?", "options": ["When space is critical: D&C uses O(1) extra space (just pointer manipulation) vs O(k) for the heap. Also simpler to implement if you already have merge-two-lists", "Never", "When k is large", "When lists are short"], "answer": 0, "explanation": "D&C: O(1) extra space, reuses merge-two-lists. Heap: O(k) space, more general (works with streams). D&C wins on space. Heap wins on simplicity and adaptability." },
+        { "q": "This is used in which production systems at Google?", "options": ["Merging sorted SSTables in LevelDB/RocksDB compaction, MapReduce shuffle-merge phase, and external sort's final merge step all use k-way merge with a min-heap", "Only in interviews", "Database indexing only", "File systems only"], "answer": 0, "explanation": "LSM-tree databases (Bigtable, RocksDB): compaction merges sorted files. MapReduce: reducers merge sorted partitions. External sort: final merge of sorted chunks. K-way merge is infrastructure-critical." }
+      ]
+    },
+    {
+      "id": "reverse-nodes-k-group",
+      "title": "Reverse Nodes In K Group",
+      "difficulty": "Hard",
+      "leetcodeNum": 25,
+      "pattern": "K-Group Processing",
+      "tldr": "Reverse every group of k nodes. If remaining nodes < k, leave them as-is. Iterate: check if k nodes exist, reverse the group, reconnect, advance to next group.",
+      "keyTrick": "For each group: 1) Check if k nodes remain (advance a temp pointer k times). 2) Reverse k nodes using standard reversal. 3) Reconnect: prev_group_tail.next = new_group_head, old_group_head (now tail) links to next group. Use a dummy head for the first group.",
+      "approaches": [
+        { "name": "Iterative with Group Reversal", "complexity": "O(n) time, O(1) space", "description": "Check group existence, reverse, reconnect. Process each group sequentially. Dummy head handles first group.", "isOptimal": true },
+        { "name": "Recursive", "complexity": "O(n) time, O(n/k) stack space", "description": "Reverse first k nodes if they exist. Recursively process the rest. Connect reversed group to recursive result.", "isOptimal": false }
+      ],
+      "quiz": [
+        { "q": "Why check if k nodes exist BEFORE reversing?", "options": ["The problem requires that remaining groups with fewer than k nodes stay unchanged. If you reverse first and then realize the group is short, you'd have to undo the reversal — wasteful and error-prone", "You can reverse and undo", "Always reverse regardless", "Short groups can't occur"], "answer": 0, "explanation": "The check-before-reverse approach is cleaner: advance a pointer k times. If it reaches null before k steps, the group is incomplete — skip reversal. No wasted work, no undo logic needed." },
+        { "q": "What's the role of the 'groupPrev' (or 'prevTail') pointer?", "options": ["It points to the tail of the previously reversed group. After reversing the current group, groupPrev.next = new_head_of_current_group. This reconnects groups seamlessly", "It tracks the head", "It's the dummy node", "Not needed for iterative approach"], "answer": 0, "explanation": "After reversing group B: A_tail must point to B_new_head. groupPrev = A_tail. After reversal: groupPrev.next = B_new_head. Then groupPrev advances to B_old_head (now B_tail) for the next group." },
+        { "q": "How many pointer reconnections are needed per group?", "options": ["Two external reconnections: 1) previous group tail → current group new head, 2) current group old head (now tail) → next group's first node. Plus k-1 internal reversals within the group", "One", "k", "k+2"], "answer": 0, "explanation": "Internal: k-1 'next' pointers reversed (standard reversal). External: 2 reconnections (link from previous group, link to next group). Total pointer operations per group: k+1. O(n) total across all groups." },
+        { "q": "The recursive approach is more elegant but has what drawback?", "options": ["O(n/k) stack depth — one recursive call per group. For large n and small k, this could be thousands of frames. Iterative uses O(1) extra space", "No drawback", "It's slower", "Can't handle odd groups"], "answer": 0, "explanation": "n/k recursive calls. For n=1M and k=2: 500K stack frames ≈ 40MB+ stack. Stack overflow risk. Iterative approach avoids this entirely. For Google-scale lists, iterative is mandatory." },
+        { "q": "How would you modify this for 'reverse ALTERNATING k-groups' (reverse first k, skip next k, repeat)?", "options": ["Add a toggle: after processing each group (reversed or skipped), flip the flag. When skipping, just advance all pointers k steps without reversing. Same reconnection logic", "Completely different approach", "Use two passes", "Not possible with linked lists"], "answer": 0, "explanation": "Small modification: boolean reverseThisGroup. If true, reverse k nodes. If false, advance k nodes. Flip flag after each group. The framework handles both cases with minimal changes. Good follow-up question." }
+      ]
+    }
+  ]
+}

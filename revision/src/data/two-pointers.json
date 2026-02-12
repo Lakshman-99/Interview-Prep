@@ -1,0 +1,307 @@
+{
+  "id": "two-pointers",
+  "title": "Two Pointers",
+  "icon": "⇄",
+  "order": 2,
+  "description": "Leverage sorted order or opposing traversal to solve problems in O(n) with O(1) space. The backbone of array manipulation at Google.",
+  "patterns": [
+    {
+      "name": "Opposite Direction (Converging)",
+      "description": "Start from both ends, move inward based on a condition. Classic for sorted arrays, palindromes, and area maximization.",
+      "problems": ["valid-palindrome", "valid-palindrome-ii", "two-sum-ii", "3sum", "4sum", "container-with-most-water", "trapping-rain-water"]
+    },
+    {
+      "name": "Same Direction (Fast/Slow or Read/Write)",
+      "description": "Both pointers move forward. Fast pointer reads, slow pointer writes or marks position. Used for in-place removal and merging.",
+      "problems": ["remove-duplicates-sorted-array", "remove-element", "merge-sorted-array"]
+    },
+    {
+      "name": "String Interleaving / Merge",
+      "description": "Use pointers on two separate sequences to merge or interleave them based on rules.",
+      "problems": ["merge-strings-alternately", "merge-sorted-array"]
+    },
+    {
+      "name": "Partitioning / Rearrangement",
+      "description": "Rearrange elements in-place using pointer-based swaps or cyclic shifts.",
+      "problems": ["rotate-array", "boats-to-save-people"]
+    },
+    {
+      "name": "k-Sum Reduction",
+      "description": "Reduce k-sum to 2-sum using nested loops + two pointers on sorted array. Foundation for 3Sum, 4Sum, and beyond.",
+      "problems": ["two-sum-ii", "3sum", "4sum"]
+    },
+    {
+      "name": "Greedy Pairing",
+      "description": "Sort and greedily pair elements from opposite ends to optimize a constraint (capacity, cost, etc.).",
+      "problems": ["boats-to-save-people", "container-with-most-water"]
+    }
+  ],
+  "problems": [
+    {
+      "id": "reverse-string",
+      "title": "Reverse String",
+      "difficulty": "Easy",
+      "leetcodeNum": 344,
+      "pattern": "Opposite Direction (Converging)",
+      "tldr": "Reverse a char array in-place. Two pointers from both ends, swap and move inward until they meet. The simplest two-pointer problem.",
+      "keyTrick": "left = 0, right = n-1. Swap s[left] and s[right], then left++, right--. Stop when left >= right. This is the atomic operation underlying many two-pointer problems.",
+      "approaches": [
+        { "name": "Two Pointers (Converging)", "complexity": "O(n) time, O(1) space", "description": "Swap characters from both ends moving inward. Exactly n/2 swaps.", "isOptimal": true },
+        { "name": "Recursion", "complexity": "O(n) time, O(n) stack space", "description": "Recursively swap s[i] and s[n-1-i]. Same logic but uses O(n) call stack. Not in-place.", "isOptimal": false }
+      ],
+      "quiz": [
+        { "q": "Why does the problem specify 'in-place with O(1) extra memory'?", "options": ["To prevent the trivial solution of creating a new reversed array. Forces you to demonstrate the two-pointer swap pattern", "Memory is expensive", "For consistency", "It's optional"], "answer": 0, "explanation": "The constraint is the teaching point. Creating a new array is trivial. In-place reversal with two pointers is the foundational technique used in rotation, palindrome, and partition problems." },
+        { "q": "How many swaps does this perform for a string of length n?", "options": ["Exactly ⌊n/2⌋ swaps — each swap places two characters in final position", "n swaps", "n-1 swaps", "n² swaps"], "answer": 0, "explanation": "Each swap fixes two characters. For odd n, the middle character stays in place. This is optimal — you can't reverse with fewer than n/2 swaps." },
+        { "q": "How does in-place string reversal connect to array rotation?", "options": ["Rotate by k = reverse whole array, reverse first k, reverse last n-k. Three reversals implement rotation", "No connection", "Rotation uses sorting", "Rotation needs extra array"], "answer": 0, "explanation": "The 'triple reversal' algorithm for rotation is built on this primitive. Reverse is the building block for many array manipulation algorithms." },
+        { "q": "In Java, why use char[] instead of String for this problem?", "options": ["Strings are immutable in Java. char[] allows in-place modification. This is why the problem gives char[] input", "No reason", "String is slower", "char[] uses less memory"], "answer": 0, "explanation": "Java String objects are immutable — any 'modification' creates a new object. char[] is mutable, enabling true O(1) space in-place reversal. Understanding mutability is key." },
+        { "q": "XOR swap can avoid a temp variable: a^=b; b^=a; a^=b. When would you mention this in an interview?", "options": ["Only if asked about bit manipulation or avoiding temp variables. In practice, temp variable swap is clearer and equally fast", "Always use XOR swap", "Never mention it", "XOR is faster"], "answer": 0, "explanation": "XOR swap is a fun trick but adds no practical benefit — modern compilers optimize temp swaps. Mention it to show bit manipulation knowledge if the interviewer probes, but don't lead with it." }
+      ]
+    },
+    {
+      "id": "valid-palindrome",
+      "title": "Valid Palindrome",
+      "difficulty": "Easy",
+      "leetcodeNum": 125,
+      "pattern": "Opposite Direction (Converging)",
+      "tldr": "Check if a string is a palindrome considering only alphanumeric characters and ignoring case. Two pointers from both ends, skip non-alphanumeric, compare lowercase.",
+      "keyTrick": "Two pointers converging with a filter: skip non-alphanumeric characters on both sides, then compare lowercase versions. The 'skip' logic is what makes this tricky — don't forget to advance the pointer AFTER skipping.",
+      "approaches": [
+        { "name": "Clean + Reverse", "complexity": "O(n) time, O(n) space", "description": "Filter string to only alphanumeric, lowercase it, check if it equals its reverse." },
+        { "name": "Two Pointers In-Place", "complexity": "O(n) time, O(1) space", "description": "left and right pointers skip non-alphanumeric chars, compare lowercase. No extra string needed.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why is the two-pointer approach preferred over clean-then-check?", "options": ["O(1) space vs O(n) space. Also processes fewer characters on average due to early termination on mismatch", "It's not preferred", "Easier to code", "Faster in all cases"], "answer": 0, "explanation": "Two pointers avoids creating a cleaned string (O(n) space) and can short-circuit on the first mismatch. At Google scale, O(1) space solutions are always worth mentioning." },
+        { "q": "What's the common bug when implementing the skip logic?", "options": ["Forgetting to check bounds (left < right) inside the while loops that skip non-alphanumeric characters", "Using wrong case conversion", "Off-by-one error", "Comparing chars instead of strings"], "answer": 0, "explanation": "If you skip without checking bounds, you can go past the other pointer. The inner while loops must check left < right: while (left < right && !isAlphanumeric(s[left])) left++." },
+        { "q": "How does Character.isLetterOrDigit() help in Java?", "options": ["It handles both letters and digits in one call, supporting Unicode. Avoids manual range checks", "It's slower than manual checks", "It only handles ASCII", "It's not available"], "answer": 0, "explanation": "Character.isLetterOrDigit() is Unicode-aware and handles all edge cases. Manual checks like (c >= 'a' && c <= 'z') miss digits and non-ASCII letters." },
+        { "q": "For the follow-up: what if we allow at most one character removal (Valid Palindrome II)?", "options": ["On mismatch, try skipping left OR right character and check if the remaining substring is a palindrome", "Add a counter", "Use dynamic programming", "Sort the string"], "answer": 0, "explanation": "This extends to Valid Palindrome II — on the first mismatch, greedily check both options (skip left or skip right). If either sub-check succeeds, return true." },
+        { "q": "An empty string and a string with all non-alphanumeric characters should return:", "options": ["true — after filtering, both are effectively empty strings, which are palindromes by definition", "false", "Error", "Depends on implementation"], "answer": 0, "explanation": "An empty string is a palindrome (base case). The two pointers never find a mismatch because left >= right immediately. These edge cases must be handled correctly." }
+      ]
+    },
+    {
+      "id": "valid-palindrome-ii",
+      "title": "Valid Palindrome II",
+      "difficulty": "Easy",
+      "leetcodeNum": 680,
+      "pattern": "Opposite Direction (Converging)",
+      "tldr": "Check if string can become a palindrome by removing at most one character. Two pointers converge; on first mismatch, try skipping either the left or right character and check if the rest is a palindrome.",
+      "keyTrick": "Greedy with one chance: run normal palindrome check. On the FIRST mismatch at (left, right), check isPalindrome(s, left+1, right) OR isPalindrome(s, left, right-1). You get exactly one 'skip' — use it wisely.",
+      "approaches": [
+        { "name": "Brute Force", "complexity": "O(n²) time", "description": "Try removing each character one at a time, check if result is palindrome. Too slow." },
+        { "name": "Greedy Two Pointers", "complexity": "O(n) time, O(1) space", "description": "Converge from both ends. On mismatch, try both skip options. Each sub-check is O(n) in worst case, but only triggered once.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why is checking BOTH skip options necessary — why not just skip one side?", "options": ["Skipping left might fail while skipping right succeeds, or vice versa. Example: 'abca' — skip 'b' fails but skip 'c' gives 'aba' (palindrome)", "One skip always works", "It's redundant", "For even-length strings only"], "answer": 0, "explanation": "Consider 'abca': mismatch at (b,c). Skip b → 'aca' ✓. Skip c → 'aba' ✓. But consider 'abdca': skip d → 'abca' needs further analysis. You must check both branches." },
+        { "q": "What's the time complexity of the sub-palindrome check?", "options": ["O(n) worst case — but the total work is still O(n) because the outer check + inner check together scan at most n characters", "O(n²)", "O(1)", "O(n log n)"], "answer": 0, "explanation": "The outer loop processes characters until the mismatch. The inner check processes the remaining substring. Combined, they visit at most n characters total, so it's O(n)." },
+        { "q": "How would you extend this to 'at most k deletions'?", "options": ["Use recursion with memoization or DP. isPalin(left, right, k) checks if s[left..right] is a palindrome with at most k deletions. O(n²·k)", "Same greedy approach with k chances", "Use k pointers", "Not possible efficiently for k > 1"], "answer": 0, "explanation": "For k > 1, the greedy approach doesn't work — you'd need to explore multiple branches. DP with state (left, right, deletions_remaining) handles it in O(n² · k)." },
+        { "q": "This problem is classified as Easy but has a subtle edge case. What is it?", "options": ["When the string is already a palindrome — you never hit a mismatch, so you must return true without any skip", "Empty strings", "Single character", "Very long strings"], "answer": 0, "explanation": "The happy path (already a palindrome) must be handled: if the pointers meet without any mismatch, return true immediately. The mismatch-and-skip logic only triggers when needed." },
+        { "q": "In a Google interview, what follow-up might they ask about this problem?", "options": ["Find the minimum number of deletions to make it a palindrome — this becomes Longest Palindromic Subsequence (LPS) DP", "Make it work for arrays", "Handle Unicode", "Optimize to O(log n)"], "answer": 0, "explanation": "Min deletions = n - LPS_length. LPS is a classic DP problem: dp[i][j] = length of longest palindromic subsequence in s[i..j]. This bridges greedy to DP thinking." }
+      ]
+    },
+    {
+      "id": "merge-strings-alternately",
+      "title": "Merge Strings Alternately",
+      "difficulty": "Easy",
+      "leetcodeNum": 1768,
+      "pattern": "String Interleaving / Merge",
+      "tldr": "Merge two strings by alternating characters. Use two pointers, one per string, appending one char from each in turn. Append remaining characters from the longer string.",
+      "keyTrick": "Single loop with index i. While i < max(len1, len2): append word1[i] if i < len1, append word2[i] if i < len2. Handles unequal lengths naturally without special post-loop logic.",
+      "approaches": [
+        { "name": "Two Separate Pointers", "complexity": "O(n+m) time, O(n+m) space", "description": "Pointer i for word1, j for word2. Alternate: append word1[i++], then word2[j++]. Append leftover." },
+        { "name": "Single Index Loop", "complexity": "O(n+m) time, O(n+m) space", "description": "One index i from 0 to max(n,m). Conditionally append from each string. Cleaner.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why is the single-index approach cleaner than two separate pointers?", "options": ["It eliminates the 'append remaining' phase — the bounds checks handle unequal lengths within the same loop", "It's faster", "It uses less memory", "No difference"], "answer": 0, "explanation": "Two-pointer needs a separate loop for the remainder of the longer string. Single-index with conditional appends handles everything uniformly. Less code, fewer bugs." },
+        { "q": "What's the output type choice in Java: String vs StringBuilder?", "options": ["StringBuilder — String concatenation in a loop creates n intermediate String objects (O(n²) total). StringBuilder is O(n)", "String is fine", "char[] is required", "StringBuffer only"], "answer": 0, "explanation": "String += in a loop is O(n²) due to immutability. StringBuilder.append() is amortized O(1) per call, O(n) total. This is a must-know Java performance point." },
+        { "q": "How does this relate to the merge step in Merge Sort?", "options": ["Same pattern: two pointers on two sequences, pick from one based on a condition, append to result. Merge sort picks the smaller; this alternates", "No relation", "Merge sort is more complex", "They use different data structures"], "answer": 0, "explanation": "The merge paradigm is identical: two input sequences, two pointers, one output. The selection criteria differs (comparison vs alternation) but the structure is the same." },
+        { "q": "If asked to merge k strings alternately, how would you approach it?", "options": ["Use k pointers, iterate positions 0, 1, 2,... At each position, append char from each string that still has characters at that position", "Merge pairs recursively", "Concatenate all then sort", "Not possible efficiently"], "answer": 0, "explanation": "Generalize to k pointers: for each position i, iterate through all k strings and append s_j[i] if it exists. Total time: O(sum of all string lengths). Natural extension." },
+        { "q": "Why is this problem good for interview warm-ups despite being easy?", "options": ["It tests string manipulation, loop control, and edge cases (empty strings, unequal lengths) — fundamentals that trip up candidates under pressure", "It's not useful", "Too simple for interviews", "Only for phone screens"], "answer": 0, "explanation": "Google often uses easy problems to assess coding speed, edge case awareness, and code quality. Cleanly solving simple problems quickly leaves more time for follow-ups." }
+      ]
+    },
+    {
+      "id": "merge-sorted-array",
+      "title": "Merge Sorted Array",
+      "difficulty": "Easy",
+      "leetcodeNum": 88,
+      "pattern": "Same Direction (Fast/Slow or Read/Write)",
+      "tldr": "Merge nums2 into nums1 (which has extra space). Start from the END — fill nums1 from the back using three pointers. Largest elements go first, avoiding overwrites.",
+      "keyTrick": "Merge BACKWARDS: p1 at end of nums1's elements, p2 at end of nums2, write pointer at end of nums1's total space. Place the larger element at write position. This avoids overwriting unprocessed nums1 elements.",
+      "approaches": [
+        { "name": "Copy + Sort", "complexity": "O((n+m) log(n+m)) time", "description": "Copy nums2 into nums1's extra space, sort the whole array. Simple but wasteful." },
+        { "name": "Extra Array Merge", "complexity": "O(n+m) time, O(n) space", "description": "Copy nums1 to temp array, merge from temp and nums2 into nums1." },
+        { "name": "Backward Merge (Three Pointers)", "complexity": "O(n+m) time, O(1) space", "description": "Fill from back to front. Largest of nums1[p1] and nums2[p2] goes at write position. No extra space needed.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why merge backwards instead of forwards?", "options": ["Forward merging would overwrite unprocessed elements in nums1. Backward merging fills empty space at the end, so no data is lost", "It's faster", "Convention", "Forward doesn't work for sorted arrays"], "answer": 0, "explanation": "nums1 has extra space at the END. If we merge forward, placing small elements at nums1[0] overwrites nums1's own elements. Backward merge fills the empty tail safely." },
+        { "q": "What happens if nums2 is exhausted before nums1?", "options": ["nums1's remaining elements are already in their correct positions — no more work needed", "Need to copy remaining nums1 elements", "Algorithm fails", "Need a final pass"], "answer": 0, "explanation": "If p2 < 0 while p1 ≥ 0, the remaining nums1 elements are already sorted and in place. Only if nums1 is exhausted first do we need to copy remaining nums2 elements." },
+        { "q": "Why is this problem important for understanding merge sort?", "options": ["This IS the merge step of merge sort. Mastering this merge operation is essential for implementing merge sort correctly", "It's unrelated", "Merge sort doesn't use this", "Only for the base case"], "answer": 0, "explanation": "The merge step is the heart of merge sort. This problem isolates that step. In merge sort, you'd use a temp array (since subarrays share the same array). Same logic." },
+        { "q": "Edge case: what if nums1 has 0 initial elements (m=0)?", "options": ["Just copy all of nums2 into nums1. The backward merge handles this naturally — p1 starts at -1, so only nums2 elements are placed", "Return empty array", "Error case", "Swap arrays"], "answer": 0, "explanation": "When m=0, p1 = -1 immediately. The loop only copies from nums2. The algorithm handles this gracefully without special cases. Always verify edge cases." },
+        { "q": "In a distributed system, how does this merge pattern scale?", "options": ["K-way merge: merge k sorted streams using a min-heap of size k. Used in external sort, LSM trees (LevelDB/RocksDB), and MapReduce's shuffle phase", "It doesn't scale", "Just merge pairs", "Use hash tables instead"], "answer": 0, "explanation": "K-way merge with a min-heap is foundational: Google's Bigtable/LevelDB uses it for SSTable compaction. MapReduce uses it in the reduce phase. This 2-way merge is the building block." }
+      ]
+    },
+    {
+      "id": "remove-duplicates-sorted-array",
+      "title": "Remove Duplicates From Sorted Array",
+      "difficulty": "Easy",
+      "leetcodeNum": 26,
+      "pattern": "Same Direction (Fast/Slow or Read/Write)",
+      "tldr": "Remove duplicates in-place from a sorted array. Slow pointer = write position, fast pointer scans. Write when fast sees a new value different from the last written.",
+      "keyTrick": "Read/write two-pointer: slow is the last written position. When nums[fast] ≠ nums[slow], advance slow and copy. The sorted order guarantees all duplicates are adjacent, so one pass suffices.",
+      "approaches": [
+        { "name": "HashSet (ignoring sorted property)", "complexity": "O(n) time, O(n) space", "description": "Use set to track seen values. Doesn't exploit sorted order. Wastes space." },
+        { "name": "Read/Write Two Pointers", "complexity": "O(n) time, O(1) space", "description": "Slow = write position, fast = read position. Copy when new unique value found.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why compare nums[fast] with nums[slow] (not nums[fast-1])?", "options": ["nums[slow] is the last WRITTEN unique value. Comparing with nums[fast-1] would miss cases where multiple duplicates are between slow and fast", "Either works", "nums[fast-1] is faster", "For sorted arrays only"], "answer": 0, "explanation": "slow tracks the write frontier — the last unique value placed. fast scans ahead. The comparison must be against the write position to correctly identify new unique values." },
+        { "q": "How does this extend to 'allow at most k duplicates' (Remove Duplicates II)?", "options": ["Compare nums[fast] with nums[slow - k + 1]. If different, write. Generalizes the pattern to allow k copies of each value", "Completely different approach", "Use a counter", "Use k pointers"], "answer": 0, "explanation": "For k=2: compare nums[fast] with nums[slow-1]. If different, it's at most the 2nd copy, so write. This elegant generalization is a common Google follow-up." },
+        { "q": "What's returned: the new array or just the length?", "options": ["Just the length k. The first k elements of the modified array contain the unique elements. The caller uses the length to know how far to read", "A new array", "Both", "The removed elements"], "answer": 0, "explanation": "Returning length k with in-place modification is a common API pattern in C/Java. The caller reads nums[0..k-1]. Elements beyond k are irrelevant. This mirrors real system APIs." },
+        { "q": "Why does this only work on SORTED arrays?", "options": ["Sorting guarantees duplicates are adjacent. Without sorting, you'd need a HashSet to track seen values, using O(n) space", "It works on unsorted too", "Sorting is optional", "For performance only"], "answer": 0, "explanation": "Sorted order = adjacent duplicates. Unsorted arrays could have duplicates anywhere, requiring random access lookups (HashSet). The sorted property enables the O(1) space solution." },
+        { "q": "This pattern appears in which real-world systems?", "options": ["Database deduplication, log compaction (Kafka), and data pipeline cleaning — all process sorted data streams and remove redundant entries", "Only in interviews", "File systems", "Network protocols"], "answer": 0, "explanation": "Log compaction in Kafka, SSTable deduplication in LevelDB, and ETL pipelines all use this exact pattern on sorted data. It's not just an interview trick." }
+      ]
+    },
+    {
+      "id": "two-sum-ii",
+      "title": "Two Sum II Input Array Is Sorted",
+      "difficulty": "Medium",
+      "leetcodeNum": 167,
+      "pattern": "Opposite Direction (Converging)",
+      "tldr": "Find two numbers in a SORTED array that sum to target. Two pointers from both ends: if sum < target, move left pointer right (need larger); if sum > target, move right pointer left (need smaller).",
+      "keyTrick": "Sorted order enables greedy pointer movement: too small → increase left, too large → decrease right. Each step eliminates one possibility. Guaranteed O(n) time, O(1) space — strictly better than hash map for sorted input.",
+      "approaches": [
+        { "name": "Hash Map (ignoring sorted property)", "complexity": "O(n) time, O(n) space", "description": "Same as Two Sum I. Works but wastes the sorted property and uses extra space." },
+        { "name": "Binary Search per Element", "complexity": "O(n log n) time, O(1) space", "description": "For each element, binary search for complement. Uses sorted property but not optimally." },
+        { "name": "Two Pointers (Converging)", "complexity": "O(n) time, O(1) space", "description": "left=0, right=n-1. Move based on sum comparison. Optimal for sorted input.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why can we guarantee no valid pair is skipped when moving pointers?", "options": ["If sum < target, moving left++ is safe because nums[left] + nums[right] is already too small — pairing nums[left] with any smaller right index would be even smaller", "We can't guarantee it", "The proof is complex", "It works by luck"], "answer": 0, "explanation": "When sum < target: nums[left] + nums[right] < target. Since nums is sorted, nums[left] + nums[j] < target for all j < right. So nums[left] can't be part of any valid pair. Safe to skip." },
+        { "q": "How does this compare to the hash map approach from Two Sum I?", "options": ["Same time O(n), but two pointers uses O(1) space vs O(n). The sorted property gives a strictly better solution", "Hash map is always better", "Same complexity", "Two pointers is slower"], "answer": 0, "explanation": "For sorted input, two pointers dominates: same time, less space. For unsorted input, hash map is needed (or sort first at O(n log n) cost). Know when each approach wins." },
+        { "q": "This is the building block for which harder problems?", "options": ["3Sum and 4Sum — they reduce to Two Sum II by fixing outer elements and running two pointers on the remainder", "Only this problem", "Binary search problems", "Graph problems"], "answer": 0, "explanation": "3Sum fixes one element, runs Two Sum II on the rest. 4Sum fixes two, runs Two Sum II. This telescoping reduction is the k-Sum pattern. Mastering Two Sum II unlocks them all." },
+        { "q": "What if there are multiple valid pairs?", "options": ["The algorithm finds one pair. For ALL pairs, continue after finding each (move both pointers inward, skip duplicates)", "It finds all automatically", "Only one pair exists", "Need a hash map"], "answer": 0, "explanation": "After finding a pair, move both pointers and skip duplicates to find the next pair. This is exactly the de-duplication logic used in 3Sum." },
+        { "q": "Can two pointers work if the array has negative numbers?", "options": ["Yes — two pointers only requires sorted order, not positive values. Negative numbers are handled naturally by the sum comparison logic", "No — negatives break the algorithm", "Need special handling", "Only with absolute values"], "answer": 0, "explanation": "The algorithm depends on sorted order, not sign. [-5, -2, 0, 3, 7] with target=1: left=-5, right=7, sum=2 > 1, so move right. Works perfectly with negatives." }
+      ]
+    },
+    {
+      "id": "3sum",
+      "title": "3Sum",
+      "difficulty": "Medium",
+      "leetcodeNum": 15,
+      "pattern": "k-Sum Reduction",
+      "tldr": "Find all unique triplets summing to zero. Sort array, fix one element, run Two Sum II on the remaining. Skip duplicates at each level to avoid duplicate triplets.",
+      "keyTrick": "Sort first. For each nums[i], find pairs in nums[i+1..n-1] where pair sum = -nums[i] using two pointers. SKIP DUPLICATES: skip i if nums[i] == nums[i-1], skip left/right if they equal previous values after finding a triplet.",
+      "approaches": [
+        { "name": "Brute Force", "complexity": "O(n³) time", "description": "Check all triplets. Use a set to avoid duplicates. Way too slow." },
+        { "name": "Hash Set per Element", "complexity": "O(n²) time, O(n) space", "description": "For each i, use hash set to find pairs summing to -nums[i]. Complex duplicate handling." },
+        { "name": "Sort + Two Pointers", "complexity": "O(n²) time, O(1) extra space", "description": "Sort. Fix i, two-pointer on rest. Skip duplicates at both levels. Clean and optimal.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why is sorting essential (not just an optimization)?", "options": ["Sorting enables two pointers for O(n) inner loop AND makes duplicate skipping trivial (identical values are adjacent)", "It's optional", "For binary search", "To make the array smaller"], "answer": 0, "explanation": "Sorting serves dual purpose: enables O(n) two-pointer search AND groups duplicates adjacently for O(1) skip logic. Without sorting, both operations become harder." },
+        { "q": "How does duplicate skipping work precisely?", "options": ["Outer loop: skip if nums[i] == nums[i-1]. Inner loop: after finding a triplet, skip while nums[left] == nums[left+1] and nums[right] == nums[right-1]", "Use a HashSet for results", "Check all triplets against a set", "Only skip the outer loop"], "answer": 0, "explanation": "Two-level deduplication: outer loop skips repeated first elements, inner loop skips repeated second/third elements. Both are needed for complete deduplication." },
+        { "q": "Optimization: when can you break the outer loop early?", "options": ["If nums[i] > 0, no triplet starting with nums[i] can sum to 0 (since all remaining elements ≥ nums[i] > 0)", "Can't break early", "When i > n/2", "When left meets right"], "answer": 0, "explanation": "Since array is sorted, if nums[i] > 0, all remaining elements are positive, so no triplet can sum to 0. This early termination can significantly speed up average case." },
+        { "q": "How does 3Sum generalize to kSum?", "options": ["Recursively: kSum fixes one element and calls (k-1)Sum. Base case is 2Sum with two pointers. Total: O(n^(k-1))", "Can't generalize", "Each k needs a unique approach", "Use k nested loops"], "answer": 0, "explanation": "The telescoping reduction: kSum → (k-1)Sum → ... → 2Sum. Each level adds one loop. 4Sum is O(n³), 5Sum is O(n⁴). This recursive structure is elegant and practical." },
+        { "q": "Why is the space complexity O(1) extra despite sorting?", "options": ["If the problem allows modifying the input, in-place sort uses O(1) extra space (ignoring sort's stack). The output list doesn't count as extra space", "It's O(n)", "Sorting needs O(n)", "The result list is extra space"], "answer": 0, "explanation": "Convention: output doesn't count as extra space (it's required). In-place sort like heapsort uses O(1) extra. Some argue sort uses O(log n) stack. Clarify this in interviews." }
+      ]
+    },
+    {
+      "id": "4sum",
+      "title": "4Sum",
+      "difficulty": "Medium",
+      "leetcodeNum": 18,
+      "pattern": "k-Sum Reduction",
+      "tldr": "Find all unique quadruplets summing to target. Sort + fix two elements + Two Sum II on the rest. O(n³). Same deduplication logic as 3Sum but with one more outer loop.",
+      "keyTrick": "Reduce to 3Sum by fixing one element, which reduces to 2Sum. Three levels of deduplication needed. Also: watch for INTEGER OVERFLOW — target and intermediate sums can exceed int range. Use long in Java.",
+      "approaches": [
+        { "name": "Brute Force", "complexity": "O(n⁴) time", "description": "Check all quadruplets. Impractical." },
+        { "name": "Sort + Two Nested Loops + Two Pointers", "complexity": "O(n³) time, O(1) extra space", "description": "Sort. Fix i and j, two pointers on the rest. Three-level duplicate skipping.", "isOptimal": true },
+        { "name": "Hash Map for Pair Sums", "complexity": "O(n²) time, O(n²) space", "description": "Store all pair sums in a map. For each pair, check if target - pairSum exists. Complex deduplication." }
+      ],
+      "quiz": [
+        { "q": "What's the critical bug that catches many candidates on 4Sum?", "options": ["Integer overflow: nums[i] + nums[j] + nums[left] + nums[right] can exceed Integer.MAX_VALUE. Must use long for the sum", "Off-by-one error", "Wrong deduplication", "Missing base case"], "answer": 0, "explanation": "With values up to 10⁹ and 4 elements, the sum can reach 4×10⁹ > Integer.MAX_VALUE (2.1×10⁹). Cast to long: (long)nums[i] + nums[j] + nums[left] + nums[right]. Google tests this." },
+        { "q": "How many levels of duplicate skipping are needed?", "options": ["Three levels: skip duplicate i values, skip duplicate j values (for same i), and skip duplicate left/right values after finding a quadruplet", "One level", "Two levels", "Four levels"], "answer": 0, "explanation": "Each 'fixed' element needs deduplication: i, j, and the left/right pair. Missing any level produces duplicate quadruplets. The pattern scales linearly with k in kSum." },
+        { "q": "What pruning optimizations can significantly speed up 4Sum?", "options": ["Early termination: if nums[i]+nums[i+1]+nums[i+2]+nums[i+3] > target, break outer loop. If nums[i]+nums[n-3]+nums[n-2]+nums[n-1] < target, skip this i", "No useful pruning", "Only skip duplicates", "Use binary search"], "answer": 0, "explanation": "Min-sum pruning (too large → break) and max-sum pruning (too small → continue) can dramatically reduce iterations. These bounds are computed using the sorted property." },
+        { "q": "Why not use the hash map approach for pair sums?", "options": ["O(n²) space for pair sums, complex index deduplication to avoid reusing the same element, and harder to implement correctly", "It's actually better", "Same complexity", "Memory doesn't matter"], "answer": 0, "explanation": "Storing all O(n²) pair sums uses O(n²) space. Ensuring no index overlap between two pairs is tricky. The sorted + two-pointer approach is cleaner and uses O(1) extra space." },
+        { "q": "At what point should you suggest a generalized kSum solution?", "options": ["When the interviewer asks about 5Sum or general kSum. Implement recursively: base case = 2Sum with two pointers, recursive case = fix one element and call (k-1)Sum", "Never generalize", "Only for k ≤ 4", "When k > 10"], "answer": 0, "explanation": "A clean recursive kSum implementation shows algorithmic maturity. The recursive structure: sort once, then kSum reduces to (k-1)Sum by fixing one element each level. Very Google." }
+      ]
+    },
+    {
+      "id": "rotate-array",
+      "title": "Rotate Array",
+      "difficulty": "Medium",
+      "leetcodeNum": 189,
+      "pattern": "Partitioning / Rearrangement",
+      "tldr": "Rotate array right by k positions. Triple reversal: reverse entire array, reverse first k elements, reverse remaining elements. O(n) time, O(1) space.",
+      "keyTrick": "Triple Reversal Algorithm: reverse(0, n-1) → reverse(0, k-1) → reverse(k, n-1). Think of it as: reversing swaps the two sections, then un-reversing each section puts elements in correct order. Always normalize k = k % n first.",
+      "approaches": [
+        { "name": "Extra Array", "complexity": "O(n) time, O(n) space", "description": "Place each element at (i + k) % n in new array. Copy back." },
+        { "name": "Cyclic Replacements", "complexity": "O(n) time, O(1) space", "description": "Follow the cycle starting at each position: place element at (i+k)%n, repeat. Handle GCD(n,k) cycles." },
+        { "name": "Triple Reversal", "complexity": "O(n) time, O(1) space", "description": "Reverse all, reverse first k, reverse last n-k. Elegant and easy to remember.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why does triple reversal work? What's the intuition?", "options": ["Reversing the whole array puts elements in roughly the right positions but backwards. Reversing each half un-reverses them within their section", "Mathematical coincidence", "It only works for certain k values", "Trial and error"], "answer": 0, "explanation": "Array [1,2,3,4,5] rotated by 2: reverse all → [5,4,3,2,1]. Reverse first 2 → [4,5,3,2,1]. Reverse last 3 → [4,5,1,2,3] ✓. Each reversal fixes one aspect." },
+        { "q": "What happens if k > n?", "options": ["k = k % n normalizes it. Rotating by n is identity. k=n+2 is same as k=2", "Error", "Wrap around automatically", "Need special handling"], "answer": 0, "explanation": "Rotating by n returns to the original. So only k % n matters. Forgetting this normalization is a common bug. Always add k = k % n at the start." },
+        { "q": "The cyclic replacement approach is tricky. When does the cycle NOT visit all elements?", "options": ["When GCD(n, k) > 1. There are GCD(n,k) independent cycles, each of length n/GCD(n,k). You need to start from each offset 0, 1, ..., GCD(n,k)-1", "Always visits all elements", "Only for even n", "When k is prime"], "answer": 0, "explanation": "For n=6, k=2: GCD=2, so there are 2 cycles of length 3. Cycle from 0: 0→2→4→0. Cycle from 1: 1→3→5→1. Understanding GCD here connects to number theory." },
+        { "q": "How does this connect to string rotation (e.g., 'check if s2 is a rotation of s1')?", "options": ["s2 is a rotation of s1 if and only if s2 is a substring of s1+s1. Array rotation is the underlying operation", "No connection", "String rotation is harder", "Different algorithm"], "answer": 0, "explanation": "If s1='abcde' and s2='cdeab', then s1+s1='abcdeabcde' contains 'cdeab'. This O(n) check uses the fact that all rotations appear as substrings of the doubled string." },
+        { "q": "Left rotation by k vs right rotation by k — what's the relationship?", "options": ["Left rotate by k = Right rotate by (n-k). Triple reversal works for both by adjusting k", "They're the same", "Need different algorithms", "Left rotation is harder"], "answer": 0, "explanation": "Left rotate by k ≡ Right rotate by n-k. If asked for left rotation, just set k = n - k and use the same algorithm. One algorithm, two directions." }
+      ]
+    },
+    {
+      "id": "container-with-most-water",
+      "title": "Container With Most Water",
+      "difficulty": "Medium",
+      "leetcodeNum": 11,
+      "pattern": "Opposite Direction (Converging)",
+      "tldr": "Find two lines forming a container holding the most water. Two pointers from both ends. Move the SHORTER line inward — keeping the shorter line can't improve area since width is decreasing.",
+      "keyTrick": "Always move the pointer with the shorter height. Why? Area = min(h[L], h[R]) × (R-L). If h[L] < h[R], moving R inward can only decrease width while min-height stays ≤ h[L]. So moving L is the only way to potentially increase area.",
+      "approaches": [
+        { "name": "Brute Force", "complexity": "O(n²) time", "description": "Check all pairs. Track maximum area." },
+        { "name": "Two Pointers (Converging)", "complexity": "O(n) time, O(1) space", "description": "Start from both ends. Move the shorter pointer inward. Track max area at each step.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why is moving the shorter pointer correct — what pairs are safely eliminated?", "options": ["If h[L] < h[R], then for ALL j < R: area(L,j) ≤ h[L]×(j-L) < h[L]×(R-L) = current area. So L can never be in a better pair. Safe to move L", "It's a heuristic", "It might miss the optimal", "Only works for sorted heights"], "answer": 0, "explanation": "Moving the shorter pointer eliminates it from consideration. Since width only decreases and height is bounded by the shorter line, no eliminated pair can beat the current area." },
+        { "q": "What if both heights are equal?", "options": ["Move either pointer — both are valid. Neither side can improve by staying since width decreases. Some implementations move both", "Must move both", "Must move left", "Must move right"], "answer": 0, "explanation": "When heights are equal, moving either works. Moving both is also valid and sometimes faster in practice. The algorithm remains correct regardless of the tie-breaking rule." },
+        { "q": "How does this differ from Trapping Rain Water?", "options": ["Container finds max single rectangle (two lines). Trapping Rain Water sums all trapped water between all bars. Different problems, different approaches", "Same problem", "Trapping is easier", "Same algorithm"], "answer": 0, "explanation": "Container: maximize one rectangle between two lines. Trapping: sum water at every position (bounded by max left and max right heights). Container uses greedy elimination; Trapping uses prefix max or stack." },
+        { "q": "Can this be solved with divide and conquer?", "options": ["Theoretically yes, but it's O(n log n) and complex. The two-pointer O(n) solution is strictly better. D&C is a common wrong instinct here", "D&C is optimal", "D&C doesn't apply", "Same complexity"], "answer": 0, "explanation": "D&C can work but is slower. The elegance of this problem is that greedy pointer movement gives O(n). Recognizing when greedy beats D&C is an important skill." },
+        { "q": "In a Google interview, what real-world analogy might help explain this?", "options": ["Imagine physically squeezing a container from both sides. You always squeeze the shorter side because the shorter side is the bottleneck determining water level", "No good analogy", "Think of sorting", "Think of binary search"], "answer": 0, "explanation": "Physical intuition: the shorter wall limits water height. Making the container narrower only helps if you find a taller wall. So you always try to replace the shorter wall. Clear and memorable." }
+      ]
+    },
+    {
+      "id": "boats-to-save-people",
+      "title": "Boats to Save People",
+      "difficulty": "Medium",
+      "leetcodeNum": 881,
+      "pattern": "Greedy Pairing",
+      "tldr": "Each boat holds at most 2 people with weight limit. Minimize boats. Sort, then greedily pair heaviest with lightest. If they fit together, great. If not, the heavy person goes alone.",
+      "keyTrick": "Sort ascending. Two pointers: light=0, heavy=n-1. If people[light]+people[heavy] ≤ limit, pair them (light++, heavy--). Otherwise, heavy person goes alone (heavy--). Always use one boat per iteration.",
+      "approaches": [
+        { "name": "Sort + Greedy Pairing", "complexity": "O(n log n) time, O(1) space", "description": "Sort weights. Pair heaviest with lightest if possible. Each iteration uses exactly one boat.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why pair the heaviest with the lightest (not the second heaviest)?", "options": ["If the heaviest can't pair with the lightest (smallest available), they can't pair with anyone. Pairing heaviest+lightest maximizes the chance of fitting two people", "The order doesn't matter", "Pair adjacent weights", "Always pair heaviest together"], "answer": 0, "explanation": "Greedy insight: the lightest person is the best candidate to share a boat with anyone heavy. If even they can't fit with the heaviest, the heaviest must go alone. This minimizes wasted capacity." },
+        { "q": "What's the invariant maintained by this algorithm?", "options": ["Each boat carries 1 or 2 people optimally. After each iteration, the heaviest unassigned person either gets a partner or goes alone — always the best possible decision for that person", "All boats are full", "Lightest go first", "Heaviest go first"], "answer": 0, "explanation": "The greedy choice for the heaviest person is optimal: if they can share, sharing is always better than going alone. The lightest partner wastes the least capacity. Exchange argument proves optimality." },
+        { "q": "What if boats could hold k people instead of 2?", "options": ["NP-hard in general (bin packing). For k=2, the greedy pairing works. For k≥3, heuristics or approximation algorithms are needed", "Same algorithm with more pointers", "Sort and group k at a time", "Always O(n log n)"], "answer": 0, "explanation": "k-person boats is a variant of bin packing, which is NP-hard. The k=2 case is special and solvable greedily. This is a great example of how a small constraint change can drastically affect complexity." },
+        { "q": "Why does sorting not affect the answer?", "options": ["We're counting boats, not tracking which person goes where. Any permutation of people gives the same set of possible pairings. Sorting just helps us find optimal pairings efficiently", "Sorting changes the answer", "Only works for sorted input", "The problem requires sorted order"], "answer": 0, "explanation": "The problem is about grouping, not ordering. Sorting is a tool to find optimal groups quickly. The answer (minimum boats) is a property of the multiset of weights, independent of order." },
+        { "q": "If all people have the same weight w and limit = 2w, what happens?", "options": ["Everyone pairs up: n/2 boats (or n/2 + 1 if n is odd). The two-pointer approach handles this correctly — every pair fits", "N boats needed", "Algorithm fails", "Need special case"], "answer": 0, "explanation": "When all weights equal w and limit ≥ 2w, every pair fits. The algorithm pairs light++ and heavy-- each time, using ceil(n/2) boats. When limit < 2w, everyone goes alone (n boats)." }
+      ]
+    },
+    {
+      "id": "trapping-rain-water",
+      "title": "Trapping Rain Water",
+      "difficulty": "Hard",
+      "leetcodeNum": 42,
+      "pattern": "Opposite Direction (Converging)",
+      "tldr": "Calculate total trapped water. For each position, water = min(maxLeft, maxRight) - height[i]. Use two pointers with running max-left and max-right to avoid precomputing arrays.",
+      "keyTrick": "Two pointers with running maxima: track leftMax and rightMax. Process the side with the SMALLER max. If leftMax < rightMax, water at left position is determined by leftMax (right side is guaranteed ≥ rightMax ≥ leftMax). Move left inward. Vice versa.",
+      "approaches": [
+        { "name": "Brute Force", "complexity": "O(n²) time, O(1) space", "description": "For each index, scan left and right to find max heights. Water = min(maxL, maxR) - height[i]." },
+        { "name": "Prefix Max Arrays", "complexity": "O(n) time, O(n) space", "description": "Precompute leftMax[] and rightMax[] arrays. Water at i = min(leftMax[i], rightMax[i]) - height[i]." },
+        { "name": "Two Pointers with Running Max", "complexity": "O(n) time, O(1) space", "description": "Track leftMax and rightMax. Process the smaller-max side. Single pass, no extra arrays.", "isOptimal": true },
+        { "name": "Monotonic Stack", "complexity": "O(n) time, O(n) space", "description": "Maintain a decreasing stack. When a taller bar is found, calculate water trapped between stack bars. Computes horizontal layers." }
+      ],
+      "quiz": [
+        { "q": "Why is it safe to process the side with the smaller max?", "options": ["If leftMax < rightMax, the actual water level at the left pointer is bounded by leftMax. The right side is guaranteed to have a wall ≥ rightMax > leftMax, so the right boundary exists", "It's not safe — it's an approximation", "Both sides must be processed", "For performance only"], "answer": 0, "explanation": "Key insight: if leftMax < rightMax, water at position left = leftMax - height[left] regardless of what's farther right. The rightMax guarantees there's a wall at least that tall. This is why it works." },
+        { "q": "What's the relationship between the prefix max approach and the two-pointer approach?", "options": ["The two-pointer approach computes leftMax and rightMax on-the-fly instead of precomputing arrays. It's the space-optimized version of the same logic", "Completely different algorithms", "Prefix max is more accurate", "Two pointers is approximate"], "answer": 0, "explanation": "Both compute min(leftMax, rightMax) - height[i] for each position. The prefix approach precomputes; the two-pointer approach computes incrementally. Same result, O(1) vs O(n) space." },
+        { "q": "How does the stack approach differ conceptually?", "options": ["It computes water in horizontal layers (rectangles between bars) while prefix/two-pointer computes vertical columns above each index. Both sum to the same total", "Same approach", "Stack is wrong", "Stack is always better"], "answer": 0, "explanation": "Vertical thinking: water above each position. Horizontal thinking: water between pairs of bars at each height level. The stack approach finds horizontal layers. Both give the correct total." },
+        { "q": "Why is this considered one of the most important interview problems?", "options": ["It tests multiple approaches (brute force → prefix arrays → two pointers → stack), each requiring different insights. It's a perfect optimization progression", "It's overrated", "Only tests one concept", "It's too hard for interviews"], "answer": 0, "explanation": "The progression from O(n²) → O(n)/O(n) → O(n)/O(1) demonstrates optimization thinking. Each step requires a new insight. Google values candidates who can walk through this progression." },
+        { "q": "How would you solve this in 2D (3D terrain with rain)?", "options": ["Use a priority queue (min-heap) of boundary cells. BFS inward from the lowest boundary. The heap ensures water level is determined by the lowest escape point", "Same two-pointer approach", "Not possible", "Use 2D prefix sums"], "answer": 0, "explanation": "2D Trapping Rain Water uses a min-heap of boundary cells + BFS. Process the lowest boundary cell first — if an inner cell is lower, it traps water. This is a classic Google Hard problem." }
+      ]
+    }
+  ]
+}
