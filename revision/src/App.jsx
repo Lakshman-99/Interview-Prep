@@ -20,12 +20,20 @@ function App() {
   const [completedProblems, setCompletedProblems] = useState({});
   const [difficultyFilter, setDifficultyFilter] = useState("All");
   const [theme, setTheme] = useState(() => localStorage.getItem("dsa-theme") || "dark");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const isLight = theme === "light";
 
   useEffect(() => {
     localStorage.setItem("dsa-theme", theme);
   }, [theme]);
+
+  // Close sidebar on resize to desktop
+  useEffect(() => {
+    const onResize = () => { if (window.innerWidth > 768) setSidebarOpen(false); };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   const topic = TOPICS_DATA.find((t) => t.id === selectedTopic);
 
@@ -47,45 +55,59 @@ function App() {
     setCompletedProblems((prev) => ({ ...prev, [pid]: !prev[pid] }));
   };
 
+  const selectTopic = (id) => {
+    setSelectedTopic(id);
+    setExpandedProblem(null);
+    setShowPatterns(false);
+    setSearchQuery("");
+    setDifficultyFilter("All");
+    setSidebarOpen(false); // close drawer on mobile
+  };
+
   const completedInTopic = topic?.problems.filter((p) => completedProblems[p.id]).length || 0;
   const totalInTopic = topic?.problems.length || 0;
   const totalCompleted = Object.values(completedProblems).filter(Boolean).length;
   const totalProblems = TOPICS_DATA.reduce((s, t) => s + t.problems.length, 0);
 
-  // Difficulty colors use CSS variables now
   const diffColor = (d) => `var(--${d.toLowerCase()})`;
 
   return (
     <div className={`app-root ${isLight ? "light" : ""}`}>
       {/* ── Header ────────────────────────────────────────── */}
       <header className="app-header">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-              <span style={{ fontSize: 20 }}>⚡</span>
-              <h1 className="heading-primary" style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.5px" }}>
-                DSA Revision Engine
-              </h1>
-              <span className="badge" style={{ background: "var(--accent-bg)", color: "var(--accent-soft)" }}>Google L3/L4</span>
+        <div className="header-inner">
+          <div className="header-left">
+            {/* Hamburger — mobile only */}
+            <button className="hamburger" onClick={() => setSidebarOpen((o) => !o)} aria-label="Toggle sidebar">
+              <span className={`hamburger-line ${sidebarOpen ? "open" : ""}`} />
+              <span className={`hamburger-line ${sidebarOpen ? "open" : ""}`} />
+              <span className={`hamburger-line ${sidebarOpen ? "open" : ""}`} />
+            </button>
+
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
+                <h1 className="heading-primary header-title">DSA Revision Engine</h1>
+                <span className="badge header-badge" style={{ background: "var(--accent-bg)", color: "var(--accent-soft)" }}>Google L3/L4</span>
+              </div>
+              <p className="header-subtitle">
+                PATTERN-BASED REVISION • NEETCODE 250 • {TOPICS_DATA.length} TOPICS • {totalProblems} PROBLEMS
+              </p>
             </div>
-            <p style={{ color: "var(--text-faint)", fontSize: 12, letterSpacing: "0.5px" }}>
-              PATTERN-BASED REVISION • NEETCODE 250 • {TOPICS_DATA.length} TOPICS • {totalProblems} PROBLEMS
-            </p>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <div style={{ textAlign: "right" }}>
+
+          <div className="header-right">
+            <div className="header-stats">
               <div style={{ fontSize: 10, color: "var(--text-faint)", marginBottom: 4 }}>OVERALL</div>
               <div style={{ fontSize: 18, color: "var(--text-heading)", fontWeight: 600 }}>
                 {totalCompleted}<span style={{ color: "var(--text-faint)" }}>/{totalProblems}</span>
               </div>
             </div>
-            <div style={{ width: 100 }}>
+            <div className="header-progress">
               <div className="progress-bar">
                 <div className="progress-fill" style={{ width: `${totalProblems ? (totalCompleted / totalProblems) * 100 : 0}%` }} />
               </div>
             </div>
 
-            {/* Theme toggle */}
             <button
               className="theme-toggle"
               onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
@@ -101,8 +123,11 @@ function App() {
       </header>
 
       <div className="app-body">
+        {/* Backdrop overlay — mobile only */}
+        {sidebarOpen && <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />}
+
         {/* ── Sidebar ──────────────────────────────────────── */}
-        <aside className="app-sidebar">
+        <aside className={`app-sidebar ${sidebarOpen ? "open" : ""}`}>
           <div style={{ fontSize: 10, color: "var(--text-ghost)", letterSpacing: "1.5px", padding: "0 8px", marginBottom: 10 }}>TOPICS</div>
 
           <div className="sidebar-topics-scroll">
@@ -110,7 +135,7 @@ function App() {
               const done = t.problems.filter((p) => completedProblems[p.id]).length;
               return (
                 <button key={t.id} className={`topic-btn ${selectedTopic === t.id ? "active" : ""}`}
-                  onClick={() => { setSelectedTopic(t.id); setExpandedProblem(null); setShowPatterns(false); setSearchQuery(""); setDifficultyFilter("All"); }}
+                  onClick={() => selectTopic(t.id)}
                   style={{ width: "100%", marginBottom: 4, justifyContent: "space-between" }}>
                   <span style={{ display: "flex", alignItems: "center", gap: 8 }}><span>{t.icon}</span><span>{t.title}</span></span>
                   <span style={{ fontSize: 11, color: "var(--text-faint)" }}>{done}/{t.problems.length}</span>
@@ -144,22 +169,22 @@ function App() {
         {/* ── Main Content ─────────────────────────────────── */}
         <main className="app-main">
           <div style={{ marginBottom: 20 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
-              <span style={{ fontSize: 28 }}>{topic?.icon}</span>
-              <h2 className="heading-primary" style={{ fontSize: 24, fontWeight: 700 }}>{topic?.title}</h2>
+            <div className="topic-heading">
+              <span className="topic-icon">{topic?.icon}</span>
+              <h2 className="heading-primary topic-title">{topic?.title}</h2>
               <span className="badge" style={{ background: "var(--tag-bg)", color: "var(--text-muted)" }}>{topic?.problems.length} problems</span>
             </div>
             <p style={{ color: "var(--text-dimmed)", fontSize: 13, lineHeight: 1.6, maxWidth: 640 }}>{topic?.description}</p>
           </div>
 
           {/* Controls */}
-          <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
+          <div className="controls-bar">
             <input className="search-input" placeholder="Search problems or patterns..." value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)} style={{ maxWidth: 300 }} />
+              onChange={(e) => setSearchQuery(e.target.value)} />
             <button className="topic-btn"
               style={{ background: showPatterns ? "var(--accent-surface)" : "transparent", borderColor: showPatterns ? "var(--border-accent)" : undefined, color: showPatterns ? "var(--accent-soft)" : undefined }}
               onClick={() => setShowPatterns(!showPatterns)}>🧩 Patterns</button>
-            <div style={{ display: "flex", gap: 4 }}>
+            <div className="diff-pills">
               {["All", "Easy", "Medium", "Hard"].map((d) => (
                 <button key={d} className={`diff-pill ${difficultyFilter === d ? "active" : ""}`}
                   style={difficultyFilter === d ? {
@@ -176,7 +201,7 @@ function App() {
           {/* Pattern Map */}
           {showPatterns && (
             <div style={{ marginBottom: 24 }}>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(270px, 1fr))", gap: 12 }}>
+              <div className="pattern-grid">
                 {topic?.patterns.map((pat) => (
                   <div key={pat.name} className="pattern-card">
                     <div style={{ fontSize: 13, fontWeight: 600, color: "var(--pattern-text)", marginBottom: 6 }}>{pat.name}</div>
@@ -205,15 +230,14 @@ function App() {
               return (
                 <div key={problem.id} className={`problem-card ${isExp ? "expanded" : ""}`}>
                   {/* Header row */}
-                  <div onClick={() => setExpandedProblem(isExp ? null : problem.id)}
-                    style={{ padding: "14px 18px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <div onClick={() => setExpandedProblem(isExp ? null : problem.id)} className="problem-header">
+                    <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
                       <button className={`check-btn ${completedProblems[problem.id] ? "done" : ""}`}
                         onClick={(e) => { e.stopPropagation(); toggleComplete(problem.id); }}>
                         {completedProblems[problem.id] && <span style={{ color: "var(--check-icon)", fontSize: 12, fontWeight: 700 }}>✓</span>}
                       </button>
-                      <div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                      <div style={{ minWidth: 0 }}>
+                        <div className="problem-title-row">
                           <span style={{
                             fontSize: 13.5, fontWeight: 500,
                             color: completedProblems[problem.id] ? "var(--completed-text)" : "var(--text-primary)",
@@ -223,24 +247,24 @@ function App() {
                             background: `color-mix(in srgb, ${diffColor(problem.difficulty)} 10%, transparent)`,
                             color: diffColor(problem.difficulty)
                           }}>{problem.difficulty}</span>
-                          <span style={{ fontSize: 11, color: "var(--text-ghost)" }}>#{problem.leetcodeNum}</span>
+                          <span className="leetcode-num">#{problem.leetcodeNum}</span>
                         </div>
                         <span className="pattern-tag" style={{ marginTop: 4 }}>{problem.pattern}</span>
                       </div>
                     </div>
-                    <span style={{ color: "var(--text-ghost)", fontSize: 18, transition: "transform 0.2s", transform: isExp ? "rotate(180deg)" : "none" }}>▾</span>
+                    <span className="expand-arrow" style={{ transform: isExp ? "rotate(180deg)" : "none" }}>▾</span>
                   </div>
 
                   {/* Expanded content */}
                   {isExp && (
                     <div className="card-divider">
-                      <div style={{ display: "flex", borderBottom: "1px solid var(--border)", padding: "0 18px", overflow: "auto" }}>
+                      <div className="tab-bar">
                         {[{ key: "tldr", label: "TLDR" }, { key: "trick", label: "Key Trick" }, { key: "approach", label: "Approaches" }, { key: "quiz", label: "Quiz" }].map((t) => (
                           <button key={t.key} className={`tab-btn ${tab === t.key ? "active" : ""}`}
                             onClick={() => setActiveTab((prev) => ({ ...prev, [problem.id]: t.key }))}>{t.label}</button>
                         ))}
                       </div>
-                      <div style={{ padding: 18 }}>
+                      <div className="tab-content">
                         {/* TLDR */}
                         {tab === "tldr" && (
                           <div>
@@ -265,7 +289,7 @@ function App() {
                           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                             {problem.approaches.map((a, aIdx) => (
                               <div key={aIdx} className={`approach-card ${a.isOptimal ? "optimal" : ""}`}>
-                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6, flexWrap: "wrap", gap: 8 }}>
+                                <div className="approach-header">
                                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                                     <span style={{ fontSize: 11, fontWeight: 600, color: a.isOptimal ? "var(--easy)" : "var(--text-muted)" }}>{a.isOptimal ? "★ OPTIMAL" : `#${aIdx + 1}`}</span>
                                     <span style={{ fontSize: 13, fontWeight: 500, color: "var(--text-secondary)" }}>{a.name}</span>
