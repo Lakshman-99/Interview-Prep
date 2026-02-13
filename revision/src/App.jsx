@@ -87,10 +87,10 @@ function App() {
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
                 <h1 className="heading-primary header-title">DSA Revision Engine</h1>
-                <span className="badge header-badge" style={{ background: "var(--accent-bg)", color: "var(--accent-soft)" }}>Google L3/L4</span>
+                <span className="badge header-badge" style={{ background: "var(--accent-bg)", color: "var(--accent-soft)" }}>NeetCode 250</span>
               </div>
               <p className="header-subtitle">
-                PATTERN-BASED REVISION • NEETCODE 250 • {TOPICS_DATA.length} TOPICS • {totalProblems} PROBLEMS
+                PATTERN-BASED REVISION • {TOPICS_DATA.length} TOPICS • {totalProblems} PROBLEMS
               </p>
             </div>
           </div>
