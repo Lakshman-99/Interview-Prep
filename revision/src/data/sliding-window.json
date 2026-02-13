@@ -28,7 +28,7 @@
     {
       "name": "Single-Pass State Tracking",
       "description": "Track running min/max/state in one pass without an explicit window. The 'window' is implicit — defined by the state variable.",
-      "problems": ["best-time-buy-sell-stock"]
+      "problems": ["best-time-to-buy-and-sell-stock"]
     },
     {
       "name": "Condition Counting / Match Tracking",
@@ -59,7 +59,7 @@
       ]
     },
     {
-      "id": "best-time-buy-sell-stock",
+      "id": "best-time-to-buy-and-sell-stock",
       "title": "Best Time to Buy And Sell Stock",
       "difficulty": "Easy",
       "leetcodeNum": 121,

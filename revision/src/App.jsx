@@ -248,6 +248,10 @@ function App() {
                             color: diffColor(problem.difficulty)
                           }}>{problem.difficulty}</span>
                           <span className="leetcode-num">#{problem.leetcodeNum}</span>
+                          <a href={`https://leetcode.com/problems/${problem.id}/`} target="_blank" rel="noopener noreferrer"
+                            className="ext-link lc" onClick={(e) => e.stopPropagation()} title="Open on LeetCode">LC</a>
+                          <a href={`https://neetcode.io/solutions/${problem.id}`} target="_blank" rel="noopener noreferrer"
+                            className="ext-link nc" onClick={(e) => e.stopPropagation()} title="NeetCode Solution">NC</a>
                         </div>
                         <span className="pattern-tag" style={{ marginTop: 4 }}>{problem.pattern}</span>
                       </div>

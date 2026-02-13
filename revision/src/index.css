@@ -738,6 +738,42 @@ html, body, #root {
   transition: background 0.35s ease, color 0.35s ease;
 }
 
+/* ── External links (LC / NC) ──────────────────────────────── */
+
+.ext-link {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
+  font-family: inherit;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+}
+
+.ext-link.lc {
+  background: #f8972015;
+  color: #f89720;
+  border: 1px solid #f8972030;
+}
+.ext-link.lc:hover {
+  background: #f8972030;
+  border-color: #f89720;
+}
+
+.ext-link.nc {
+  background: #3dd68c15;
+  color: #3dd68c;
+  border: 1px solid #3dd68c30;
+}
+.ext-link.nc:hover {
+  background: #3dd68c30;
+  border-color: #3dd68c;
+}
+
 .card-divider {
   border-top: 1px solid var(--border);
 }
