@@ -4,7 +4,7 @@ import {
   ArrowUpDown, Layers, Filter, CircleCheck, CircleDashed,
   List,
 } from "lucide-react";
-import { useLocalStorage } from "./Uselocalstorage";
+import { useLocalStorage } from "./useLocalStorage";
 
 // ── Data loading ──────────────────────────────────────────────
 const companyModules = import.meta.glob("./data/company/*.json", { eager: true });

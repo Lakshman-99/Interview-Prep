@@ -1,17 +1,50 @@
-import { useState, useEffect } from "react";
-import { Zap, Building2, Sun, Moon } from "lucide-react";
-import CompanyPrep from "./Companyprep";
-import { useLocalStorage, usePersistedSet } from "./Uselocalstorage";
+import { useState, useEffect, useCallback } from "react";
+import { Zap, Building2, Sun, Moon, Search } from "lucide-react";
 import "./App.css";
+import CompanyPrep from "./CompanyPrep";
+import GlobalSearch from "./GlobalSearch";
+import { useLocalStorage, usePersistedSet } from "./useLocalStorage";
 
 // ═══════════════════════════════════════════════════════════════
 // DATA: Auto-loaded from all .json files in the data/ folder.
-// To add a new topic: just drop a new JSON file in src/data/
-// Schema: { id, title, icon, description, patterns[], problems[] }
 // ═══════════════════════════════════════════════════════════════
 
 const topicModules = import.meta.glob("./data/neetcode/*.json", { eager: true });
 const TOPICS_DATA = Object.values(topicModules).map((m) => m.default).sort((a, b) => a.order - b.order);
+
+// Company data: build slug → [{company, frequency}] lookup
+const companyModules = import.meta.glob("./data/company/*.json", { eager: true });
+const slugToCompanies = {};
+Object.entries(companyModules).forEach(([path, mod]) => {
+  const name = path.split("/").pop().replace(".json", "");
+  mod.default.forEach((p) => {
+    if (!slugToCompanies[p.slug]) slugToCompanies[p.slug] = [];
+    slugToCompanies[p.slug].push({ name, frequency: p.frequency });
+  });
+});
+// Sort each entry by frequency descending
+Object.values(slugToCompanies).forEach((arr) =>
+  arr.sort((a, b) => {
+    const fa = a.frequency?.match(/(\d+)\/(\d+)/);
+    const fb = b.frequency?.match(/(\d+)\/(\d+)/);
+    return (fb ? +fb[1] / +fb[2] : 0) - (fa ? +fa[1] / +fa[2] : 0);
+  })
+);
+
+function parseFreq(f) {
+  if (!f) return 0;
+  const m = f.match(/(\d+)\/(\d+)/);
+  return m ? parseInt(m[1]) / parseInt(m[2]) : 0;
+}
+
+function CompanyLogo({ name, size = 14 }) {
+  const slug = name.toLowerCase().replace(/\s+/g, "-");
+  return (
+    <img src={`/company/${slug}.svg`} alt={name} width={size} height={size}
+      style={{ borderRadius: 3, objectFit: "contain", flexShrink: 0 }}
+      onError={(e) => { e.target.style.display = "none"; }} />
+  );
+}
 
 function App() {
   // ── Persisted state ─────────────────────────────────────────
@@ -28,8 +61,21 @@ function App() {
   const [showPatterns, setShowPatterns] = useState(false);
   const [difficultyFilter, setDifficultyFilter] = useState("All");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const isLight = theme === "light";
+
+  // Cmd/Ctrl + K to open search
+  useEffect(() => {
+    const handler = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
 
   useEffect(() => {
     const onResize = () => { if (window.innerWidth > 768) setSidebarOpen(false); };
@@ -69,6 +115,29 @@ function App() {
 
   const diffColor = (d) => `var(--${d.toLowerCase()})`;
 
+  // Navigate from global search result
+  const onSearchNavigate = useCallback((item) => {
+    if (item.neetcodeTopic) {
+      // Go to neetcode page, select the topic, expand the problem
+      setPage("neetcode");
+      setSelectedTopic(item.neetcodeTopic);
+      setExpandedProblem(item.slug);
+      setShowPatterns(false);
+      setSearchQuery("");
+      setDifficultyFilter("All");
+    } else if (item.companies.length > 0) {
+      // Go to company page — CompanyPrep will handle the rest via localStorage
+      setPage("company");
+      // Set the selected company to the first one that has this problem
+      localStorage.setItem(
+        "dsa-rev::selectedCompany",
+        JSON.stringify(item.companies[0])
+      );
+      // Force re-render by toggling a tick
+      window.dispatchEvent(new Event("storage"));
+    }
+    setSidebarOpen(false);
+  }, [setPage, setSelectedTopic]);
   return (
     <div className={`app-root ${isLight ? "light" : ""}`}>
       {/* ── Header ────────────────────────────────────────── */}
@@ -89,6 +158,12 @@ function App() {
                   onClick={() => { setPage("neetcode"); setSidebarOpen(false); }}><Zap size={14} /> NeetCode</button>
                 <button className={`page-tab ${page === "company" ? "active" : ""}`}
                   onClick={() => { setPage("company"); setSidebarOpen(false); }}><Building2 size={14} /> Companies</button>
+                <button className="global-search-trigger" onClick={() => setSearchOpen(true)}
+                  title="Search all problems (Ctrl+K)">
+                  <Search size={14} />
+                  <span className="gs-trigger-text">Search…</span>
+                  <kbd className="gs-trigger-kbd">⌘K</kbd>
+                </button>
               </div>
             </div>
           </div>
@@ -220,14 +295,12 @@ function App() {
             </div>
           )}
 
-          {/* Problems */}
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {filteredProblems.map((problem) => {
               const isExp = expandedProblem === problem.id;
               const tab = getTab(problem.id);
               return (
                 <div key={problem.id} className={`problem-card ${isExp ? "expanded" : ""}`}>
-                  {/* Header row */}
                   <div onClick={() => setExpandedProblem(isExp ? null : problem.id)} className="problem-header">
                     <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
                       <button className={`check-btn ${completed.isOn(problem.id) ? "done" : ""}`}
@@ -251,13 +324,22 @@ function App() {
                           <a href={`https://neetcode.io/solutions/${problem.id}`} target="_blank" rel="noopener noreferrer"
                             className="ext-link nc" onClick={(e) => e.stopPropagation()} title="NeetCode Solution">NC</a>
                         </div>
-                        <span className="pattern-tag" style={{ marginTop: 4 }}>{problem.pattern}</span>
+                        <div className="problem-meta-row">
+                          <span className="pattern-tag">{problem.pattern}</span>
+                          {slugToCompanies[problem.id]?.map((c) => (
+                              <div key={c.name} className="company-freq-pill" title={`${c.name}: ${c.frequency}`}>
+                                <CompanyLogo name={c.name} size={12} />
+                                <div className="freq-micro-bar">
+                                  <div className="freq-micro-fill" style={{ width: `${parseFreq(c.frequency) * 100}%` }} />
+                                </div>
+                                <span className="freq-micro-label">{c.frequency}</span>
+                              </div>
+                            ))}
+                          </div>
                       </div>
                     </div>
                     <span className="expand-arrow" style={{ transform: isExp ? "rotate(180deg)" : "none" }}>▾</span>
                   </div>
-
-                  {/* Expanded content */}
                   {isExp && (
                     <div className="card-divider">
                       <div className="tab-bar">
@@ -267,7 +349,6 @@ function App() {
                         ))}
                       </div>
                       <div className="tab-content">
-                        {/* TLDR */}
                         {tab === "tldr" && (
                           <div>
                             <p style={{ fontSize: 13.5, lineHeight: 1.7, color: "var(--text-secondary)" }}>{problem.tldr}</p>
@@ -277,16 +358,12 @@ function App() {
                             </div>
                           </div>
                         )}
-
-                        {/* Key Trick */}
                         {tab === "trick" && (
                           <div className="trick-box">
                             <div style={{ fontSize: 10, color: "var(--easy)", letterSpacing: "1px", marginBottom: 8 }}>💡 THE KEY INSIGHT</div>
                             <p style={{ fontSize: 13.5, lineHeight: 1.7, color: "var(--text-secondary)" }}>{problem.keyTrick}</p>
                           </div>
                         )}
-
-                        {/* Approaches */}
                         {tab === "approach" && (
                           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                             {problem.approaches.map((a, aIdx) => (
@@ -306,8 +383,6 @@ function App() {
                             ))}
                           </div>
                         )}
-
-                        {/* Quiz */}
                         {tab === "quiz" && (
                           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
                             {problem.quiz.map((q, qIdx) => {
@@ -364,6 +439,9 @@ function App() {
         </>
         )}
       </div>
+      {searchOpen && (
+        <GlobalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} onNavigate={onSearchNavigate} />
+      )}
     </div>
   );
 }
