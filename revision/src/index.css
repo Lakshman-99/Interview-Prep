@@ -377,6 +377,7 @@ html, body, #root {
 }
 .theme-toggle-knob.is-light {
   transform: translateX(24px);
+  color: whitesmoke;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -703,6 +704,8 @@ html, body, #root {
   color: var(--pill-text);
   font-family: inherit;
   transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
 }
 .diff-pill:hover {
   border-color: var(--pill-hover-border);
@@ -777,6 +780,415 @@ html, body, #root {
 .card-divider {
   border-top: 1px solid var(--border);
 }
+
+/* ── Page tabs (NeetCode / Companies) ──────────────────────── */
+
+.page-tabs {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.page-tab {
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-dimmed);
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.page-tab:hover {
+  border-color: var(--border-hover);
+  color: var(--text-secondary);
+}
+.page-tab.active {
+  background: var(--accent-surface);
+  border-color: var(--border-accent);
+  color: var(--accent-soft);
+}
+
+/* ── View switcher (List / Overlap / Insights) ─────────────── */
+
+.view-switcher {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-deep);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.view-btn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-dimmed);
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.view-btn:hover {
+  color: var(--text-secondary);
+}
+.view-btn.active {
+  background: var(--bg-card);
+  color: var(--text-heading);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+/* ── Company sidebar view switcher ──────────────────────────── */
+
+.sidebar-view-switch {
+  display: flex;
+  gap: 3px;
+  margin: 0 8px 12px;
+  background: var(--bg-deep);
+  border-radius: 6px;
+  padding: 3px;
+}
+
+.sv-btn {
+  flex: 1;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-dimmed);
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+.sv-btn:hover {
+  color: var(--text-secondary);
+}
+.sv-btn.active {
+  background: var(--bg-card);
+  color: var(--text-heading);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+/* ── Overlap companies row (under heading) ─────────────────── */
+
+.overlap-companies-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.overlap-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  background: var(--tag-bg);
+  color: var(--tag-text);
+}
+
+/* ── Status dot ────────────────────────────────────────────── */
+
+.status-dot {
+  color: var(--text-ghost);
+  display: inline-flex;
+  align-items: center;
+}
+.status-dot.solved {
+  color: var(--easy);
+}
+
+/* ── Other company logos in list mode ──────────────────────── */
+
+.other-companies {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.more-badge {
+  font-size: 9px;
+  color: var(--text-faint);
+  padding: 0 3px;
+}
+
+/* ── Sort bar ──────────────────────────────────────────────── */
+
+.sort-bar {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin: 12px 0;
+  flex-wrap: wrap;
+}
+
+.sort-btn {
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-dimmed);
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.sort-btn:hover {
+  border-color: var(--border-hover);
+  color: var(--text-secondary);
+}
+.sort-btn.active {
+  border-color: var(--border-accent);
+  color: var(--accent-soft);
+  background: var(--accent-surface);
+}
+
+/* ── Company sidebar ───────────────────────────────────────── */
+
+.company-sidebar {
+  width: 260px;
+}
+
+.sidebar-section-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 1.5px;
+  padding: 0 8px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mini-btn {
+  font-size: 9px;
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.mini-btn:hover {
+  border-color: var(--border-hover);
+  color: var(--text-secondary);
+}
+
+/* Sidebar dashboard grid */
+.sidebar-dashboard {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 0 8px;
+  margin-bottom: 12px;
+}
+
+.dash-stat {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-card);
+  text-align: center;
+  transition: background 0.35s ease;
+}
+
+.dash-num {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-heading);
+  font-family: 'Space Grotesk', sans-serif;
+  line-height: 1.2;
+}
+
+.dash-label {
+  font-size: 9px;
+  color: var(--text-faint);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* Company row in sidebar */
+.company-row {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12.5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 2px;
+  transition: all 0.15s;
+  color: var(--text-primary);
+}
+.company-row:hover {
+  background: var(--topic-btn-hover-bg);
+}
+.company-row.on {
+  border-color: var(--border);
+}
+.company-row.off {
+  opacity: 0.45;
+}
+.company-row.off:hover {
+  opacity: 0.7;
+}
+
+.company-row-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.company-row-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.company-row-count {
+  font-size: 10px;
+  color: var(--text-faint);
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.company-check {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1.5px solid var(--check-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.company-check.checked {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* ── Company frequency pills in problem row ────────────────── */
+
+.company-freq-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.company-freq-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--tag-bg);
+  font-size: 10px;
+  color: var(--text-faint);
+}
+
+.freq-micro-bar {
+  width: 32px;
+  height: 3px;
+  background: var(--progress-track);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.freq-micro-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--medium), var(--hard));
+  transition: width 0.3s ease;
+}
+
+.freq-micro-label {
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  min-width: 18px;
+}
+
+.problem-links {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+/* Notes badge */
+.notes-badge {
+  background: var(--accent-bg);
+  color: var(--accent-soft) !important;
+  font-size: 9px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ── Search with icon ──────────────────────────────────────── */
+
+.search-wrap {
+  position: relative;
+  flex: 1;
+  max-width: 300px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-ghost);
+  pointer-events: none;
+}
+
+.search-input.has-icon {
+  padding-left: 34px;
+}
+
+/* ── Difficulty stacked bar ────────────────────────────────── */
+
+.diff-bar-stack {
+  display: flex;
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--progress-track);
+}
+
+.diff-bar {
+  height: 100%;
+  transition: width 0.4s ease;
+}
+.diff-bar.easy { background: var(--easy); }
+.diff-bar.medium { background: var(--medium); }
+.diff-bar.hard { background: var(--hard); }
 
 
 /* ══════════════════════════════════════════════════════════════
@@ -919,6 +1331,59 @@ html, body, #root {
     padding: 8px 12px;
     font-size: 11px;
   }
+
+  /* Company page responsive */
+  .view-switcher {
+    width: 100%;
+  }
+  .view-btn {
+    flex: 1;
+    text-align: center;
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+  .sort-bar {
+    gap: 4px;
+  }
+  .sort-btn {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+  .company-sidebar {
+    width: 280px;
+  }
+  .sidebar-view-switch {
+    margin: 0 8px 10px;
+  }
+  .sv-btn {
+    font-size: 10px;
+    padding: 5px 6px;
+  }
+  .sidebar-dashboard {
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+  }
+  .dash-num {
+    font-size: 16px;
+  }
+  .search-wrap {
+    max-width: 100%;
+    flex-basis: 100%;
+    order: -1;
+  }
+  .company-freq-row {
+    gap: 4px;
+  }
+  .freq-micro-bar {
+    width: 24px;
+  }
+  .page-tabs {
+    gap: 3px;
+  }
+  .page-tab {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
 }
 
 
@@ -1010,5 +1475,46 @@ html, body, #root {
 
   .pattern-box {
     padding: 8px 12px;
+  }
+
+  /* Company page — small phone */
+  .company-freq-row {
+    gap: 3px;
+  }
+  .company-freq-pill {
+    padding: 2px 4px;
+    gap: 3px;
+  }
+  .freq-micro-bar {
+    width: 20px;
+  }
+  .freq-micro-label {
+    font-size: 8px;
+  }
+  .problem-links {
+    margin-left: 0;
+  }
+  .other-companies {
+    display: none;
+  }
+  .overlap-companies-row {
+    gap: 3px;
+  }
+  .overlap-chip {
+    font-size: 9px;
+    padding: 2px 6px;
+  }
+  .sidebar-dashboard {
+    gap: 4px;
+  }
+  .dash-num {
+    font-size: 14px;
+  }
+  .dash-stat {
+    padding: 6px 8px;
+  }
+  .view-btn {
+    font-size: 10px;
+    padding: 5px 6px;
   }
 }

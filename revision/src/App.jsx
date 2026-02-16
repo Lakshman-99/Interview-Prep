@@ -1,4 +1,7 @@
 import { useState, useEffect } from "react";
+import { Zap, Building2, Sun, Moon } from "lucide-react";
+import CompanyPrep from "./Companyprep";
+import { useLocalStorage, usePersistedSet } from "./Uselocalstorage";
 import "./App.css";
 
 // ═══════════════════════════════════════════════════════════════
@@ -7,28 +10,27 @@ import "./App.css";
 // Schema: { id, title, icon, description, patterns[], problems[] }
 // ═══════════════════════════════════════════════════════════════
 
-const topicModules = import.meta.glob("./data/*.json", { eager: true });
+const topicModules = import.meta.glob("./data/neetcode/*.json", { eager: true });
 const TOPICS_DATA = Object.values(topicModules).map((m) => m.default).sort((a, b) => a.order - b.order);
 
 function App() {
-  const [selectedTopic, setSelectedTopic] = useState(TOPICS_DATA[0]?.id);
+  // ── Persisted state ─────────────────────────────────────────
+  const [theme, setTheme] = useLocalStorage("theme", "dark");
+  const [page, setPage] = useLocalStorage("page", "neetcode");
+  const [selectedTopic, setSelectedTopic] = useLocalStorage("selectedTopic", TOPICS_DATA[0]?.id);
+  const completed = usePersistedSet("completed");
+  const [quizState, setQuizState] = useLocalStorage("quiz", {});
+
+  // ── Session-only state ──────────────────────────────────────
   const [expandedProblem, setExpandedProblem] = useState(null);
   const [activeTab, setActiveTab] = useState({});
-  const [quizState, setQuizState] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
   const [showPatterns, setShowPatterns] = useState(false);
-  const [completedProblems, setCompletedProblems] = useState({});
   const [difficultyFilter, setDifficultyFilter] = useState("All");
-  const [theme, setTheme] = useState(() => localStorage.getItem("dsa-theme") || "dark");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const isLight = theme === "light";
 
-  useEffect(() => {
-    localStorage.setItem("dsa-theme", theme);
-  }, [theme]);
-
-  // Close sidebar on resize to desktop
   useEffect(() => {
     const onResize = () => { if (window.innerWidth > 768) setSidebarOpen(false); };
     window.addEventListener("resize", onResize);
@@ -51,22 +53,18 @@ function App() {
     setQuizState((prev) => ({ ...prev, [`${pid}-${qIdx}`]: sel }));
   };
 
-  const toggleComplete = (pid) => {
-    setCompletedProblems((prev) => ({ ...prev, [pid]: !prev[pid] }));
-  };
-
   const selectTopic = (id) => {
     setSelectedTopic(id);
     setExpandedProblem(null);
     setShowPatterns(false);
     setSearchQuery("");
     setDifficultyFilter("All");
-    setSidebarOpen(false); // close drawer on mobile
+    setSidebarOpen(false);
   };
 
-  const completedInTopic = topic?.problems.filter((p) => completedProblems[p.id]).length || 0;
+  const completedInTopic = topic?.problems.filter((p) => completed.isOn(p.id)).length || 0;
   const totalInTopic = topic?.problems.length || 0;
-  const totalCompleted = Object.values(completedProblems).filter(Boolean).length;
+  const totalCompleted = completed.count;
   const totalProblems = TOPICS_DATA.reduce((s, t) => s + t.problems.length, 0);
 
   const diffColor = (d) => `var(--${d.toLowerCase()})`;
@@ -77,21 +75,21 @@ function App() {
       <header className="app-header">
         <div className="header-inner">
           <div className="header-left">
-            {/* Hamburger — mobile only */}
             <button className="hamburger" onClick={() => setSidebarOpen((o) => !o)} aria-label="Toggle sidebar">
               <span className={`hamburger-line ${sidebarOpen ? "open" : ""}`} />
               <span className={`hamburger-line ${sidebarOpen ? "open" : ""}`} />
               <span className={`hamburger-line ${sidebarOpen ? "open" : ""}`} />
             </button>
-
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
                 <h1 className="heading-primary header-title">DSA Revision Engine</h1>
-                <span className="badge header-badge" style={{ background: "var(--accent-bg)", color: "var(--accent-soft)" }}>NeetCode 250</span>
               </div>
-              <p className="header-subtitle">
-                PATTERN-BASED REVISION • {TOPICS_DATA.length} TOPICS • {totalProblems} PROBLEMS
-              </p>
+              <div className="page-tabs">
+                <button className={`page-tab ${page === "neetcode" ? "active" : ""}`}
+                  onClick={() => { setPage("neetcode"); setSidebarOpen(false); }}><Zap size={14} /> NeetCode</button>
+                <button className={`page-tab ${page === "company" ? "active" : ""}`}
+                  onClick={() => { setPage("company"); setSidebarOpen(false); }}><Building2 size={14} /> Companies</button>
+              </div>
             </div>
           </div>
 
@@ -107,15 +105,12 @@ function App() {
                 <div className="progress-fill" style={{ width: `${totalProblems ? (totalCompleted / totalProblems) * 100 : 0}%` }} />
               </div>
             </div>
-
-            <button
-              className="theme-toggle"
+            <button className="theme-toggle"
               onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
               aria-label="Toggle theme"
-              title={isLight ? "Switch to dark mode" : "Switch to light mode"}
-            >
+              title={isLight ? "Switch to dark mode" : "Switch to light mode"}>
               <div className={`theme-toggle-knob ${isLight ? "is-light" : ""}`}>
-                {isLight ? "☀" : "☾"}
+                {isLight ? <Sun size={12} /> : <Moon size={12} />}
               </div>
             </button>
           </div>
@@ -123,16 +118,22 @@ function App() {
       </header>
 
       <div className="app-body">
-        {/* Backdrop overlay — mobile only */}
         {sidebarOpen && <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />}
 
-        {/* ── Sidebar ──────────────────────────────────────── */}
+        {page === "company" ? (
+          <CompanyPrep
+            completed={completed}
+            sidebarOpen={sidebarOpen}
+            setSidebarOpen={setSidebarOpen}
+          />
+        ) : (
+        <>
+        {/* ── NeetCode Sidebar ─────────────────────────────── */}
         <aside className={`app-sidebar ${sidebarOpen ? "open" : ""}`}>
           <div style={{ fontSize: 10, color: "var(--text-ghost)", letterSpacing: "1.5px", padding: "0 8px", marginBottom: 10 }}>TOPICS</div>
-
           <div className="sidebar-topics-scroll">
             {TOPICS_DATA.map((t) => {
-              const done = t.problems.filter((p) => completedProblems[p.id]).length;
+              const done = t.problems.filter((p) => completed.isOn(p.id)).length;
               return (
                 <button key={t.id} className={`topic-btn ${selectedTopic === t.id ? "active" : ""}`}
                   onClick={() => selectTopic(t.id)}
@@ -143,13 +144,12 @@ function App() {
               );
             })}
           </div>
-
           <div className="glow-line" style={{ margin: "16px 0" }} />
           <div style={{ fontSize: 10, color: "var(--text-ghost)", letterSpacing: "1.5px", padding: "0 8px", marginBottom: 10 }}>CURRENT TOPIC</div>
           <div style={{ padding: "0 8px" }}>
             {["Easy", "Medium", "Hard"].map((d) => {
               const count = topic?.problems.filter((p) => p.difficulty === d).length || 0;
-              const doneCount = topic?.problems.filter((p) => p.difficulty === d && completedProblems[p.id]).length || 0;
+              const doneCount = topic?.problems.filter((p) => p.difficulty === d && completed.isOn(p.id)).length || 0;
               return (
                 <div key={d} style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, fontSize: 12 }}>
                   <span style={{ color: diffColor(d) }}>{d}</span>
@@ -166,7 +166,7 @@ function App() {
           </div>
         </aside>
 
-        {/* ── Main Content ─────────────────────────────────── */}
+        {/* ── NeetCode Main ────────────────────────────────── */}
         <main className="app-main">
           <div style={{ marginBottom: 20 }}>
             <div className="topic-heading">
@@ -177,7 +177,6 @@ function App() {
             <p style={{ color: "var(--text-dimmed)", fontSize: 13, lineHeight: 1.6, maxWidth: 640 }}>{topic?.description}</p>
           </div>
 
-          {/* Controls */}
           <div className="controls-bar">
             <input className="search-input" placeholder="Search problems or patterns..." value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)} />
@@ -198,7 +197,6 @@ function App() {
             </div>
           </div>
 
-          {/* Pattern Map */}
           {showPatterns && (
             <div style={{ marginBottom: 24 }}>
               <div className="pattern-grid">
@@ -232,16 +230,16 @@ function App() {
                   {/* Header row */}
                   <div onClick={() => setExpandedProblem(isExp ? null : problem.id)} className="problem-header">
                     <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
-                      <button className={`check-btn ${completedProblems[problem.id] ? "done" : ""}`}
-                        onClick={(e) => { e.stopPropagation(); toggleComplete(problem.id); }}>
-                        {completedProblems[problem.id] && <span style={{ color: "var(--check-icon)", fontSize: 12, fontWeight: 700 }}>✓</span>}
+                      <button className={`check-btn ${completed.isOn(problem.id) ? "done" : ""}`}
+                        onClick={(e) => { e.stopPropagation(); completed.toggle(problem.id); }}>
+                        {completed.isOn(problem.id) && <span style={{ color: "var(--check-icon)", fontSize: 12, fontWeight: 700 }}>✓</span>}
                       </button>
                       <div style={{ minWidth: 0 }}>
                         <div className="problem-title-row">
                           <span style={{
                             fontSize: 13.5, fontWeight: 500,
-                            color: completedProblems[problem.id] ? "var(--completed-text)" : "var(--text-primary)",
-                            textDecoration: completedProblems[problem.id] ? "line-through" : "none"
+                            color: completed.isOn(problem.id) ? "var(--completed-text)" : "var(--text-primary)",
+                            textDecoration: completed.isOn(problem.id) ? "line-through" : "none"
                           }}>{problem.title}</span>
                           <span className="badge" style={{
                             background: `color-mix(in srgb, ${diffColor(problem.difficulty)} 10%, transparent)`,
@@ -363,6 +361,8 @@ function App() {
           )}
           <div style={{ height: 40 }} />
         </main>
+        </>
+        )}
       </div>
     </div>
   );
