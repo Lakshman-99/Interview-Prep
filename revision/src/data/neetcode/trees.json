@@ -1,0 +1,509 @@
+{
+  "id": "trees",
+  "title": "Trees",
+  "icon": "𖣂︎",
+  "order": 6,
+  "description": "Recursive structures demanding recursive thinking. Trees unlock Tries, Graphs, Backtracking, and DP on trees. Master DFS (pre/in/post), BFS (level-order), and the BST invariant — then every tree problem is a variation of these.",
+  "patterns": [
+    {
+      "name": "DFS Traversal (Pre / In / Post)",
+      "description": "Visit nodes in specific orders using recursion or an explicit stack. Preorder = process before children, Inorder = between children (gives sorted order for BST), Postorder = after children (bottom-up aggregation).",
+      "problems": ["bt-inorder", "bt-preorder", "bt-postorder", "validate-bst", "kth-smallest-bst", "construct-bt-preorder-inorder"]
+    },
+    {
+      "name": "Bottom-Up DFS (Postorder Pattern)",
+      "description": "Compute results from leaves upward. Each node aggregates children's results. Used for height, diameter, balance, path sums, and subtree problems.",
+      "problems": ["max-depth", "diameter-bt", "balanced-bt", "same-tree", "subtree-another-tree", "house-robber-iii", "delete-leaves-value", "bt-max-path-sum"]
+    },
+    {
+      "name": "Top-Down DFS (Preorder Pattern)",
+      "description": "Pass state downward from root to leaves. Used for path tracking, constraint propagation, and validation with running bounds.",
+      "problems": ["count-good-nodes", "validate-bst", "serialize-deserialize-bt"]
+    },
+    {
+      "name": "BFS / Level-Order",
+      "description": "Process nodes level by level using a queue. Enables level-aware operations: level sums, right-side view, zigzag traversal, and minimum depth.",
+      "problems": ["bt-level-order", "bt-right-side-view"]
+    },
+    {
+      "name": "BST Properties",
+      "description": "Exploit the BST invariant (left < node < right). Inorder traversal gives sorted order. Search, insert, delete all use the invariant for O(h) operations.",
+      "problems": ["lca-bst", "insert-bst", "delete-bst", "validate-bst", "kth-smallest-bst"]
+    },
+    {
+      "name": "Tree Construction / Destruction",
+      "description": "Build trees from traversal sequences or serialize/deserialize tree structures. Requires understanding how traversal orders uniquely determine tree structure.",
+      "problems": ["construct-bt-preorder-inorder", "serialize-deserialize-bt", "construct-quad-tree"]
+    },
+    {
+      "name": "Tree Modification (Structural Changes)",
+      "description": "Modify tree structure in-place: invert, delete nodes, prune subtrees. Requires careful pointer/reference management and often postorder processing.",
+      "problems": ["invert-bt", "delete-bst", "delete-leaves-value"]
+    },
+    {
+      "name": "Tree DP",
+      "description": "Dynamic programming on trees where each node's optimal solution depends on its children's solutions. Often involves choosing to include or exclude the current node.",
+      "problems": ["house-robber-iii", "bt-max-path-sum"]
+    }
+  ],
+  "problems": [
+    {
+      "id": "bt-inorder",
+      "title": "Binary Tree Inorder Traversal",
+      "difficulty": "Easy",
+      "leetcodeNum": 94,
+      "pattern": "DFS Traversal (Pre / In / Post)",
+      "tldr": "Visit left subtree, then node, then right subtree. For BST, inorder gives sorted order. Recursive is trivial; iterative uses an explicit stack pushing all left children first.",
+      "keyTrick": "Iterative inorder: push all left children onto stack. Pop = visit. Then move to right child and push all ITS left children. The pattern is: go left as far as possible, visit, step right, repeat.",
+      "approaches": [
+        { "name": "Recursive", "complexity": "O(n) time, O(h) stack", "description": "inorder(left), visit(node), inorder(right). Trivial but uses O(h) call stack." },
+        { "name": "Iterative with Stack", "complexity": "O(n) time, O(h) space", "description": "Push all left nodes. Pop and visit. Move to right child. Repeat.", "isOptimal": true },
+        { "name": "Morris Traversal", "complexity": "O(n) time, O(1) space", "description": "Thread right pointers to inorder successor temporarily. No stack needed. Modifies then restores tree." }
+      ],
+      "quiz": [
+        { "q": "Why does inorder traversal of a BST produce sorted output?", "options": ["BST invariant: left < node < right. Inorder visits left (smaller), then node, then right (larger). Recursively, this visits all nodes in ascending order", "Coincidence for balanced BSTs", "Only works for complete BSTs", "It doesn't always produce sorted output"], "answer": 0, "explanation": "The BST invariant guarantees: everything in the left subtree < node < everything in the right subtree. Inorder visits left subtree first (all smaller), then node, then right (all larger). Sorted by construction." },
+        { "q": "The iterative approach uses a stack. What invariant does the stack maintain?", "options": ["The stack holds nodes whose left subtrees have been fully processed but the node itself and its right subtree haven't been visited yet", "All unvisited nodes", "Nodes in sorted order", "Only leaf nodes"], "answer": 0, "explanation": "Each node on the stack: its left subtree is done (we pushed left children first). When we pop, we visit the node and then process its right subtree. The stack is the 'pending visit' list." },
+        { "q": "Morris Traversal achieves O(1) space. What's the trade-off?", "options": ["It temporarily modifies the tree structure by creating threaded links (right pointers to inorder successors), then restores them. Not safe for concurrent access or read-only trees", "No trade-off", "It's slower than O(n)", "It only works for BSTs"], "answer": 0, "explanation": "Morris creates temporary right-pointer threads from predecessors to successors. This replaces the stack with in-tree links. After traversal, all links are restored. But during traversal, the tree is modified — thread safety is lost." },
+        { "q": "How do you convert the iterative inorder template to preorder?", "options": ["Visit the node WHEN YOU PUSH IT (before going left) instead of when you pop it. The stack mechanics stay the same — just move the visit operation", "Completely different algorithm", "Reverse the stack operations", "Change to BFS"], "answer": 0, "explanation": "Inorder: push lefts, visit on pop, go right. Preorder: visit on push, push lefts, go right. Postorder: trickier (reverse of modified preorder, or two stacks). Understanding these transformations is powerful." },
+        { "q": "In which non-obvious problems is inorder traversal the key?", "options": ["Validate BST (check sorted order), Kth Smallest in BST (count during inorder), Convert BST to Sorted DLL, and Recover BST (find swapped nodes in inorder sequence)", "Only for printing trees", "Only for BST search", "No non-obvious applications"], "answer": 0, "explanation": "Inorder = sorted sequence for BSTs. Any problem asking about 'order' or 'rank' in a BST maps to inorder traversal. Recognizing this connection unlocks many BST problems instantly." }
+      ]
+    },
+    {
+      "id": "bt-preorder",
+      "title": "Binary Tree Preorder Traversal",
+      "difficulty": "Easy",
+      "leetcodeNum": 144,
+      "pattern": "DFS Traversal (Pre / In / Post)",
+      "tldr": "Visit node first, then left subtree, then right subtree. Iterative: push root, pop and visit, push RIGHT then LEFT (so left is processed first — LIFO). Preorder is the natural DFS order.",
+      "keyTrick": "Iterative preorder is the simplest: stack starts with root. Pop → visit → push right child → push left child. Left is pushed second so it's popped first (LIFO). This gives root-left-right order naturally.",
+      "approaches": [
+        { "name": "Recursive", "complexity": "O(n) time, O(h) stack", "description": "visit(node), preorder(left), preorder(right). Simplest." },
+        { "name": "Iterative with Stack", "complexity": "O(n) time, O(h) space", "description": "Push root. Pop → visit → push right → push left. Natural DFS.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why push right child before left in the iterative approach?", "options": ["Stack is LIFO. Pushing right first means left is on top and gets processed first. This gives the correct root → left → right preorder sequence", "Convention", "Right is always smaller", "It doesn't matter"], "answer": 0, "explanation": "LIFO reverses push order: push [right, left] → pop left first, then right. This ensures the entire left subtree is visited before the right subtree. Simple but the ordering is critical." },
+        { "q": "Preorder traversal uniquely defines the tree structure when combined with which other traversal?", "options": ["Inorder. Preorder + Inorder uniquely reconstructs the binary tree. Preorder's first element is the root; Inorder tells you which nodes are left vs right of that root", "Postorder only", "Level-order only", "Preorder alone is sufficient"], "answer": 0, "explanation": "Preorder: root is always first. Find root in inorder → everything left of root in inorder is the left subtree, everything right is the right subtree. Recurse. This is LC 105 (Construct Binary Tree)." },
+        { "q": "How does preorder relate to serialization?", "options": ["Preorder with null markers uniquely represents a tree and enables simple serialization/deserialization. Process root first, then recursively serialize left and right", "Not useful for serialization", "Only level-order works", "Need both preorder and inorder"], "answer": 0, "explanation": "Preorder + null markers: '1,2,null,null,3,4,null,null,5,null,null'. Deserialize by reading left-to-right, building root, then recursing for left and right. This is the approach in LC 297." },
+        { "q": "What real-world structure is a preorder traversal of a file system?", "options": ["The output of 'tree' command or 'find' command — list a directory, then recursively list its contents. Directory is visited before its children (preorder = parent before children)", "Postorder", "No connection to file systems", "BFS"], "answer": 0, "explanation": "File system traversal is preorder: print directory name, then recurse into subdirectories. 'du -s' (disk usage) is postorder (compute child sizes first). Recognizing real-world traversal patterns helps intuition." },
+        { "q": "The iterative preorder template can be modified for postorder. How?", "options": ["Modified preorder: root → right → left (push left before right). Then reverse the result. Reversed root-right-left = left-right-root = postorder", "Can't derive postorder from preorder", "Just swap left and right in recursion", "Use BFS instead"], "answer": 0, "explanation": "Trick: preorder = root,left,right. Modified preorder = root,right,left. Reverse of that = left,right,root = postorder. So: do modified preorder (push left before right), reverse the output. Clever single-stack approach." }
+      ]
+    },
+    {
+      "id": "bt-postorder",
+      "title": "Binary Tree Postorder Traversal",
+      "difficulty": "Easy",
+      "leetcodeNum": 145,
+      "pattern": "DFS Traversal (Pre / In / Post)",
+      "tldr": "Visit left subtree, right subtree, then node (bottom-up). Iterative is trickiest of the three. Simplest iterative: do modified preorder (root-right-left) and reverse the result.",
+      "keyTrick": "Reverse of modified preorder: push root, pop → append → push LEFT → push RIGHT. This gives root-right-left. Reverse the result → left-right-root = postorder. Avoids the complex 'visited flag' approach.",
+      "approaches": [
+        { "name": "Recursive", "complexity": "O(n) time, O(h) stack", "description": "postorder(left), postorder(right), visit(node)." },
+        { "name": "Two Stacks / Reverse Preorder", "complexity": "O(n) time, O(n) space", "description": "Modified preorder (root-right-left) then reverse. Simple.", "isOptimal": true },
+        { "name": "One Stack with Prev Pointer", "complexity": "O(n) time, O(h) space", "description": "Track previously visited node. Only pop when both children are processed. More complex but true O(h) space." }
+      ],
+      "quiz": [
+        { "q": "Why is postorder the hardest to implement iteratively?", "options": ["A node should only be visited AFTER both children are done. When you pop a node, you don't know if its right child has been processed yet. Need extra tracking (prev pointer or visited flag)", "It's not harder", "The stack behaves differently", "Postorder requires BFS"], "answer": 0, "explanation": "In preorder/inorder, you process the node immediately or after left. In postorder, you need to defer the node until BOTH children are done. This requires knowing whether you're returning from left or right child." },
+        { "q": "Postorder is the natural order for which type of computation?", "options": ["Bottom-up aggregation: compute children's results first, then combine at the parent. Height, diameter, subtree sums, and tree DP all use postorder logic", "Top-down propagation", "Level-by-level processing", "Random access"], "answer": 0, "explanation": "Postorder = children before parent = bottom-up. Height = 1 + max(leftH, rightH). Diameter = leftH + rightH. These require children's answers first. Postorder is the natural DP-on-trees evaluation order." },
+        { "q": "How does the 'prev pointer' approach for true iterative postorder work?", "options": ["Track the last visited node (prev). When peeking stack top: if right child exists and isn't prev, push right and left of right. If right child is prev or doesn't exist, pop and visit", "Pop both children first", "Use two stacks always", "Mark nodes as visited"], "answer": 0, "explanation": "prev tells you which child you just returned from. If prev == node.right, both children are done → visit node. If prev == node.left and right exists, process right next. This enables true O(h) space postorder." },
+        { "q": "In a compiler, which traversal order evaluates an expression tree?", "options": ["Postorder — evaluate left operand, evaluate right operand, then apply operator. This naturally computes the expression bottom-up, like RPN evaluation", "Preorder", "Inorder (gives infix)", "Level-order"], "answer": 0, "explanation": "Expression tree for (3+4)*5: postorder visits 3, 4, + (gives 7), 5, * (gives 35). This is exactly RPN evaluation. Compilers generate postorder traversal of expression trees for code generation." },
+        { "q": "What's the relationship between the three traversal orders for a binary tree?", "options": ["Preorder: root, left subtree, right subtree. Inorder: left, root, right. Postorder: left, right, root. The root's position (first/middle/last) distinguishes them. Any two uniquely reconstruct the tree", "They produce the same output", "Only inorder matters", "All three are needed to reconstruct"], "answer": 0, "explanation": "Root position: pre=first, in=middle, post=last. Any two (pre+in, post+in, or pre+post with special care) uniquely determine the tree. This is why construction problems always give two traversals." }
+      ]
+    },
+    {
+      "id": "invert-bt",
+      "title": "Invert Binary Tree",
+      "difficulty": "Easy",
+      "leetcodeNum": 226,
+      "pattern": "Tree Modification (Structural Changes)",
+      "tldr": "Mirror/flip a binary tree: swap left and right children at every node. Recursive: swap children, recurse on both. Can also use BFS — swap children level by level.",
+      "keyTrick": "At each node: swap left and right children (node.left, node.right = node.right, node.left). Then recurse on both children. Order doesn't matter — preorder, postorder, or even BFS all work since every node needs its children swapped.",
+      "approaches": [
+        { "name": "Recursive DFS", "complexity": "O(n) time, O(h) space", "description": "Swap children at each node, recurse on both. Three lines of code.", "isOptimal": true },
+        { "name": "Iterative BFS", "complexity": "O(n) time, O(n) space", "description": "Queue-based BFS. At each node, swap its children. Enqueue children." }
+      ],
+      "quiz": [
+        { "q": "Does it matter whether you swap before or after recursing?", "options": ["No — swapping before (preorder) or after (postorder) both work. The swap is local to each node and doesn't depend on children's state. Even in-order works with care", "Must swap before (preorder)", "Must swap after (postorder)", "Only BFS works correctly"], "answer": 0, "explanation": "Preorder: swap, then recurse on (now-swapped) children. Postorder: recurse, then swap. Both produce the same result because every node gets swapped exactly once regardless of order." },
+        { "q": "The famous 'Homebrew incident': why is this problem culturally significant in tech?", "options": ["Max Howell, creator of Homebrew (used by millions), was rejected by Google for not solving this on a whiteboard. It sparked debate about interview relevance vs practical engineering skills", "It's not culturally significant", "It was created by Google", "It's the hardest tree problem"], "answer": 0, "explanation": "The incident highlighted the gap between interview algorithm questions and real-world engineering. It's worth knowing as cultural context, but the problem itself tests fundamental tree recursion — which IS important." },
+        { "q": "How do you verify your inversion is correct?", "options": ["Invert twice and check if you get the original tree back. Or: inorder of inverted tree should be the reverse of inorder of original tree", "Visual inspection only", "Compare heights", "Check if it's still a BST"], "answer": 0, "explanation": "Double inversion is identity: invert(invert(tree)) == tree. Also: inorder of inverted tree = reverse of original inorder. These are testable invariants for verification." },
+        { "q": "If the tree is a BST, what property does the inverted tree have?", "options": ["It becomes a 'reverse BST' where left > node > right. Inorder traversal gives descending order. Searching requires flipping comparison logic", "Still a valid BST", "No longer a tree", "All values change"], "answer": 0, "explanation": "Inverting a BST reverses the ordering invariant: now left > node > right. In-order gives descending sorted order. This is sometimes useful for finding kth largest (inorder of inverted = reverse sorted)." },
+        { "q": "In Python, the swap is elegantly expressed as:", "options": ["node.left, node.right = node.right, node.left — Python's tuple unpacking does simultaneous swap without a temp variable", "temp = node.left; node.left = node.right; node.right = temp", "Both work, Python's tuple swap is more Pythonic", "You need a swap function"], "answer": 2, "explanation": "Python's simultaneous assignment handles the swap atomically. No temp variable needed. This is one of Python's syntactic strengths. The explicit temp approach works too but is less Pythonic." }
+      ]
+    },
+    {
+      "id": "max-depth",
+      "title": "Maximum Depth of Binary Tree",
+      "difficulty": "Easy",
+      "leetcodeNum": 104,
+      "pattern": "Bottom-Up DFS (Postorder Pattern)",
+      "tldr": "Find the maximum depth (longest root-to-leaf path). Postorder: depth(node) = 1 + max(depth(left), depth(right)). Base case: null node has depth 0.",
+      "keyTrick": "The quintessential bottom-up recursion: compute children's depths first, take max, add 1 for current node. This three-line function is the template for nearly ALL bottom-up tree problems.",
+      "approaches": [
+        { "name": "Recursive DFS (Postorder)", "complexity": "O(n) time, O(h) space", "description": "return 1 + max(depth(left), depth(right)). Base: return 0 for null.", "isOptimal": true },
+        { "name": "Iterative BFS", "complexity": "O(n) time, O(n) space", "description": "Level-order traversal, count levels. Queue size varies but max is O(n) for last level." }
+      ],
+      "quiz": [
+        { "q": "Why is this a POSTORDER computation?", "options": ["You must know children's depths BEFORE computing the current node's depth. Children first, then parent = postorder. This bottom-up flow is the defining characteristic", "It's preorder", "It's inorder", "Order doesn't matter"], "answer": 0, "explanation": "depth(node) depends on depth(left) and depth(right). Dependencies flow upward. You compute leaves first (depth 0), then their parents (depth 1), etc. This IS postorder evaluation." },
+        { "q": "How does this template extend to the Diameter problem?", "options": ["Diameter at a node = leftHeight + rightHeight. While computing height bottom-up, simultaneously track the maximum leftH + rightH seen. One traversal computes both", "Completely different approach", "Need two separate traversals", "Use BFS instead"], "answer": 0, "explanation": "Diameter is a 'piggyback' on height computation. At each node: update globalMax with leftH + rightH, then return 1 + max(leftH, rightH) as the height. One DFS, two results. Very common pattern." },
+        { "q": "What's the depth of a single-node tree?", "options": ["1 — the root has depth 1 (or 0 depending on definition). LeetCode counts edges → 0. If counting nodes on path → 1. The problem says depth = number of nodes on longest root-to-leaf path, so 1", "0", "Depends on definition — always clarify in interviews", "undefined"], "answer": 2, "explanation": "Some definitions count edges (depth of single node = 0), others count nodes (depth = 1). LeetCode 104 counts nodes. ALWAYS clarify 'depth' vs 'height' and 'edge-count' vs 'node-count' with your interviewer." },
+        { "q": "The BFS approach counts levels. Why might it be preferred in some scenarios?", "options": ["BFS naturally gives level count (depth) and is iterative (no stack overflow risk). For very deep trees (linked-list shaped), BFS uses O(1) space per level vs O(n) recursive stack", "BFS is always better", "BFS gives wrong answer", "DFS is always preferred"], "answer": 0, "explanation": "A skewed tree (like a linked list) has depth n. Recursive DFS uses O(n) stack (potential overflow). BFS queue holds at most 1 node per level for skewed trees — O(1) space. BFS wins on worst-case space." },
+        { "q": "Minimum depth is subtly different from maximum depth. What's the key difference?", "options": ["Min depth goes to the nearest LEAF (a node with no children). If a node has only one child, you can't count the null child as a leaf — must go through the existing child", "Just replace max with min", "Same logic works", "Min depth is always 1"], "answer": 0, "explanation": "Max depth: max(left, right). Min depth: if one child is null, you MUST go through the other (null isn't a leaf). Only when both children exist do you take min. This catches many candidates." }
+      ]
+    },
+    {
+      "id": "diameter-bt",
+      "title": "Diameter of Binary Tree",
+      "difficulty": "Easy",
+      "leetcodeNum": 543,
+      "pattern": "Bottom-Up DFS (Postorder Pattern)",
+      "tldr": "Longest path between any two nodes (not necessarily through root). At each node: diameter = leftHeight + rightHeight. Track global maximum. Return height (1 + max(leftH, rightH)) for parent's use.",
+      "keyTrick": "Piggyback on height computation. Each recursive call returns HEIGHT but also updates a global DIAMETER variable. Diameter through node X = leftHeight(X) + rightHeight(X). The answer might not pass through the root.",
+      "approaches": [
+        { "name": "DFS with Global Max", "complexity": "O(n) time, O(h) space", "description": "Compute height bottom-up. At each node, update diameter = max(diameter, leftH + rightH). Return height.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why can't you just compute depth of left subtree + depth of right subtree from root?", "options": ["The longest path might not go through the root. It could be entirely within a subtree. You must check EVERY node as a potential 'bend point' for the diameter path", "That approach works", "Root always has the max diameter", "Only for balanced trees"], "answer": 0, "explanation": "Consider a tree where the root has a short right subtree but a deep left subtree with a long path between two leaves. The diameter is in the left subtree. Check every node, not just the root." },
+        { "q": "Why return height but track diameter separately?", "options": ["Height is what the PARENT needs (to compute its own height). Diameter is a GLOBAL property that doesn't propagate upward — it's the max across all nodes. Two different concerns in one traversal", "Should return diameter instead", "Both can be returned as a tuple", "Only height matters"], "answer": 0, "explanation": "The function serves two purposes: 1) return height for the parent's computation, 2) update global diameter as a side effect. In Python, use self.diameter or nonlocal. Returning a tuple (height, diameter) also works." },
+        { "q": "In Python, how do you handle the global max without a class?", "options": ["Use a list [0] as a mutable container (diameter = [0], update diameter[0]) or use nonlocal keyword in a nested function. Both avoid the need for a class variable", "Must use a class", "Use a global variable", "Pass as parameter and return"], "answer": 0, "explanation": "Python trick: diameter = [0] as a mutable container that the inner function can modify. Or: define inner function with nonlocal diameter. Or return (height, max_diameter) as a tuple from each call. Multiple clean approaches." },
+        { "q": "What's the relationship between diameter and the 'Binary Tree Maximum Path Sum' problem?", "options": ["Identical structure: both check every node as a potential path 'bend point'. Diameter counts edges, Max Path Sum counts values. Same DFS template, different aggregation", "Completely different", "Max Path Sum is BFS", "Diameter is simpler and unrelated"], "answer": 0, "explanation": "Both problems: at each node, the optimal 'path through this node' uses left contribution + node + right contribution. For diameter: leftH + rightH. For max path sum: leftGain + node.val + rightGain. Same skeleton." },
+        { "q": "Does the diameter count edges or nodes?", "options": ["Edges. A path between two nodes with one edge between them has diameter 1. LeetCode 543 counts edges. Some definitions count nodes (edges + 1). Clarify in interviews", "Always nodes", "Always edges", "Depends on implementation"], "answer": 0, "explanation": "LeetCode 543: diameter = number of edges on the longest path. leftHeight + rightHeight (where height counts edges) gives the correct edge count. If heights count nodes, subtract 1. Definition matters." }
+      ]
+    },
+    {
+      "id": "balanced-bt",
+      "title": "Balanced Binary Tree",
+      "difficulty": "Easy",
+      "leetcodeNum": 110,
+      "pattern": "Bottom-Up DFS (Postorder Pattern)",
+      "tldr": "Check if a binary tree is height-balanced (every node's left and right subtree heights differ by at most 1). Bottom-up: compute height, return -1 if any subtree is unbalanced. One pass.",
+      "keyTrick": "Return -1 as a sentinel for 'unbalanced'. At each node: get leftH and rightH. If either is -1 or abs(leftH - rightH) > 1, return -1 (unbalanced). Otherwise return 1 + max(leftH, rightH). Final check: result ≠ -1.",
+      "approaches": [
+        { "name": "Top-Down (Naive)", "complexity": "O(n²) time, O(h) space", "description": "For each node, compute height of left and right (O(n) each). Check balance. Recomputes heights redundantly." },
+        { "name": "Bottom-Up with Sentinel", "complexity": "O(n) time, O(h) space", "description": "Compute height bottom-up. Return -1 if unbalanced. Each node visited once.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why is the top-down approach O(n²)?", "options": ["height() is called on every node, and each call traverses its subtree. For a skewed tree, height(root) is O(n), height(root.left) is O(n-1), etc. Total: n + (n-1) + ... + 1 = O(n²)", "It's O(n log n)", "It's O(n)", "Only for unbalanced trees"], "answer": 0, "explanation": "Top-down recomputes heights for overlapping subtrees. Node at depth d triggers height computation of O(n-d). For a skewed tree: sum = O(n²). Bottom-up computes each height once: O(n)." },
+        { "q": "Why use -1 as a sentinel instead of a separate boolean?", "options": ["Returning (height, is_balanced) tuples works but is verbose. -1 encodes 'unbalanced' in the height value itself, keeping the function signature simple: int → int with -1 meaning invalid", "Tuples are better", "-1 is required", "Booleans don't work in recursion"], "answer": 0, "explanation": "Both work. -1 sentinel is elegant and avoids tuple overhead. In Python, returning a tuple (height, balanced) is also clean. The sentinel approach is more common in interview settings for its simplicity." },
+        { "q": "Is a balanced BST guaranteed to have O(log n) height?", "options": ["Yes — height-balanced means left and right subtree heights differ by ≤ 1. This constrains height to O(log n). Specifically, a balanced tree of n nodes has height at most ~1.44·log₂(n) (Fibonacci tree is the worst case)", "No — could be O(n)", "Only for complete trees", "Only for AVL trees"], "answer": 0, "explanation": "Height-balanced trees have height Θ(log n). The worst case is the Fibonacci tree (like AVL worst case): h(n) ~ 1.44·log₂(n). This is why balanced BSTs guarantee O(log n) operations." },
+        { "q": "How does this problem connect to AVL tree implementation?", "options": ["AVL trees maintain the balanced property after every insert/delete by tracking heights and performing rotations. This problem checks the STATIC property; AVL maintains it DYNAMICALLY", "No connection", "This IS an AVL tree check", "AVL doesn't need balance checking"], "answer": 0, "explanation": "AVL trees: after insert/delete, check if any node became unbalanced (|leftH - rightH| > 1). If so, rotate. This problem is the 'check' step of AVL. The rotations are the 'fix' step." },
+        { "q": "What about 'balanced' in the context of Red-Black trees?", "options": ["Red-Black trees have a weaker balance guarantee: longest path is at most 2× shortest path. Less strict than AVL (≤1 height difference) but cheaper to maintain. Both are 'balanced' with different constants", "Same as AVL", "Red-Black isn't balanced", "Red-Black uses this exact check"], "answer": 0, "explanation": "Red-Black: height ≤ 2·log₂(n+1). AVL: height ≤ 1.44·log₂(n). AVL is more strictly balanced (faster lookups) but more expensive to maintain (more rotations). Know the trade-off for Google interviews." }
+      ]
+    },
+    {
+      "id": "same-tree",
+      "title": "Same Tree",
+      "difficulty": "Easy",
+      "leetcodeNum": 100,
+      "pattern": "Bottom-Up DFS (Postorder Pattern)",
+      "tldr": "Check if two binary trees are structurally identical with same node values. Recurse: both null → true. One null → false. Different values → false. Otherwise, check both subtrees.",
+      "keyTrick": "Base cases first: both None → True. One None → False. Values differ → False. Then: return isSame(p.left, q.left) and isSame(p.right, q.right). The AND ensures both subtrees must match.",
+      "approaches": [
+        { "name": "Recursive DFS", "complexity": "O(n) time, O(h) space", "description": "Compare corresponding nodes. Recurse on left-left and right-right pairs.", "isOptimal": true },
+        { "name": "Iterative BFS", "complexity": "O(n) time, O(n) space", "description": "Queue pairs of nodes. Dequeue, compare, enqueue children pairs." }
+      ],
+      "quiz": [
+        { "q": "Why check 'both null' before 'one null'?", "options": ["If both are null, they match (base case success). If only one is null, structure differs (base case failure). Checking both-null first avoids null pointer errors when accessing .val on the next line", "Order doesn't matter", "One-null should be first", "Only values matter"], "answer": 0, "explanation": "Logic flow: both None → True (matching leaves). One None → False (structural mismatch). Neither None → compare values and recurse. This order prevents accessing .val on a None node." },
+        { "q": "How does this become the building block for 'Subtree of Another Tree'?", "options": ["Subtree check = for every node in the main tree, check if isSameTree(node, subtree_root). It's 'same tree' called at every possible root position", "Different algorithm", "Use string matching instead", "Only check at matching values"], "answer": 0, "explanation": "Subtree: traverse the main tree. At each node where node.val == subRoot.val, call isSameTree(node, subRoot). If any call returns True, it's a subtree. O(m×n) naive, optimizable with hashing." },
+        { "q": "Can you solve this without recursion and without BFS (using serialization)?", "options": ["Serialize both trees to strings (preorder with null markers). Compare strings. If identical, trees are identical. O(n) time, O(n) space for the strings", "Serialization doesn't work", "Only BFS works", "Serialize loses structure info"], "answer": 0, "explanation": "Preorder serialization with null markers uniquely represents the tree. Two identical serializations ↔ two identical trees. This also enables string-matching-based subtree checking (Subtree of Another Tree)." },
+        { "q": "What's the difference between 'same tree' and 'symmetric tree'?", "options": ["Same tree: left-left and right-right match. Symmetric: left-right and right-left match (mirror comparison). Symmetric checks if a tree is its own mirror image", "Same thing", "Symmetric is harder conceptually but same code with swapped comparisons", "Symmetric requires BFS"], "answer": 1, "explanation": "Symmetric tree: isMirror(left, right) where you compare left.left with right.right and left.right with right.left. Same recursive structure as Same Tree but with crossed children. Minimal code change." },
+        { "q": "In a distributed system, how would you check if two large trees are identical?", "options": ["Compute a Merkle hash: each node's hash = hash(val + leftHash + rightHash). Compare root hashes in O(1). If different, recurse to find the difference. Used in Git, blockchain, and database replication", "Transfer both trees and compare", "Always use BFS", "Not possible efficiently"], "answer": 0, "explanation": "Merkle trees: hash each subtree recursively. Root hash summarizes the entire tree. Two trees with same root hash are (almost certainly) identical. Git uses this for efficient diff detection. Very Google-relevant." }
+      ]
+    },
+    {
+      "id": "subtree-another-tree",
+      "title": "Subtree of Another Tree",
+      "difficulty": "Easy",
+      "leetcodeNum": 572,
+      "pattern": "Bottom-Up DFS (Postorder Pattern)",
+      "tldr": "Check if tree t is a subtree of tree s. For each node in s, check if the subtree rooted there is identical to t (using Same Tree). Optimize with tree hashing or serialization.",
+      "keyTrick": "Naive: DFS on s, at each node call isSameTree(node, t). O(m×n) worst case. Optimization: serialize both trees, check if t's serialization is a substring of s's serialization. Or use Merkle hashing for O(m+n).",
+      "approaches": [
+        { "name": "DFS + Same Tree Check", "complexity": "O(m×n) time, O(h) space", "description": "For each node in s, check isSameTree(node, t). Worst case: check at every node." },
+        { "name": "Serialization + String Matching", "complexity": "O(m+n) time, O(m+n) space", "description": "Serialize both trees. Check if t's serial is a substring of s's serial using KMP.", "isOptimal": true },
+        { "name": "Merkle Hashing", "complexity": "O(m+n) time, O(m+n) space", "description": "Hash each subtree. t is a subtree iff its hash matches any node's subtree hash in s." }
+      ],
+      "quiz": [
+        { "q": "Why is the naive approach O(m×n) and not O(m+n)?", "options": ["In the worst case, isSameTree is called at every node of s (m nodes), and each call traverses up to n nodes of t. Total: O(m × n). Example: s is a chain, t is a similar chain", "It is O(m+n)", "Only O(n)", "Depends on balance"], "answer": 0, "explanation": "s = [1,1,1,...,1,2] (chain), t = [1,1,...,1,2] (slightly shorter chain). isSameTree is called at each node of s and traverses most of t before failing at the end. Nearly m×n comparisons." },
+        { "q": "The serialization approach uses which string matching algorithm?", "options": ["KMP (Knuth-Morris-Pratt) for O(m+n) substring search. Naive string matching would be O(m×n) — same as the tree approach. KMP or Rabin-Karp are needed for the speedup", "No special algorithm needed", "Binary search on strings", "Regex matching"], "answer": 0, "explanation": "Serialize s and t to strings. Check if serial(t) is a substring of serial(s). Naive substring search is O(m×n). KMP or Rabin-Karp achieves O(m+n). The serialization converts tree comparison to string comparison." },
+        { "q": "What's a subtle serialization pitfall?", "options": ["Node values like 2 and 12 could cause false matches in serialization. Use delimiters: ',2,' won't match ',12,'. Also mark nulls explicitly: ',#,' to prevent structural ambiguity", "No pitfalls", "Only affects negative numbers", "Use binary encoding"], "answer": 0, "explanation": "Without delimiters: serializing [12] and [1,2] could produce ambiguous strings. Use unique delimiters between values and explicit null markers. Example: '#,2,#,#' vs '#,12,#,#' — delimiter prevents false match." },
+        { "q": "Merkle hashing achieves O(m+n). How does it work?", "options": ["Hash each subtree bottom-up: hash(node) = hash(val, hash(left), hash(right)). Store all hashes of s in a set. Check if hash(t) is in the set. Equal hashes → (very likely) equal subtrees", "Hash only leaf values", "Top-down hashing", "Random hash assignment"], "answer": 0, "explanation": "Merkle hash: each node's hash encodes its entire subtree. Compute bottom-up in O(m) for s and O(n) for t. Check hash(t) in s's hash set: O(1). Total: O(m+n). Small collision probability (use strong hash)." },
+        { "q": "Is 'subtree' the same as 'substructure'?", "options": ["No. Subtree: the subtree rooted at a node in s must EXACTLY match t (including all descendants). Substructure: t's structure appears in s but s may have additional children. Different problems", "Same definition", "Substructure is easier", "Only terminology differs"], "answer": 0, "explanation": "Subtree: exact match from some node downward (all leaves must match). Substructure: t appears as a 'partial match' — s can have extra branches. Substructure checking is a different algorithm. Clarify which one is asked." }
+      ]
+    },
+    {
+      "id": "lca-bst",
+      "title": "Lowest Common Ancestor of a Binary Search Tree",
+      "difficulty": "Medium",
+      "leetcodeNum": 235,
+      "pattern": "BST Properties",
+      "tldr": "Find LCA of two nodes in a BST. Exploit BST property: if both values < node, go left. If both > node, go right. If they split (one left, one right), current node IS the LCA.",
+      "keyTrick": "The split point is the LCA. Walk from root: if both p and q are smaller, go left. If both are larger, go right. The first node where they diverge (or one equals the node) is the LCA. O(h) time, no need to visit both subtrees.",
+      "approaches": [
+        { "name": "Recursive BST Walk", "complexity": "O(h) time, O(h) space", "description": "If both < node, recurse left. Both > node, recurse right. Otherwise, current is LCA." },
+        { "name": "Iterative BST Walk", "complexity": "O(h) time, O(1) space", "description": "Same logic as recursive but with a while loop. No stack needed.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why is this O(h) for BST but O(n) for a general binary tree?", "options": ["BST property tells us which direction to go — only one path from root to LCA. General binary tree has no ordering, so you must search both subtrees at every node", "Same complexity", "BST is slower", "General tree is O(h) too"], "answer": 0, "explanation": "BST: at each node, the comparison tells you to go left or right (one direction). General tree LCA (LC 236): check if p or q is in left subtree, right subtree, or current node — must explore both sides." },
+        { "q": "What if p or q equals the current node?", "options": ["That node IS the LCA. If p = node, then p is an ancestor of q (or q is elsewhere). Either way, node is the lowest common ancestor. The split condition naturally handles this", "Continue searching", "Both must be in subtrees", "Return parent instead"], "answer": 0, "explanation": "If node == p: node is p, and q is in one of its subtrees (or is the same node). Either way, node is the LCA. The condition 'p ≤ node ≤ q' (or vice versa) captures this case." },
+        { "q": "For a general binary tree (not BST), how does the LCA algorithm change?", "options": ["Recursive: check if left subtree contains either target, check if right subtree contains either. If both sides return non-null, current node is LCA. If only one side returns non-null, propagate that result up", "Same algorithm", "Use BFS", "Need parent pointers"], "answer": 0, "explanation": "General LCA (LC 236): recursively search left and right. If both return non-null (found one target on each side), current node is LCA. If only one returns non-null, propagate it up. O(n) time." },
+        { "q": "How does LCA appear in practical systems?", "options": ["File system: LCA of two file paths = deepest common directory. Version control: LCA of two commits = common ancestor. Network routing: LCA of two nodes = branch point. Organizational charts: LCA = common manager", "Only in interviews", "Database queries", "No practical applications"], "answer": 0, "explanation": "Git's merge-base is LCA of two commits. File systems use LCA for path resolution. Phylogenetic trees use LCA for evolutionary analysis. It's a fundamental concept far beyond coding interviews." },
+        { "q": "If we need LCA queries for many pairs, how to optimize?", "options": ["Preprocess with Euler tour + sparse table for O(1) per query after O(n log n) preprocessing. Or use Binary Lifting (jump pointers) for O(log n) per query. Beats O(h) per query for many queries", "Can't preprocess for LCA", "Each query is independent", "Use a hash map"], "answer": 0, "explanation": "Tarjan's offline LCA, Euler tour + RMQ, and Binary Lifting are all preprocessing techniques for O(1) or O(log n) per query. Essential for competitive programming and systems processing many LCA queries." }
+      ]
+    },
+    {
+      "id": "insert-bst",
+      "title": "Insert into a Binary Search Tree",
+      "difficulty": "Medium",
+      "leetcodeNum": 701,
+      "pattern": "BST Properties",
+      "tldr": "Insert a value into a BST (no duplicates). Walk down the tree: go left if val < node, right if val > node. When you reach null, insert the new node there.",
+      "keyTrick": "Recursive: if null, return new TreeNode(val). If val < node.val, node.left = insert(node.left, val). If val > node.val, node.right = insert(node.right, val). Return node. The recursive assignment reconnects the tree.",
+      "approaches": [
+        { "name": "Recursive", "complexity": "O(h) time, O(h) space", "description": "Navigate to insertion point, create node, recursive assignment reconnects parent.", "isOptimal": true },
+        { "name": "Iterative", "complexity": "O(h) time, O(1) space", "description": "Walk down tracking parent. When reaching null, attach new node to parent." }
+      ],
+      "quiz": [
+        { "q": "Why does the recursive assignment (node.left = insert(node.left, val)) work?", "options": ["When the recursion reaches null, it returns a new node. The parent's assignment (node.left = ...) attaches this new node. For existing nodes, insert returns the same node, so the assignment is a no-op", "It doesn't always work", "Need explicit parent tracking", "Only works for balanced trees"], "answer": 0, "explanation": "The recursive assignment pattern: each call returns the (possibly modified) subtree root. For non-null nodes, it returns the same node (no change). For null, it returns the new node. The parent's assignment links it." },
+        { "q": "BST insert always adds at a leaf. Why?", "options": ["The BST property directs us left or right at each node until we reach null (a leaf position). We never modify existing nodes — just attach the new node where null was. This preserves BST structure", "It can insert in the middle", "Leaf insertion is optional", "Only for unbalanced BSTs"], "answer": 0, "explanation": "Inserting in the 'middle' would require restructuring. Leaf insertion is the simplest correct approach. Self-balancing BSTs (AVL, Red-Black) may then rotate to rebalance, but the initial insert is always at a leaf." },
+        { "q": "After insertion, is the tree still balanced?", "options": ["Not necessarily. Inserting into a BST without rebalancing can create skewed trees. Inserting sorted data creates a linked list (O(n) height). Self-balancing BSTs add rotations to prevent this", "Always balanced", "Balanced if input is random", "Both B and C are partially true — random insertion gives O(log n) expected height, but not guaranteed"], "answer": 3, "explanation": "Random insertions give O(log n) expected height. Sorted insertions give O(n). AVL and Red-Black trees guarantee O(log n) by rotating after insert. Understanding when rebalancing is needed is key." },
+        { "q": "How does this insert template extend to Delete in BST?", "options": ["Same recursive assignment pattern: node.left = delete(node.left, key). The complexity is in the delete logic itself (three cases: leaf, one child, two children), but the tree reconnection uses the same pattern", "Completely different approach", "Delete doesn't use recursion", "Delete requires parent pointers"], "answer": 0, "explanation": "Insert and delete both use the recursive assignment pattern for tree reconnection. Insert creates a node at null. Delete removes a node and replaces it (with null, child, or inorder successor). Same skeleton." },
+        { "q": "What's the amortized cost of n random insertions into an initially empty BST?", "options": ["O(n log n) total — each insertion is O(log n) expected for random data. The resulting tree has O(log n) expected height. This is why random BSTs are efficient on average", "O(n²)", "O(n)", "Depends on insertion order"], "answer": 0, "explanation": "Random BST: expected height is O(log n) (proven by analysis similar to QuickSort). Each of n insertions costs O(log n) expected. Total: O(n log n). But worst case (sorted input) is O(n²)." }
+      ]
+    },
+    {
+      "id": "delete-bst",
+      "title": "Delete Node in a BST",
+      "difficulty": "Medium",
+      "leetcodeNum": 450,
+      "pattern": "BST Properties",
+      "tldr": "Delete a node from a BST. Three cases: 1) Leaf → remove. 2) One child → replace with child. 3) Two children → replace with inorder successor (smallest in right subtree), then delete successor.",
+      "keyTrick": "For two-children case: find the inorder successor (leftmost node in right subtree). Copy its value to the current node. Then recursively delete the successor from the right subtree (it has ≤1 child, so simpler).",
+      "approaches": [
+        { "name": "Recursive with Three Cases", "complexity": "O(h) time, O(h) space", "description": "Navigate to node. Handle leaf/one-child/two-children. Recursive assignment reconnects tree.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why use the inorder successor (not predecessor) for the two-children case?", "options": ["Either works — inorder successor (min of right subtree) or inorder predecessor (max of left subtree). Both maintain BST property. Convention is successor, but predecessor is equally valid", "Successor is required", "Predecessor breaks BST property", "Both are correct — mention this flexibility in interviews"], "answer": 3, "explanation": "Both successor and predecessor are valid replacements. Successor = smallest value larger than the deleted node. Predecessor = largest value smaller. Both maintain BST invariant. Showing you know both options is a plus." },
+        { "q": "After finding the inorder successor, why is deleting it simpler?", "options": ["The inorder successor is the leftmost node in the right subtree — it has NO left child (otherwise a smaller node would exist). So deleting it is the 'zero or one child' case, which is trivial", "It's not simpler", "It always has no children", "It could have a right child but never a left child"], "answer": 3, "explanation": "The leftmost node has no left child by definition. It might have a right child. So it's always the 'one child or leaf' case — replace with its right child (or null). Never the complex two-children case." },
+        { "q": "What's the alternative to 'copy value and delete successor'?", "options": ["Splice the successor node directly into the deleted node's position by rewiring pointers. More complex pointer manipulation but avoids copying values (matters if nodes are heavy objects)", "No alternative exists", "Always copy values", "Use a different data structure"], "answer": 0, "explanation": "Value copying is simpler (just swap val, then delete leaf/one-child node). Pointer splicing is more principled (rewire parent/child pointers). In interviews, mention both. Value copying is usually cleaner." },
+        { "q": "What's the worst-case height after n random insertions and deletions?", "options": ["If only using simple insert/delete (no rebalancing), the tree can degrade to O(n) height over time even with random operations. Self-balancing BSTs prevent this", "Always O(log n)", "O(√n)", "Depends on the ratio of inserts to deletes"], "answer": 0, "explanation": "Without rebalancing, delete-heavy workloads can skew the tree. The standard delete (always replacing with successor) creates an asymmetry that biases the tree. Self-balancing (AVL, RB) is needed for guaranteed O(log n)." },
+        { "q": "In a Google interview, what follow-up might they ask about BST deletion?", "options": ["How would you delete the kth smallest element? How does deletion work in a self-balancing BST (rotations after delete)? How to implement lazy deletion (mark as deleted without removing)?", "No follow-ups", "Implement a balanced BST", "Convert to a different structure"], "answer": 0, "explanation": "Lazy deletion: mark nodes as deleted, periodically rebuild. Used in databases and persistent data structures. Self-balancing deletion: AVL requires ≤ O(log n) rotations, Red-Black requires ≤ 3 rotations. Know the trade-offs." }
+      ]
+    },
+    {
+      "id": "bt-level-order",
+      "title": "Binary Tree Level Order Traversal",
+      "difficulty": "Medium",
+      "leetcodeNum": 102,
+      "pattern": "BFS / Level-Order",
+      "tldr": "Return node values level by level as a list of lists. BFS with a queue. Key: process one FULL LEVEL per iteration by recording queue size at the start of each level.",
+      "keyTrick": "Queue-based BFS. At each level: levelSize = len(queue). Process exactly levelSize nodes, collecting their values. Enqueue their children. After processing levelSize nodes, one level is complete. Append level to result.",
+      "approaches": [
+        { "name": "BFS with Queue", "complexity": "O(n) time, O(n) space", "description": "Queue processes one level at a time using size snapshot. Most natural.", "isOptimal": true },
+        { "name": "DFS with Level Parameter", "complexity": "O(n) time, O(h) space", "description": "DFS passing depth as parameter. Append to result[depth]. Less intuitive but uses less space for balanced trees." }
+      ],
+      "quiz": [
+        { "q": "Why snapshot the queue size at the start of each level?", "options": ["During processing, new children are enqueued. Without snapshotting, you'd process children (next level) in the same iteration. The snapshot ensures you process exactly the current level's nodes", "For performance", "To count nodes", "Not necessary with a deque"], "answer": 0, "explanation": "Queue starts with level L's nodes. As you process them, you enqueue level L+1's children. Snapshot = len(queue) at level start tells you exactly how many are level L. Without it, levels mix." },
+        { "q": "How does the DFS approach work for level-order?", "options": ["Pass a 'depth' parameter. At each node: if result has no list for this depth, create one. Append node.val to result[depth]. Recurse with depth+1. Preorder DFS visits left-to-right within each level", "DFS can't produce level-order", "DFS reverses the order", "Need two DFS passes"], "answer": 0, "explanation": "DFS with depth tracking: result is a list of lists indexed by depth. Each recursive call appends to the right list. Left children are visited before right, preserving left-to-right order within each level." },
+        { "q": "This is the template for which family of problems?", "options": ["Level-order variants: zigzag traversal (alternate direction), average of levels, largest value in each level, right-side view, and minimum depth. All use the same queue + level-snapshot pattern", "Only this specific problem", "Binary search problems", "Graph problems only"], "answer": 0, "explanation": "The level-snapshot BFS template is universal. Zigzag: alternate append direction. Right-side view: take last element per level. Level average: sum/count per level. One template, many applications." },
+        { "q": "In Python, what's the best data structure for the BFS queue?", "options": ["collections.deque — O(1) popleft(). A regular list uses list.pop(0) which is O(n) due to shifting elements. This matters for large trees", "Regular list is fine", "Use a stack instead", "queue.Queue (thread-safe but slower)"], "answer": 0, "explanation": "deque.popleft() is O(1). list.pop(0) is O(n). For a tree with 1M nodes, using list.pop(0) makes BFS O(n²) instead of O(n). Always use deque for BFS in Python." },
+        { "q": "Level-order with a delimiter: how does this connect to serialization?", "options": ["BFS serialization: output values level-by-level with null markers. Deserialize by reading level-by-level, connecting children. This is how LeetCode's tree input format works", "No connection", "Only preorder works for serialization", "Level-order can't represent trees"], "answer": 0, "explanation": "LeetCode represents trees as level-order with 'null' for missing nodes: [1,2,3,null,null,4,5]. Deserialize: BFS — create root, queue it, assign children from the sequence. This IS level-order traversal." }
+      ]
+    },
+    {
+      "id": "bt-right-side-view",
+      "title": "Binary Tree Right Side View",
+      "difficulty": "Medium",
+      "leetcodeNum": 199,
+      "pattern": "BFS / Level-Order",
+      "tldr": "Return values visible from the right side — the last node at each level. BFS: take the last element from each level. Or DFS: visit right before left, take the first node at each new depth.",
+      "keyTrick": "BFS: standard level-order, append level[-1] to result. DFS alternative: traverse right-first, track depth. When visiting a depth for the first time (len(result) == depth), add the node. Right-first DFS is elegant and O(h) space.",
+      "approaches": [
+        { "name": "BFS (Last per Level)", "complexity": "O(n) time, O(n) space", "description": "Standard level-order. For each level, take the last element." },
+        { "name": "DFS (Right-First)", "complexity": "O(n) time, O(h) space", "description": "DFS visiting right child first. First node encountered at each depth is the rightmost.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "The DFS approach visits right child first. Why does this give the right-side view?", "options": ["Right-first DFS reaches the rightmost node at each level before any left nodes at that level. The first time a new depth is reached, it's guaranteed to be the rightmost node", "Left-first also works", "Only BFS gives correct results", "Right-first misses some nodes"], "answer": 0, "explanation": "Right-first DFS: at depth d, the first node visited is the rightmost (because right subtrees are explored before left). Check: if depth == len(result), this is a new depth → add to result." },
+        { "q": "For 'left-side view', what changes?", "options": ["BFS: take level[0] instead of level[-1]. DFS: visit left child first. Same template, just flip which side gets priority", "Completely different algorithm", "Left view requires BFS only", "Reverse the right-side view"], "answer": 0, "explanation": "Left view: mirror of right view. BFS: first element per level. DFS: left-first, add first node at each new depth. The code changes are minimal — shows the flexibility of the template." },
+        { "q": "If the tree is a complete binary tree, what does the right-side view look like?", "options": ["It's the rightmost path from root to the last level. For a complete tree, this is always the right child chain, plus possibly one left child at the last level", "All nodes", "Only the root", "Only leaves"], "answer": 0, "explanation": "Complete tree: every level is full except possibly the last. The rightmost node at each level is the right child at each step. For the last level, it might be a left child if the last level isn't full." },
+        { "q": "Can two completely different trees have the same right-side view?", "options": ["Yes — the right-side view only shows one node per level. Many tree structures produce the same view. Example: a single right-chain and a full tree of the same height have different structures but could share the same right-side view", "No — right-side view uniquely identifies the tree", "Only for balanced trees", "Only if same number of nodes"], "answer": 0, "explanation": "Right-side view loses massive information. A right-chain [1,2,3] and a full tree [1,_,2,_,_,_,3] both show [1,2,3] from the right. The view is a projection, not a bijection." },
+        { "q": "How does right-side view relate to tree printing/visualization?", "options": ["Tree visualization tools use level-order with position tracking to draw nodes. Right-side view is a vertical projection. 'Top view', 'bottom view', and 'vertical order traversal' are related projection problems", "No relation", "Only for debugging", "Visualization uses preorder"], "answer": 0, "explanation": "Family of projection problems: right view (rightmost per level), top view (first per column), bottom view (last per column), vertical order (group by column). All use BFS/DFS with coordinate tracking." }
+      ]
+    },
+    {
+      "id": "construct-quad-tree",
+      "title": "Construct Quad Tree",
+      "difficulty": "Medium",
+      "leetcodeNum": 427,
+      "pattern": "Tree Construction / Destruction",
+      "tldr": "Build a quad tree from a 2D grid. If all values in the region are the same, create a leaf node. Otherwise, split into 4 quadrants and recurse. Each node has isLeaf and val properties.",
+      "keyTrick": "Recursive divide and conquer: check if the n×n region is uniform (all same value). If yes → leaf node. If no → create internal node with 4 children by splitting into 4 equal quadrants. Base case: 1×1 is always a leaf.",
+      "approaches": [
+        { "name": "Recursive D&C", "complexity": "O(n² log n) time, O(log n) space", "description": "Check uniformity (O(n²) per level). Split if non-uniform. log n levels of recursion.", "isOptimal": true },
+        { "name": "Prefix Sum Optimization", "complexity": "O(n²) time, O(n²) space", "description": "Precompute 2D prefix sums. Check uniformity in O(1) per region using sum comparison." }
+      ],
+      "quiz": [
+        { "q": "What makes this a tree problem rather than a pure matrix problem?", "options": ["The quad tree IS a tree — each internal node has 4 children representing quadrants. The recursive spatial subdivision naturally creates a tree structure. Building it IS constructing a tree", "It's only a matrix problem", "The tree is just the output format", "Trees and matrices are unrelated"], "answer": 0, "explanation": "Quad trees are a spatial data structure: they recursively partition 2D space. The tree structure captures the hierarchy of regions. This connects grid problems to tree construction — useful for spatial databases and image compression." },
+        { "q": "How do you check if a region is uniform without scanning all cells?", "options": ["Precompute 2D prefix sums. A region is all-ones if sum == area, all-zeros if sum == 0. Check in O(1) per region after O(n²) preprocessing", "Must scan every cell", "Use hashing", "Sample random cells"], "answer": 0, "explanation": "Prefix sum: sum of region = prefix[r2][c2] - prefix[r1][c2] - prefix[r2][c1] + prefix[r1][c1]. If sum == 0: all zeros. If sum == area: all ones. Otherwise: mixed. This drops time from O(n² log n) to O(n²)." },
+        { "q": "Where are quad trees used in real systems?", "options": ["Image compression (sparse regions stored as single nodes), geographic information systems (spatial indexing), collision detection in games, and Google Maps tile rendering", "Only in interviews", "Database indexing", "No practical use"], "answer": 0, "explanation": "Quad trees power spatial search: Google Maps uses quadtree-like tiling for map rendering. Image formats use quad tree compression for regions of uniform color. Game engines use them for spatial partitioning." },
+        { "q": "What's the maximum and minimum number of nodes in a quad tree for an n×n grid?", "options": ["Minimum: 1 (uniform grid → single leaf). Maximum: O(n²) (checkerboard pattern → every cell is its own leaf plus internal nodes). The tree is space-adaptive", "Always n²", "Always 4^(log n)", "Depends on implementation"], "answer": 0, "explanation": "Best case: uniform region = 1 node. Worst case: every 1×1 cell differs from neighbors = O(n²) leaves + O(n²/3) internal nodes = O(n²). The adaptive nature is the whole point of quad trees — efficient for sparse data." },
+        { "q": "How does this extend to 3D (octree)?", "options": ["Same concept: recursively split 3D space into 8 octants instead of 4 quadrants. Used in 3D graphics, physics simulations, and point cloud processing. Same divide-and-conquer approach", "3D requires different approach", "Only works in 2D", "Use a different tree type"], "answer": 0, "explanation": "Octree = 3D quad tree. Each node has 8 children (2³ octants). Used in voxel rendering, 3D collision detection, and LiDAR point cloud processing. The recursive subdivision pattern scales to any dimension." }
+      ]
+    },
+    {
+      "id": "count-good-nodes",
+      "title": "Count Good Nodes In Binary Tree",
+      "difficulty": "Medium",
+      "leetcodeNum": 1448,
+      "pattern": "Top-Down DFS (Preorder Pattern)",
+      "tldr": "A node is 'good' if no node on the path from root to it has a greater value. DFS passing the maximum value seen so far. If node.val ≥ maxSoFar, it's good. Update maxSoFar = max(maxSoFar, node.val) for children.",
+      "keyTrick": "Top-down DFS with state propagation: pass maxSoFar as a parameter. At each node: if val ≥ maxSoFar → count it as good. Recurse on children with updated max. Preorder pattern: process before recursing.",
+      "approaches": [
+        { "name": "DFS with Max Parameter", "complexity": "O(n) time, O(h) space", "description": "Pass maxSoFar down. Count nodes where val ≥ maxSoFar. Update max for children.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why is this a top-down (not bottom-up) problem?", "options": ["The 'good' property depends on the path from ROOT to this node — information flows DOWNWARD. You need to know all ancestors' values, which are passed as parameters from parent to child", "It could be bottom-up", "Both directions work", "It's a BFS problem"], "answer": 0, "explanation": "Bottom-up can't work because a node's 'goodness' depends on its ancestors, not its descendants. The max-so-far must be passed down from root. This is the defining characteristic of top-down DFS problems." },
+        { "q": "What's the initial value of maxSoFar?", "options": ["The root's value (or negative infinity). The root is always a good node since no ancestor exists with a greater value. Start: dfs(root, root.val) or dfs(root, float('-inf'))", "0", "The minimum value in the tree", "float('inf')"], "answer": 0, "explanation": "Root has no ancestors → always good. maxSoFar starts at root.val (or -∞ to ensure root passes the check). Both approaches correctly count the root as good." },
+        { "q": "How would you modify this for 'count nodes where path from root to node has strictly increasing values'?", "options": ["Change the condition: node.val > maxSoFar (strict inequality instead of ≥). Also update maxSoFar only when the node passes the condition. Same template, different condition", "Completely different approach", "Use BFS instead", "Need to track the entire path"], "answer": 0, "explanation": "Strictly increasing: change ≥ to > in the comparison. The template is identical. This shows the power of parameterized DFS — changing the condition handles a family of related problems." },
+        { "q": "Can this be solved iteratively?", "options": ["Yes — use a stack of (node, maxSoFar) pairs. Pop, process, push children with updated max. The parameter becomes part of the stack frame", "Only recursion works", "Use BFS with levels", "Iterative can't track path info"], "answer": 0, "explanation": "Any recursive DFS with parameters can be converted to iterative by pushing (node, params) onto an explicit stack. Stack entry: (node, maxSoFar). Pop → check → push children with updated max." },
+        { "q": "What pattern family does this belong to?", "options": ["'Top-down DFS with accumulated state' — same pattern as path sum, valid BST (min/max bounds), and constraint propagation. The state (maxSoFar, sum, bounds) is passed from parent to children", "Backtracking", "Dynamic programming", "Greedy"], "answer": 0, "explanation": "Pattern: propagate a state variable downward. Path Sum: pass remaining target. Validate BST: pass (min, max) bounds. Good Nodes: pass maxSoFar. All use the same DFS-with-parameter template." }
+      ]
+    },
+    {
+      "id": "validate-bst",
+      "title": "Validate Binary Search Tree",
+      "difficulty": "Medium",
+      "leetcodeNum": 98,
+      "pattern": "Top-Down DFS (Preorder Pattern)",
+      "tldr": "Check if a binary tree is a valid BST. Top-down: pass valid range (min, max) down. Each node must be within its range. Left child inherits (min, node.val). Right child inherits (node.val, max).",
+      "keyTrick": "Pass bounds (lo, hi) as parameters. At each node: check lo < node.val < hi. Recurse left with (lo, node.val) and right with (node.val, hi). Initial bounds: (-∞, +∞). Alternative: inorder traversal should be strictly increasing.",
+      "approaches": [
+        { "name": "Top-Down with Bounds", "complexity": "O(n) time, O(h) space", "description": "Pass (min, max) range. Check each node within bounds. Recurse with tightened bounds.", "isOptimal": true },
+        { "name": "Inorder Check", "complexity": "O(n) time, O(h) space", "description": "Inorder traversal should be strictly increasing. Track previous value and verify.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why can't you just check node.left.val < node.val < node.right.val at each node?", "options": ["This only checks immediate children, not deeper descendants. A node deep in the left subtree could violate the root's constraint. Example: [5,1,6,null,null,3,7] — 3 is in right subtree of 5 but 3 < 5", "That check is sufficient", "Only matters for balanced trees", "Duplicates cause issues"], "answer": 0, "explanation": "Local check misses global constraints. Node 3 is a valid left child of 6, but it's in the RIGHT subtree of 5 — violating 'all right descendants > 5'. The bounds approach propagates global constraints downward." },
+        { "q": "The inorder approach: why must values be STRICTLY increasing?", "options": ["BST definition typically requires strict inequality (no duplicates). If left < node AND node < right (strict), then inorder is strictly increasing. Equal values would violate the BST property", "Non-strict is fine", "Depends on the BST variant", "Both B and C — clarify with interviewer whether duplicates are allowed"], "answer": 3, "explanation": "LeetCode's definition: left < node < right (strict). Some BST implementations allow left ≤ node. Always clarify. For this problem, strictly increasing inorder is required." },
+        { "q": "What are the initial bounds for the top-down approach?", "options": ["(-∞, +∞) or (float('-inf'), float('inf')) in Python. The root can be any value. As we descend, bounds tighten: left child gets upper bound of parent, right child gets lower bound", "(-1, 1)", "(0, n)", "(min_val, max_val) of the tree"], "answer": 0, "explanation": "Root has no constraints → (-∞, +∞). Left child of root with val 5: (-∞, 5). Right child: (5, +∞). Each step tightens one bound. This propagation is the core of the algorithm." },
+        { "q": "The inorder approach has a subtle bug risk. What is it?", "options": ["Initializing prev to a specific value (like -∞) can fail if the tree contains that value. Better: use None/null as initial prev and skip comparison for the first node", "No bug risks", "Overflow with large values", "Stack overflow"], "answer": 0, "explanation": "If prev starts at float('-inf') and the tree's minimum is also -inf (or MIN_INT), the first comparison fails. Using prev = None and checking 'if prev is not None and node.val <= prev' avoids this edge case." },
+        { "q": "How does this connect to serialization/deserialization?", "options": ["Preorder traversal with bounds can reconstruct a BST without null markers. When deserializing, the bounds tell you whether the next value belongs to the left subtree, right subtree, or parent", "No connection", "Only level-order works for BST", "BSTs can't be serialized efficiently"], "answer": 0, "explanation": "BST serialization is more efficient than general tree serialization: preorder alone (no null markers) suffices. Deserialization uses bounds to determine tree structure. O(n) space vs O(2n) for general trees." }
+      ]
+    },
+    {
+      "id": "kth-smallest-bst",
+      "title": "Kth Smallest Element In a Bst",
+      "difficulty": "Medium",
+      "leetcodeNum": 230,
+      "pattern": "BST Properties",
+      "tldr": "Find the kth smallest element in a BST. Inorder traversal gives sorted order — the kth node visited in inorder is the answer. Stop early once k nodes are visited.",
+      "keyTrick": "Inorder traversal with early termination: maintain a counter. When counter reaches k, return current node's value. Iterative inorder is preferred for clean early stopping. No need to traverse the entire tree.",
+      "approaches": [
+        { "name": "Inorder Traversal (Count to K)", "complexity": "O(h + k) time, O(h) space", "description": "Iterative inorder. Count visited nodes. When count == k, return value. Early termination.", "isOptimal": true },
+        { "name": "Augmented BST", "complexity": "O(h) time per query after O(n) preprocessing", "description": "Store subtree sizes at each node. Navigate: if leftSize == k-1, found. If leftSize ≥ k, go left. Else go right with k -= leftSize+1." }
+      ],
+      "quiz": [
+        { "q": "Why is the time complexity O(h + k) and not O(n)?", "options": ["Iterative inorder first pushes h nodes (the leftmost path). Then processes k nodes before stopping. Worst case: k=n gives O(n). Best case: k=1 gives O(h). Average: O(h+k)", "It's always O(n)", "It's O(k)", "It's O(h)"], "answer": 0, "explanation": "The initial 'push all lefts' costs O(h). Then we pop and process k nodes, each step being O(1) amortized. Total: O(h + k). For small k and balanced tree: O(log n + k) ≈ O(log n). Very efficient." },
+        { "q": "The augmented BST approach stores what at each node?", "options": ["The size of its left subtree (or total subtree size). This enables O(h) kth-smallest queries by comparing k with left subtree size to decide direction without traversing", "The node's rank", "The minimum value in subtree", "A sorted list"], "answer": 0, "explanation": "With left_size stored: if left_size == k-1 → current is kth. If left_size ≥ k → answer is in left subtree. If left_size < k-1 → go right with k = k - left_size - 1. O(h) per query, O(n) setup." },
+        { "q": "If kth smallest is called frequently and the tree changes, what structure to use?", "options": ["Order-statistic tree (augmented BST with subtree sizes, maintained on insert/delete). Or a balanced BST like AVL/Red-Black with size augmentation. O(log n) per query AND per modification", "Rebuild on each query", "Use a sorted array instead", "No efficient solution"], "answer": 0, "explanation": "Order-statistic tree: rank queries in O(log n), with O(log n) insert/delete maintaining subtree sizes through rotations. This is the standard solution for dynamic rank queries. Used in databases." },
+        { "q": "How would you find the kth LARGEST element?", "options": ["Reverse inorder (right, node, left) and count to k. Or use kth smallest with k' = n - k + 1. Or invert the BST and do normal inorder", "Same as kth smallest", "Sort and index from end", "All three approaches work — reverse inorder is most direct"], "answer": 3, "explanation": "Reverse inorder: visit right first, then node, then left. This gives descending order. Count to k gives kth largest. Or convert to kth smallest: kth largest = (n-k+1)th smallest. Multiple valid approaches." },
+        { "q": "Can this be solved without any tree traversal?", "options": ["If the BST is stored in an array (like a heap), the sorted order is the inorder traversal, but you still need O(h+k) to navigate. There's no way to avoid O(h) to reach the right region of the tree", "Just index the array", "Use binary search on node values", "Not without traversal — the tree structure requires O(h) navigation minimum"], "answer": 3, "explanation": "The kth element requires reaching a specific position in the tree. Even with augmentation, you need O(h) to navigate from root. The lower bound for BST kth query is Ω(h). This is why balanced trees matter." }
+      ]
+    },
+    {
+      "id": "construct-bt-preorder-inorder",
+      "title": "Construct Binary Tree From Preorder And Inorder Traversal",
+      "difficulty": "Medium",
+      "leetcodeNum": 105,
+      "pattern": "Tree Construction / Destruction",
+      "tldr": "Reconstruct binary tree from preorder and inorder arrays. Preorder's first element = root. Find root in inorder → left of root = left subtree, right = right subtree. Recurse with sliced arrays.",
+      "keyTrick": "Root = preorder[0]. Find root's index in inorder (use a HashMap for O(1) lookup). Left subtree: inorder[:rootIdx], preorder[1:1+leftSize]. Right subtree: inorder[rootIdx+1:], preorder[1+leftSize:]. Recurse.",
+      "approaches": [
+        { "name": "Recursive with HashMap", "complexity": "O(n) time, O(n) space", "description": "HashMap maps inorder values to indices for O(1) root lookup. Recurse with index ranges instead of array slicing.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why is a HashMap for inorder indices essential?", "options": ["Finding root in inorder by scanning is O(n) per call, making the total O(n²). HashMap gives O(1) lookup, reducing total to O(n). The map is built once in O(n) preprocessing", "It's optional", "For handling duplicates", "For space efficiency"], "answer": 0, "explanation": "Without HashMap: T(n) = T(k) + T(n-k-1) + O(n) where O(n) is for finding root in inorder. This gives O(n²). With HashMap: O(1) lookup → T(n) = O(n) total. The optimization matters." },
+        { "q": "Why do preorder + inorder uniquely define a binary tree?", "options": ["Preorder gives the root (first element). Inorder gives the left/right split around that root. Together, they uniquely determine every node's position. This is provable by induction", "They don't — need postorder too", "Only for BSTs", "Only for complete trees"], "answer": 0, "explanation": "Preorder: root is first. Find root in inorder → determines left subtree set and right subtree set. Left subtree's preorder is known (next leftSize elements). Recurse. Unique at each step → unique tree." },
+        { "q": "Can you construct from preorder + postorder (without inorder)?", "options": ["Only if the tree is FULL (every node has 0 or 2 children). For general trees, preorder + postorder is ambiguous — a single-child node could be left or right child", "Always possible", "Never possible", "Only for BSTs"], "answer": 0, "explanation": "Pre + Post ambiguity: preorder [1,2], postorder [2,1]. Is 2 the left or right child of 1? Can't tell. For full binary trees, every non-leaf has 2 children, eliminating this ambiguity." },
+        { "q": "Using index ranges instead of array slicing — why does this matter in Python?", "options": ["Array slicing creates new lists each time → O(n) per slice, O(n²) total over all recursive calls. Using index ranges (inStart, inEnd, preStart, preEnd) avoids copies → O(n) total", "No difference in Python", "Slicing is faster", "Python doesn't copy on slice"], "answer": 0, "explanation": "Python list slicing DOES copy. Slicing O(k) elements creates a new list of size k. Over the recursion, total slicing cost is O(n²). Index ranges: each call is O(1) setup + O(1) HashMap lookup. Total O(n)." },
+        { "q": "What if the tree has duplicate values?", "options": ["Duplicates make the inorder HashMap ambiguous (which occurrence of the value is the root?). The problem guarantees unique values. With duplicates, additional info (like indices) would be needed", "HashMap handles duplicates", "Use a multi-map", "Duplicates are impossible in trees"], "answer": 0, "explanation": "If value 3 appears twice in inorder, finding which 3 is the root from preorder is ambiguous. The standard algorithm requires unique values. With duplicates, you'd need tree structure constraints or indexed matching." }
+      ]
+    },
+    {
+      "id": "house-robber-iii",
+      "title": "House Robber III",
+      "difficulty": "Medium",
+      "leetcodeNum": 337,
+      "pattern": "Tree DP",
+      "tldr": "Rob houses arranged in a binary tree — can't rob directly connected (parent-child) houses. At each node, choose: rob this node (skip children) OR skip this node (take best from children). Return max.",
+      "keyTrick": "Each node returns TWO values: (rob_this, skip_this). rob_this = node.val + skip_left + skip_right. skip_this = max(rob_left, skip_left) + max(rob_right, skip_right). Bottom-up DFS, no memoization needed.",
+      "approaches": [
+        { "name": "Naive Recursion", "complexity": "O(2ⁿ) time", "description": "At each node: max(rob + grandchildren, skip + children). Exponential without memoization." },
+        { "name": "Memoized Recursion", "complexity": "O(n) time, O(n) space", "description": "Cache results per node in a HashMap. Avoids recomputation." },
+        { "name": "Pair-Return DFS (Optimal)", "complexity": "O(n) time, O(h) space", "description": "Return (rob_this, skip_this) pair. No memoization needed — each node computed once.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why does returning a pair eliminate the need for memoization?", "options": ["Without the pair, computing rob(node) requires skip(child) which requires rob(grandchild) — overlapping subproblems. The pair precomputes both options at each node, so each node is visited exactly once", "Pairs are always faster", "Memoization doesn't work on trees", "The pair approach is approximate"], "answer": 0, "explanation": "The naive approach: rob(node) calls skip(child) calls rob(grandchild). Without memoization, rob(grandchild) is computed multiple times. The pair approach: one call returns both values. Each node visited once → O(n)." },
+        { "q": "What does skip_this = max(rob_left, skip_left) + max(rob_right, skip_right) mean?", "options": ["If we skip the current node, each child independently chooses its own best option (rob or skip). Children aren't constrained by each other, only by the parent. So take the max for each independently", "Children must both be robbed", "Children must both be skipped", "Only one child can be robbed"], "answer": 0, "explanation": "Skipping the parent frees both children to make independent optimal choices. Left child picks max(rob_left, skip_left). Right child picks max(rob_right, skip_right). They don't constrain each other — only the parent-child constraint matters." },
+        { "q": "This is 'DP on trees'. How does it relate to linear House Robber (LC 198)?", "options": ["Linear: dp[i] = max(dp[i-1], dp[i-2] + nums[i]) — can't rob adjacent. Tree version: same 'rob or skip' choice but the adjacency follows tree edges instead of linear order. Same concept, tree structure", "Completely different", "Linear is easier but unrelated", "Tree version uses graph algorithms"], "answer": 0, "explanation": "Linear: can't rob neighbors on a line. Tree: can't rob parent-child pairs. The DP recurrence is identical: max(take_current + skip_neighbors, skip_current + best_of_neighbors). The topology differs." },
+        { "q": "Could this be solved with BFS (level-order)?", "options": ["No — alternating levels (rob odd levels, skip even) doesn't give optimal. The optimal may rob some nodes at level 2 and some at level 4, skipping level 3 selectively. It's not a level-based decision", "Yes — rob alternate levels", "BFS with dynamic programming", "Only DFS works for tree DP"], "answer": 0, "explanation": "Counter-example: tree where robbing levels 1 and 3 gives less than robbing some level-2 and level-4 nodes selectively. The optimal is per-node, not per-level. DFS with pair returns handles this correctly." },
+        { "q": "What other problems use the 'return pair from DFS' pattern?", "options": ["Binary Tree Maximum Path Sum (return max_single_path, update global_max), Diameter (return height, update global_diameter), and any tree DP with include/exclude decisions", "Only this problem", "All DP problems", "Graph problems only"], "answer": 0, "explanation": "The 'DFS returns multiple values' pattern is universal for tree DP: at each node, compute multiple things (include/exclude, height/diameter, max_gain/contribution). One traversal, multiple outputs." }
+      ]
+    },
+    {
+      "id": "delete-leaves-value",
+      "title": "Delete Leaves With a Given Value",
+      "difficulty": "Medium",
+      "leetcodeNum": 1325,
+      "pattern": "Tree Modification (Structural Changes)",
+      "tldr": "Delete all leaf nodes with the given target value. After deletion, new leaves may also need removal. Postorder: process children first, then check if current node became a leaf with target value.",
+      "keyTrick": "Postorder DFS: first recurse on children (potentially deleting them), THEN check if current node is now a leaf with target value. Return None to delete. The postorder ensures newly-exposed leaves are also handled in the same pass.",
+      "approaches": [
+        { "name": "Postorder DFS", "complexity": "O(n) time, O(h) space", "description": "Recurse children first. If node becomes a leaf with target value, return None (delete). One pass handles cascading deletions.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why must this be postorder (not preorder)?", "options": ["Deleting a leaf might expose its parent as a new target-value leaf. Postorder processes children first, so by the time we check the parent, its children are already pruned. One pass handles cascading deletions", "Preorder also works", "Order doesn't matter", "Need two passes"], "answer": 0, "explanation": "Preorder would check parent before children — can't know if parent becomes a leaf after children are deleted. Postorder: delete children first, then check parent. Natural bottom-up pruning." },
+        { "q": "How does the recursive return handle deletion?", "options": ["node.left = deleteLeaves(node.left, target) and node.right = deleteLeaves(node.right, target). If both children become None and node.val == target, return None. The parent's assignment detaches this node", "Must use parent pointer", "Delete in a separate pass", "Mark and sweep"], "answer": 0, "explanation": "Same recursive assignment pattern as BST insert/delete. Returning None from a recursive call makes the parent's assignment (node.left = None) detach the deleted node. No parent pointer needed." },
+        { "q": "Can this cascade multiple levels in one DFS pass?", "options": ["Yes — postorder naturally handles any depth of cascading. If deleting a leaf exposes its parent, grandparent, etc. as target leaves, each is handled as the recursion returns upward. One pass suffices", "Need multiple passes", "Only one level per pass", "Use BFS for multi-level"], "answer": 0, "explanation": "Tree [1,2,2] target=2: delete both leaves (2s). Parent (1) now has no children but val≠2, so it stays. Tree [2,2,2]: delete leaves (2s), parent becomes leaf with val=2 → also deleted. One DFS handles it all." },
+        { "q": "What if the root itself should be deleted?", "options": ["The top-level call returns None if the root becomes a target-value leaf after its children are pruned. The caller (main function) handles: if result is None, tree is empty", "Root can never be deleted", "Need a dummy root", "Check root separately"], "answer": 0, "explanation": "The recursive function naturally handles root deletion. If root becomes a target leaf → returns None. The caller: root = removeLeafNodes(root, target). If root is now None, tree is empty. No special case needed." },
+        { "q": "This 'prune from bottom' pattern appears in which other problems?", "options": ["Binary Tree Pruning (LC 814), where you remove subtrees that don't contain 1. Same postorder pattern: process children, then decide if current node should be removed based on updated children", "No similar problems", "Only for leaf deletion", "Top-down problems only"], "answer": 0, "explanation": "Binary Tree Pruning (LC 814): remove subtrees not containing 1. Same template: postorder DFS, prune children first, then check if current subtree is 'empty'. The postorder-prune pattern is reusable." }
+      ]
+    },
+    {
+      "id": "bt-max-path-sum",
+      "title": "Binary Tree Maximum Path Sum",
+      "difficulty": "Hard",
+      "leetcodeNum": 124,
+      "pattern": "Tree DP",
+      "tldr": "Find the maximum path sum between any two nodes (path doesn't need to pass through root). At each node: max path THROUGH this node = leftGain + node.val + rightGain. Return max single-direction gain for parent's use.",
+      "keyTrick": "Each node returns its max 'single-direction' gain: max(node.val + max(leftGain, rightGain), 0). The 0 handles negative paths (better to not include). Simultaneously update global_max with node.val + leftGain + rightGain (the 'bend' path through this node).",
+      "approaches": [
+        { "name": "DFS with Global Max", "complexity": "O(n) time, O(h) space", "description": "Return max single-direction gain. Update global max with bend-path sum. Same pattern as Diameter.", "isOptimal": true }
+      ],
+      "quiz": [
+        { "q": "Why return max(gain, 0) instead of just gain?", "options": ["A negative gain means including this subtree decreases the path sum. Better to exclude it (gain = 0). This allows the parent to ignore negative subtrees entirely", "Negative gains are impossible", "For integer overflow prevention", "Convention"], "answer": 0, "explanation": "Tree: [1, -5, 3]. Left subtree gain = -5 + max(leftchildren) might be negative. Including it hurts the path. Returning max(gain, 0) lets the parent exclude this subtree, choosing a shorter but higher-sum path." },
+        { "q": "Why can't the returned value include both left and right children?", "options": ["A path can't branch — it's a single chain from some node to another. If you include both children, the path 'bends' at this node and can't extend upward. The bend is captured in global_max, not the return value", "It can include both", "Both children are always included", "The return value doesn't matter"], "answer": 0, "explanation": "The return value tells the parent 'the best I can contribute as a single-direction extension.' Including both children would mean the path bends here — it can't extend to the parent. Bend paths update global_max directly." },
+        { "q": "How does this compare to Diameter of Binary Tree?", "options": ["Identical structure. Diameter: leftHeight + rightHeight → update global max. Return 1 + max(leftH, rightH). Max Path Sum: leftGain + node.val + rightGain → update global max. Return node.val + max(leftGain, rightGain). Same template", "Completely different", "Max Path Sum is easier", "Only similar in name"], "answer": 0, "explanation": "The template is identical: at each node, compute a 'bend' value (both children) for global_max, and return a 'single-direction' value for the parent. Diameter uses heights, Max Path Sum uses gains. Same skeleton." },
+        { "q": "What's the initial value of global_max?", "options": ["float('-inf') or the root's value. All node values could be negative (e.g., [-3, -2, -1]). The answer is -1 (the least negative single node). -inf ensures any path beats the initial value", "0", "Root's value", "Sum of all nodes"], "answer": 0, "explanation": "If all values are negative, the best path is a single node (the least negative). Initializing global_max to 0 would be wrong. float('-inf') ensures even a single node with value -1 can update the max." },
+        { "q": "Can the maximum path be a single node (length 0)?", "options": ["Yes — if all values are negative, the best 'path' is the single least-negative node. A path must contain at least one node. The algorithm handles this: node.val alone (with 0 gains from children) is always considered", "Must have ≥ 2 nodes", "Must pass through root", "Must be a leaf-to-leaf path"], "answer": 0, "explanation": "The problem says: a path must contain at least one node. A single node is a valid path of length 0. The algorithm: global_max is updated with node.val + leftGain + rightGain. When both gains are 0, it's just node.val." }
+      ]
+    },
+    {
+      "id": "serialize-deserialize-bt",
+      "title": "Serialize And Deserialize Binary Tree",
+      "difficulty": "Hard",
+      "leetcodeNum": 297,
+      "pattern": "Tree Construction / Destruction",
+      "tldr": "Convert a binary tree to a string and back. Preorder with null markers: serialize with DFS, use 'null' for missing children. Deserialize by reading values left-to-right, recursively building left then right.",
+      "keyTrick": "Serialize: preorder DFS. Append node.val or 'null'. Comma-separated. Deserialize: split by comma into a queue. Pop front = root val. If 'null', return None. Else create node, recurse for left then right. The queue is consumed left-to-right.",
+      "approaches": [
+        { "name": "Preorder DFS with Null Markers", "complexity": "O(n) time, O(n) space", "description": "Serialize: preorder with 'null' for None. Deserialize: consume from queue, build recursively.", "isOptimal": true },
+        { "name": "BFS (Level-Order)", "complexity": "O(n) time, O(n) space", "description": "Serialize level-by-level with nulls. Deserialize with queue connecting parents to children." }
+      ],
+      "quiz": [
+        { "q": "Why does preorder with null markers uniquely define a binary tree?", "options": ["Null markers explicitly mark where children are absent. Without them, preorder alone is ambiguous (is the second element a left or right child?). Nulls resolve this: after the root, the next value starts the left subtree, and 'null' terminates branches", "Preorder alone is unique", "Need both preorder and inorder", "Only works for BSTs"], "answer": 0, "explanation": "Preorder without nulls: [1,2,3] could be multiple trees. With nulls: '1,2,null,null,3,null,null' is unambiguous — 2 is left child (has no children), 3 is right child (has no children). Nulls provide structure." },
+        { "q": "Why use a queue (deque) for deserialization?", "options": ["Values are consumed left-to-right in preorder. A queue's popleft() gives O(1) access to the next value. Using a list index works too, but a queue is cleaner and self-advancing", "Stack would be better", "Array indexing is faster", "Queue preserves tree structure"], "answer": 0, "explanation": "Deserialization reads values sequentially. deque.popleft() consumes one value per recursive call. No need to track an index manually. The queue 'feeds' values to the recursion in the right order." },
+        { "q": "For a BST, serialization can be more compact. How?", "options": ["BST preorder (without null markers) uniquely defines the tree. During deserialization, use value bounds (min, max) to determine when a subtree ends. Saves ~50% space by omitting null markers", "Same serialization for BSTs", "BSTs can't be serialized", "Use inorder instead"], "answer": 0, "explanation": "BST property gives implicit structure. Preorder: [5,3,1,4,8,7]. Deserialize: 5 is root. 3 < 5 → left child. 1 < 3 → left child of 3. 4 < 5 but > 3 → right child of 3. Bounds determine placement." },
+        { "q": "What delimiter considerations matter?", "options": ["Use a delimiter that doesn't appear in values. For integers, comma works. For strings, need escaping. Also: handle edge cases like empty tree (serialize as 'null' or empty string)", "No delimiters needed", "Use newlines", "Space-separated is risky if values contain spaces"], "answer": 0, "explanation": "Comma-separated with 'null' for missing nodes is standard. Empty tree: 'null' or ''. Multiple-digit numbers: '12,3' must parse as [12, 3] not [1, 2, 3]. split(',') handles this correctly." },
+        { "q": "This problem is a Google interview favorite. Why?", "options": ["It tests DFS, recursion, string processing, tree construction, and design thinking all in one problem. The interviewer can probe: different serialization formats, edge cases, BST optimization, and complexity analysis", "It's easy to test", "Only Google asks this", "It tests library knowledge"], "answer": 0, "explanation": "Serialize/Deserialize is the Swiss Army knife of tree questions: it requires understanding traversal orders, tree construction, string parsing, and handling edge cases. It's a complete test of tree mastery in one problem." }
+      ]
+    }
+  ]
+}
