@@ -1470,7 +1470,6 @@ html, body, #root {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 120px;
   }
 
   .header-subtitle {
