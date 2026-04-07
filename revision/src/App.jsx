@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
-import { Zap, Building2, Sun, Moon, Search } from "lucide-react";
+import { Zap, Building2, Sun, Moon, Search, FileText } from "lucide-react";
 import "./App.css";
 import CompanyPrep from "./CompanyPrep";
 import GlobalSearch from "./GlobalSearch";
+import PageViewer from "./PageViewer";
 import { useLocalStorage, usePersistedSet } from "./useLocalStorage";
 
 // ═══════════════════════════════════════════════════════════════
@@ -155,9 +156,11 @@ function App() {
               </div>
               <div className="page-tabs">
                 <button className={`page-tab ${page === "neetcode" ? "active" : ""}`}
-                  onClick={() => { setPage("neetcode"); setSidebarOpen(false); }}><Zap size={14} /> NeetCode</button>
+                  onClick={() => { setPage("neetcode"); setSidebarOpen(false); }}><Zap size={14} /><span className="tab-text">NeetCode</span></button>
                 <button className={`page-tab ${page === "company" ? "active" : ""}`}
-                  onClick={() => { setPage("company"); setSidebarOpen(false); }}><Building2 size={14} /> Companies</button>
+                  onClick={() => { setPage("company"); setSidebarOpen(false); }}><Building2 size={14} /><span className="tab-text">Companies</span></button>
+                <button className={`page-tab ${page === "pages" ? "active" : ""}`}
+                  onClick={() => { setPage("pages"); setSidebarOpen(false); }}><FileText size={14} /><span className="tab-text">Pages</span></button>
                 <button className="global-search-trigger" onClick={() => setSearchOpen(true)}
                   title="Search all problems (Ctrl+K)">
                   <Search size={14} />
@@ -181,7 +184,15 @@ function App() {
               </div>
             </div>
             <button className="theme-toggle"
-              onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+              onClick={() => {
+                // Disable all CSS transitions for an instant, lag-free switch
+                const root = document.querySelector(".app-root");
+                root?.classList.add("no-transition");
+                setTheme((t) => (t === "dark" ? "light" : "dark"));
+                requestAnimationFrame(() =>
+                  requestAnimationFrame(() => root?.classList.remove("no-transition"))
+                );
+              }}
               aria-label="Toggle theme"
               title={isLight ? "Switch to dark mode" : "Switch to light mode"}>
               <div className={`theme-toggle-knob ${isLight ? "is-light" : ""}`}>
@@ -201,11 +212,17 @@ function App() {
             sidebarOpen={sidebarOpen}
             setSidebarOpen={setSidebarOpen}
           />
+        ) : page === "pages" ? (
+          <PageViewer
+            isLight={isLight}
+            sidebarOpen={sidebarOpen}
+            setSidebarOpen={setSidebarOpen}
+          />
         ) : (
         <>
         {/* ── NeetCode Sidebar ─────────────────────────────── */}
         <aside className={`app-sidebar ${sidebarOpen ? "open" : ""}`}>
-          <div style={{ fontSize: 10, color: "var(--text-ghost)", letterSpacing: "1.5px", padding: "0 8px", marginBottom: 10 }}>TOPICS</div>
+          <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "1.5px", padding: "0 8px", marginBottom: 10 }}>TOPICS</div>
           <div className="sidebar-topics-scroll">
             {TOPICS_DATA.map((t) => {
               const done = t.problems.filter((p) => completed.isOn(p.id)).length;
@@ -220,7 +237,7 @@ function App() {
             })}
           </div>
           <div className="glow-line" style={{ margin: "16px 0" }} />
-          <div style={{ fontSize: 10, color: "var(--text-ghost)", letterSpacing: "1.5px", padding: "0 8px", marginBottom: 10 }}>CURRENT TOPIC</div>
+          <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "1.5px", padding: "0 8px", marginBottom: 10 }}>CURRENT TOPIC</div>
           <div style={{ padding: "0 8px" }}>
             {["Easy", "Medium", "Hard"].map((d) => {
               const count = topic?.problems.filter((p) => p.difficulty === d).length || 0;
